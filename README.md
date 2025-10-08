@@ -19,7 +19,12 @@ Platform website "AnyVenue" dirancang untuk memudahkan pengguna dalam mencari da
    - Memungkinkan pengguna untuk membuat akun baru, melakukan *login*, serta *logout* dengan aman. Modul ini juga mengatur hak akses agar fitur tertentu hanya dapat diakses sesuai *role*.
    
 2. *Landing Page*:
-   - Menampilkan halaman utama yang menjadi pusat navigasi aplikasi. Di halaman ini, pengguna dapat melihat daftar *venue* yang tersedia, kategori olahraga, serta informasi singkat seperti lokasi dan harga. *Landing page* juga menyediakan navigasi ke modul `Booking`, `Venue`, `Event`, dan `User Profile`.
+   - Landing page berfungsi sebagai halaman utama yang menampilkan gambaran umum dari seluruh fitur yang tersedia dalam aplikasi. Pada bagian awal halaman, terdapat section perkenalan yang menjelaskan secara singkat tujuan dan konsep utama dari website ini. Setelah itu, pengguna dapat menemukan beberapa section overview yang menampilkan ringkasan dari fitur-fitur utama aplikasi, antara lain:
+      - *Booking Venue/ Tambah Venue (untuk Owner):* menampilkan deskripsi singkat tentang fitur booking venue bagi pengguna atau dapat menambahkan venue baru bagi role owner.
+      - *Event :* menampilkan ringkasan fitur untuk melihat daftar event yang sedang berlangsung bagi pengguna atau menambahkan event baru bagi owner.
+      - *Review Lapangan:* menampilkan cuplikan fitur bagi pengguna untuk memberikan ulasan terhadap lapangan yang telah digunakan.
+
+      Setiap section dilengkapi dengan tombol navigasi yang akan mengarahkan pengguna langsung ke halaman fitur terkait, sehingga landing page berfungsi sebagai pusat orientasi sekaligus pintu masuk ke seluruh modul utama dalam aplikasi.
 
 3. *Venue* (Keisha Vania Laurent):
    - Menampilkan detail *venue* seperti deskripsi, lokasi, harga, kategori, dan review atau ulasan yang diberikan oleh pengguna. Modul ini juga menyediakan navigasi ke modul `Booking` dan `Review`.
