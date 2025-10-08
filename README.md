@@ -1,4 +1,4 @@
-# AnyVenue - Platform Booking Lapangan Olahraga Digita
+# AnyVenue - Platform Booking Lapangan Olahraga Digital
 
 ## Nama-nama Anggota Kelompok
 - Alya Nabilla Khamil (2406358094)
