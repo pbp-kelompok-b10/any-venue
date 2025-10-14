@@ -2,21 +2,32 @@
 {% load static %}
 {% block content %}
 
-<div class="w-[1440px] h-[900px] px-16 bg-gradient-to-b from-blue-300/0 to-blue-300 inline-flex justify-center items-center overflow-hidden">
-    <div class="flex-1 max-w-[1280px] inline-flex flex-col justify-start items-center gap-20">
-        <div class="w-full max-w-[768px] flex flex-col justify-start items-center gap-8">
-            <div class="self-stretch flex flex-col justify-start items-center gap-6">
-                <div class="self-stretch text-center justify-start text-Color-White text-6xl font-bold font-['Roboto'] leading-[67.20px]">Your next game begins here.. with AnyVenue.</div>
-                <div class="self-stretch text-center justify-start text-Color-White text-lg font-normal font-['Roboto'] leading-relaxed"> Cari, sewa, dan ikuti berbagai event olahraga dengan cara baru yang lebih simple dan efisien.          AnyVenue hadir untuk menyatukan komunitas olahraga dalam satu platform yang modern, cepat, dan terpercaya.</div>
-            </div>
-            <div class="inline-flex justify-start items-start gap-4">
-                <div data-alternate="True" data-icon-position="No icon" data-small="False" data-style="Primary" class="px-6 py-3 bg-Color-White outline outline-1 outline-Color-White flex justify-center items-center gap-2">
-                    <div class="justify-start text-Neutral-Dark text-base font-normal font-['Roboto'] leading-normal">Login</div>
-                </div>
-                <div data-alternate="True" data-icon-position="No icon" data-small="False" data-style="Secondary" class="px-6 py-3 outline outline-1 outline-Color-White flex justify-center items-center gap-2">
-                    <div class="justify-start text-Color-White text-base font-normal font-['Roboto'] leading-normal">Explore</div>
-                </div>
-            </div>
+<div class="relative w-full h-screen bg-cover bg-center flex items-center justify-center text-white"
+    style="background-image: url('{% static 'image/header.jpg' %}');">
+
+    <!-- Gradient Overlay -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-blue-900/40"></div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 flex flex-col justify-center items-center gap-8 max-w-3xl text-center px-4">
+        <div class="flex flex-col justify-start items-center gap-6">
+            <h1 class="text-white text-6xl font-bold font-['Roboto'] leading-[67.20px]">
+                Your next game begins here.. with AnyVenue.
+            </h1>
+            <p class="text-white text-lg font-normal font-['Roboto'] leading-relaxed">
+                Cari, sewa, dan ikuti berbagai event olahraga dengan cara baru yang lebih simple dan efisien. AnyVenue
+                hadir untuk menyatukan komunitas olahraga dalam satu platform yang modern, cepat, dan terpercaya.
+            </p>
+        </div>
+        <div class="flex justify-start items-start gap-4">
+            <a href="#"
+                class="px-6 py-3 bg-white text-black font-['Roboto'] text-base leading-normal rounded-md shadow-lg hover:bg-gray-200 transition-colors duration-300">
+                Login
+            </a>
+            <a href="#"
+                class="px-6 py-3 border border-white text-white font-['Roboto'] text-base leading-normal rounded-md hover:bg-white hover:text-black transition-colors duration-300">
+                Explore
+            </a>
         </div>
     </div>
 </div>
