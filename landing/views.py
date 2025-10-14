@@ -10,3 +10,6 @@ def features_preview(request):
 
 def header_test(request):
     return render(request, "sections/header.html")
+
+def booking_preview_test(request):
+    return render(request, "sections/booking_preview.html")
