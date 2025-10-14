@@ -2,32 +2,34 @@
 {% load static %}
 {% block content %}
 
-<div 
-  class="relative w-full h-screen bg-cover bg-center flex items-center justify-center text-white" 
-  style="background-image: url('{% static 'image/header.jpg' %}');">
-  
-  <!-- Gradient Overlay -->
-  <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-blue-900/40"></div>
+<div class="relative w-full h-screen bg-cover bg-center flex items-center justify-center text-white"
+    style="background-image: url('{% static 'image/header.jpg' %}');">
 
-  <!-- Main Content -->
-  <div class="relative z-10 flex flex-col justify-center items-center gap-8 max-w-3xl text-center px-4">
-    <div class="flex flex-col justify-start items-center gap-6">
-      <h1 class="text-white text-6xl font-bold font-['Roboto'] leading-[67.20px]">
-        Your next game begins here.. with AnyVenue.
-      </h1>
-      <p class="text-white text-lg font-normal font-['Roboto'] leading-relaxed">
-        Cari, sewa, dan ikuti berbagai event olahraga dengan cara baru yang lebih simple dan efisien. AnyVenue hadir untuk menyatukan komunitas olahraga dalam satu platform yang modern, cepat, dan terpercaya.
-      </p>
+    <!-- Gradient Overlay -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-blue-900/40"></div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 flex flex-col justify-center items-center gap-8 max-w-3xl text-center px-4">
+        <div class="flex flex-col justify-start items-center gap-6">
+            <h1 class="text-white text-6xl font-bold font-['Roboto'] leading-[67.20px]">
+                Your next game begins here.. with AnyVenue.
+            </h1>
+            <p class="text-white text-lg font-normal font-['Roboto'] leading-relaxed">
+                Cari, sewa, dan ikuti berbagai event olahraga dengan cara baru yang lebih simple dan efisien. AnyVenue
+                hadir untuk menyatukan komunitas olahraga dalam satu platform yang modern, cepat, dan terpercaya.
+            </p>
+        </div>
+        <div class="flex justify-start items-start gap-4">
+            <a href="#"
+                class="px-6 py-3 bg-white text-black font-['Roboto'] text-base leading-normal rounded-md shadow-lg hover:bg-gray-200 transition-colors duration-300">
+                Login
+            </a>
+            <a href="#"
+                class="px-6 py-3 border border-white text-white font-['Roboto'] text-base leading-normal rounded-md hover:bg-white hover:text-black transition-colors duration-300">
+                Explore
+            </a>
+        </div>
     </div>
-    <div class="flex justify-start items-start gap-4">
-      <a href="#" class="px-6 py-3 bg-white text-black font-['Roboto'] text-base leading-normal rounded-md shadow-lg hover:bg-gray-200 transition-colors duration-300">
-        Login
-      </a>
-      <a href="#" class="px-6 py-3 border border-white text-white font-['Roboto'] text-base leading-normal rounded-md hover:bg-white hover:text-black transition-colors duration-300">
-        Explore
-      </a>
-    </div>
-  </div>
 </div>
 
 {% endblock content %}
