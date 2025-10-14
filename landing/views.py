@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 
 def show_main(request):
-    return render(request, "hello_world.html")
+    return render(request, "landing.html")
 
 def features_preview(request):
     return render(request, "sections/features_preview.html")
