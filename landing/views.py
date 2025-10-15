@@ -11,5 +11,8 @@ def features_preview(request):
 def header_test(request):
     return render(request, "sections/header.html")
 
+def features_review(request):
+    return render(request, "sections/features_review.html")
+
 def booking_preview_test(request):
     return render(request, "sections/booking_preview.html")
