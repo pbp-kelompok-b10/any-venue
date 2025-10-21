@@ -47,9 +47,10 @@ INSTALLED_APPS = [
     'landing',
     'venue',
     'booking',
-    'user',
+    'user.apps.UserConfig',
     'review',
     'event',
+    
 ]
 
 MIDDLEWARE = [
