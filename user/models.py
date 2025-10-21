@@ -17,4 +17,4 @@ class Profile(models.Model):
         return self.role == self.Role.OWNER
 
     def __str__(self):
-        return f"{self.username} ({self.role})"
+        return f"{self.user.username} ({self.role})"
