@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="w-[1440px] h-[980px] relative bg-white overflow-hidden">
+    <div class="w-[1440px] px-16 pb-4 left-0 top-0 absolute bg-gradient-to-b from-Light-Navy to-Flash-White inline-flex flex-col justify-start items-center gap-36 overflow-hidden">
+        <div class="w-[1280px] h-16 max-w-[1280px] flex flex-col justify-center items-center overflow-hidden">
+            <div class="w-full max-w-[1280px] inline-flex justify-center items-center gap-8 overflow-hidden">
+                <div class="flex-1 flex justify-start items-start">
+                    <div data-alternate="False" class="w-full h-9 relative overflow-hidden">
+                        <div class="w-full h-9 left-[6.67px] top-0 absolute overflow-hidden">
+                            <a href="/" id="brand-link" class="text-2xl font-bold text-white tracking-wide transition-colors duration-300">
+                                AnyVenue
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-start items-center gap-[5px]">
+                    <div class="text-center justify-start text-Flash-White text-base font-normal font-['Roboto'] leading-normal">Don't have an account?</div>
+                    <div class="text-center justify-start text-Flash-White text-base font-normal font-['Roboto'] underline leading-normal">Register Now</div>
+                </div>
+            </div>
+        </div>
+        <div class="w-[1064px] bg-white/0 flex flex-col justify-start items-center gap-12">
+            <div class="self-stretch text-center justify-start text-Flash-White text-5xl font-bold font-['Roboto'] leading-[57.60px]">Sign In</div>
+            <div data-breakpoint="Desktop" class="self-stretch bg-white/0 inline-flex justify-start items-end gap-6">
+                <div class="flex-1 inline-flex flex-col justify-start items-start gap-2">
+                    <div class="self-stretch text-center justify-start text-Flash-White text-2xl font-bold font-['Roboto'] leading-loose">Welcome to AnyVenue!</div>
+                    <div class="self-stretch text-center justify-start text-Flash-White text-base font-normal font-['Roboto'] leading-normal">Continue discovering and managing your experiences with Anyvenue.</div>
+                </div>
+            </div>
+            <!-- FORM LOGIN AJAX -->
+            <form id="loginForm" class="w-[580px] p-8 bg-white/50 outline outline-1 outline-offset-[-1px] outline-Color-Scheme-1-Border flex flex-col justify-start items-start gap-6">
+                <div class="self-stretch flex flex-col justify-start items-start gap-6">
+                    <div class="self-stretch flex flex-col justify-start items-start gap-2">
+                        <div class="self-stretch justify-start text-Color-Scheme-1-Text text-base font-normal font-['Roboto'] leading-normal">Username</div>
+                        <input type="text" name="username" class="self-stretch p-3 outline outline-1 outline-Color-Neutral-Darkest  bg-transparent focus:outline-Color-Neutral-Darkest focus:ring-0 focus:border-Color-Neutral-Darkest" required>
+                    </div>
+                    <div class="self-stretch flex flex-col justify-start items-start gap-2">
+                        <div class="self-stretch justify-start text-Color-Scheme-1-Text text-base font-normal font-['Roboto'] leading-normal">Password</div>
+                        <input type="password" name="password" class="self-stretch p-3 outline outline-1 outline-Color-Neutral-Darkest  bg-transparent focus:ring-0 focus:border-Color-Neutral-Darkest" required>
+                    </div>
+                </div>
+                <div id="loginMessage" class="text-red-600 text-sm"></div>
+                <div class="self-stretch pt-6 inline-flex justify-end items-start gap-4">
+                    <div class="px-5 py-2 outline outline-1 outline-Color-Neutral-Darkest flex justify-center items-center gap-2">
+                        <div class="justify-start text-Color-Neutral-Darkest text-base font-normal font-['Roboto'] leading-normal">Back</div>
+                    </div>
+                    <button type="submit" class="px-5 py-2 bg-black outline outline-1 outline-Color-Neutral-Darkest flex justify-center items-center gap-2">
+                        <div class="justify-start text-white text-base font-normal font-['Roboto'] leading-normal">Login</div>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="w-[1280px] h-9 max-w-[1280px] inline-flex justify-center items-center gap-[5px]">
+            <div class="text-center justify-start text-Color-Scheme-1-Text text-sm font-normal font-['Roboto'] leading-tight">© 2025 AnyVenue</div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+$("#loginForm").submit(function(e){
+    e.preventDefault(); // cegah reload halaman
+
+    $.ajax({
+        type: "POST",
+        url: "{% url 'login' %}",  // pastikan url name login
+        data: $(this).serialize(),
+        success: function(response){
+            $("#loginMessage").text(response.message);
+            if(response.success){
+                window.location.href = "{% url  'landing:show_main' %}"; // redirect ke halaman utama
+            }
+        }
+    });
+});
+</script>
+
+{% endblock content %}
