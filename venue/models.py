@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 
 # Create your models here.
 class City(models.Model):
@@ -38,7 +37,8 @@ class Venue(models.Model):
         ('Outdoor', 'Outdoor'),
     ]
 
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='venues')
+    owner = models.ForeignKey('user.Profile', on_delete=models.CASCADE, related_name='venues', 
+                              limit_choices_to={'role': 'OWNER'})
     name = models.CharField(max_length=255)
     price = models.IntegerField()
     city = models.ForeignKey(City, on_delete=models.PROTECT)
