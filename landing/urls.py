@@ -1,6 +1,7 @@
 from django.urls import path
 from landing.views import (
-    show_main, features_preview, header_test, features_review, booking_preview_test
+    show_main, features_preview, header_test, 
+    features_review, booking_preview_test,
 )
 
 app_name = 'landing'
