@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 # Import model dari app venue
 from venue.models import Venue, City, Category
 # Import model Profile dari app user
-from user.models import Profile  
+from account.models import Profile  
 
 class Command(BaseCommand):
     help = 'Mengimpor data venue dari file venues_data.csv, menghubungkan owner ke user.Profile'

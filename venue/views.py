@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Venue, City, Category
-from authentication.models import Profile
+from account.models import Profile
 
 # Create your views here.
 @login_required(login_url='/login')
