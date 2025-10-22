@@ -167,35 +167,11 @@
     const CSRF_TOKEN = "{{ csrf_token }}";
 
     // DOM ELEMENTS
-    const loadingSpinner = document.getElementById('loading');
-    const errorMessage = document.getElementById('error');
-    const emptyStateDisplay = document.getElementById('empty');
-    const venuesGridContainer = document.getElementById('venue-grid');
-    const refreshButton = document.getElementById('refresh-venues-btn');
-    
-    // Filters
-    const ownerFilterSelect = document.getElementById('filter-owner');
-    const cityFilterSelect = document.getElementById('filter-city');
-    const categoryFilterSelect = document.getElementById('filter-category');
-    const typeFilterSelect = document.getElementById('filter-type');
-    const searchInput = document.getElementById('search-input');
-
-    // Add Modal
-    const addVenueModal = document.getElementById('addVenueModal');
-    const addVenueForm = document.getElementById('addVenueForm');
-    const addVenueSubmitBtn = document.getElementById('addVenueSubmitBtn');
-
-    // Edit Modal
-    const editVenueModal = document.getElementById('editVenueModal');
-    const editVenueForm = document.getElementById('editVenueForm');
-    const editVenueSubmitBtn = document.getElementById('editVenueSubmitBtn');
-    const editVenueHiddenId = document.getElementById('edit-venue-id');
-
-    // Delete Modal
-    const deleteVenueModal = document.getElementById('deleteVenueModal');
-    const deleteVenueNameSpan = document.getElementById('venue-name-to-delete');
-    const deleteVenueHiddenId = document.getElementById('delete-venue-id');
-    const deleteVenueConfirmBtn = document.getElementById('confirmDeleteBtn');
+    let loadingSpinner, errorMessage, emptyStateDisplay, venuesGridContainer, refreshButton;
+    let ownerFilterSelect, cityFilterSelect, categoryFilterSelect, typeFilterSelect, searchInput;
+    let addVenueModal, addVenueForm, addVenueSubmitBtn;
+    let editVenueModal, editVenueForm, editVenueSubmitBtn, editVenueHiddenId;
+    let deleteVenueModal, deleteVenueNameSpan, deleteVenueHiddenId, deleteVenueConfirmBtn;
 
     // STATE
     let allVenuesData = []; 
@@ -527,6 +503,19 @@
 
     // INISIALISASI & EVENT LISTENERS
     document.addEventListener('DOMContentLoaded', () => {
+        // Ambil elemen halaman utama
+        loadingSpinner = document.getElementById('loading');
+        errorMessage = document.getElementById('error');
+        emptyStateDisplay = document.getElementById('empty');
+        venuesGridContainer = document.getElementById('venue-grid'); 
+        refreshButton = document.getElementById('refresh-venues-btn');
+        
+        ownerFilterSelect = document.getElementById('filter-owner');
+        cityFilterSelect = document.getElementById('filter-city');
+        categoryFilterSelect = document.getElementById('filter-category');
+        typeFilterSelect = document.getElementById('filter-type');
+        searchInput = document.getElementById('search-input');
+
         // Listener untuk semua filter (on change)
         if (ownerFilterSelect) ownerFilterSelect.addEventListener('change', filterAndDisplayVenues);
         if (cityFilterSelect) cityFilterSelect.addEventListener('change', filterAndDisplayVenues);
@@ -543,6 +532,16 @@
         
         // MODAL
         if (IS_OWNER) {
+            // Ambil elemen modal
+            addVenueForm = document.getElementById('addVenueForm'); 
+            addVenueSubmitBtn = document.getElementById('addVenueSubmitBtn');
+            editVenueForm = document.getElementById('editVenueForm'); 
+            editVenueSubmitBtn = document.getElementById('editVenueSubmitBtn');
+            editVenueHiddenId = document.getElementById('edit-venue-id');
+            deleteVenueNameSpan = document.getElementById('venue-name-to-delete');
+            deleteVenueHiddenId = document.getElementById('delete-venue-id');
+            deleteVenueConfirmBtn = document.getElementById('confirmDeleteBtn');
+
             // Listener untuk submit form ADD
             if (addVenueForm) {
                 addVenueForm.addEventListener('submit', handleAddFormSubmit);
@@ -564,13 +563,13 @@
                 
                 if (target.classList.contains('edit-btn')) {
                     const venueId = target.dataset.id; 
-                    openEditModal(venueId);
+                    showEditModal(venueId);
                 }
                 
                 if (target.classList.contains('delete-btn')) {
                     const venueId = target.dataset.id; 
                     const venueName = target.closest('.group').querySelector('h3 a').textContent;
-                    openDeleteModal(venueId, venueName);
+                    showDeleteModal(venueId, venueName);
                 }
             });
         }
