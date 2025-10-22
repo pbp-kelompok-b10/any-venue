@@ -13,7 +13,7 @@ def register_view(request):
         username = request.POST.get("username")
         password1 = request.POST.get("password1")
         password2 = request.POST.get("password2")
-        is_owner = request.POST.get("is_owner") == "on"
+        is_owner = request.POST.get("is_owner") == "true"
 
         # Validasi basic
         if not username or not password1 or not password2:

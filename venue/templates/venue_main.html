@@ -27,7 +27,7 @@
                 </div>
             </div>
             {% if is_owner_role %}
-                <button onclick="showModal('addVenueModal')" {% comment %} Ini akan memanggil JS modal nanti {% endcomment %}
+                <button onclick="showAddModal()" {% comment %} Ini akan memanggil JS modal nanti {% endcomment %}
                         class="flex-shrink-0 group inline-flex items-center gap-2 px-5 py-3 bg-Sunrise-Orange text-white font-semibold rounded-lg hover:bg-Orange transition-all duration-300 hover:scale-105 shadow">
                     <svg class="w-5 h-5 transition-transform duration-300 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     <span class="hidden sm:inline">Add Venue</span>
@@ -97,7 +97,7 @@
             <h3 class="text-lg font-medium text-gray-900 mb-2">No venues found</h3>
             {% if is_owner_role %}
                 <p class="text-gray-500 mb-6">Start by adding your first venue.</p>
-                <button onclick="showModal('addVenueModal')" class="inline-flex items-center px-4 py-2 bg-Sunrise-Orange hover:bg-Orange text-white rounded-md transition-all duration-300 hover:scale-105">
+                <button onclick="showAddModal()" class="inline-flex items-center px-4 py-2 bg-Sunrise-Orange hover:bg-Orange text-white rounded-md transition-all duration-300 hover:scale-105">
                     Add Venue
                 </button>
             {% else %}
@@ -110,6 +110,11 @@
 
 {% include 'footer.html' %}
 
+{% if is_owner_role %}
+    {% include 'modal/add_venue.html' %}
+    {% include 'modal/edit_venue.html' %}
+    {% include 'modal/delete_venue.html' %}
+{% endif %}
 
 <style>
   @keyframes fadeIn {
@@ -151,13 +156,11 @@
 {% block extra_js %}
 <script>
     const VENUES_API_URL = "{% url 'venue:api_get_venues' %}";
-
     const VENUE_DETAIL_URL_BASE = "{% url 'venue:venue_detail' 9999 %}".replace('9999', '');
     const VENUE_DETAIL_API_URL_BASE = "{% url 'venue:api_get_venue_detail' 9999 %}".replace('9999', '');
     const ADD_VENUE_API_URL = "{% url 'venue:api_add_venue' %}";
     const EDIT_VENUE_API_URL_BASE = "{% url 'venue:api_edit_venue' 9999 %}".replace('9999', '');
     const DELETE_VENUE_API_URL_BASE = "{% url 'venue:api_delete_venue' 9999 %}".replace('9999', '');
-    const PLACEHOLDER_IMG_URL = "{% static 'image/no-venues.png' %}";
 
     const CURRENT_USER_PROFILE_PK = "{{ profile.pk|default_if_none:'' }}";
     const IS_OWNER = {{ is_owner_role|yesno:"true,false" }};
@@ -176,6 +179,23 @@
     const categoryFilterSelect = document.getElementById('filter-category');
     const typeFilterSelect = document.getElementById('filter-type');
     const searchInput = document.getElementById('search-input');
+
+    // Add Modal
+    const addVenueModal = document.getElementById('addVenueModal');
+    const addVenueForm = document.getElementById('addVenueForm');
+    const addVenueSubmitBtn = document.getElementById('addVenueSubmitBtn');
+
+    // Edit Modal
+    const editVenueModal = document.getElementById('editVenueModal');
+    const editVenueForm = document.getElementById('editVenueForm');
+    const editVenueSubmitBtn = document.getElementById('editVenueSubmitBtn');
+    const editVenueHiddenId = document.getElementById('edit-venue-id');
+
+    // Delete Modal
+    const deleteVenueModal = document.getElementById('deleteVenueModal');
+    const deleteVenueNameSpan = document.getElementById('venue-name-to-delete');
+    const deleteVenueHiddenId = document.getElementById('delete-venue-id');
+    const deleteVenueConfirmBtn = document.getElementById('confirmDeleteBtn');
 
     // STATE
     let allVenuesData = []; 
@@ -243,7 +263,6 @@
         renderAllVenueCards(filteredVenues);
     }
 
-    // Menggambar ulang semua kartu venue di grid
     function renderAllVenueCards(venues) {
         venuesGridContainer.innerHTML = '';
         
@@ -322,6 +341,190 @@
         }
     }
 
+    function showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        const modalContent = modal.querySelector('[id$="ModalContent"]');
+
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden'); 
+        setTimeout(() => {
+            if (modalContent) modalContent.classList.add('opacity-100', 'scale-100');
+        }, 10);
+    }
+
+    function hideModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        const modalContent = modal.querySelector('[id$="ModalContent"]');
+
+        if (modalContent) {
+            modalContent.classList.remove('opacity-100', 'scale-100');
+            modalContent.classList.add('opacity-0', 'scale-90');
+        }
+
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 300); 
+    }
+
+    function showAddModal() {
+        if (addVenueForm) addVenueForm.reset();
+        showModal('addVenueModal');
+    }
+
+    async function showEditModal(venueId) {
+        if (!editVenueForm) return;
+
+        editVenueForm.reset();
+        showModal('editVenueModal');
+        
+        // Tampilkan loading di dalam modal (opsional, tapi bagus)
+        document.getElementById('editVenueModal-title').textContent = 'Loading data...';
+
+        try {
+            const response = await fetch(`${VENUE_DETAIL_API_URL_BASE}${venueId}/`);
+            if (!response.ok) throw new Error('Failed to fetch venue details.');
+            
+            const venue = await response.json();
+
+            // Isi form EDIT
+            editVenueHiddenId.value = venue.id;
+            document.getElementById('edit-venue-name').value = venue.name;
+            document.getElementById('edit-venue-price').value = venue.price;
+            document.getElementById('edit-venue-type').value = venue.type;
+            document.getElementById('edit-venue-city').value = venue.city; 
+            document.getElementById('edit-venue-category').value = venue.category; 
+            document.getElementById('edit-venue-address').value = venue.address;
+            document.getElementById('edit-venue-description').value = venue.description;
+            document.getElementById('edit-venue-image_url').value = venue.image_url;
+
+            document.getElementById('editVenueModal-title').textContent = 'Edit Venue';
+
+        } catch (error) {
+            console.error('Error fetching venue for edit:', error);
+            document.getElementById('editVenueModal-title').textContent = 'Error loading data';
+        }
+    }
+
+    function showDeleteModal(venueId, venueName) {
+        if(deleteVenueNameSpan) deleteVenueNameSpan.textContent = `"${venueName}"`;
+        if(deleteVenueHiddenId) deleteVenueHiddenId.value = venueId;
+        showModal('deleteVenueModal');
+    }
+
+    function displayFormErrors(formElement, errors) {
+        // Hapus error lama
+        formElement.querySelectorAll('.form-error-message').forEach(el => el.remove());
+        
+        // Tampilkan error baru
+        for (const field in errors) {
+            const input = formElement.querySelector(`[name="${field}"]`);
+            if (input) {
+                const errorText = errors[field].join(' ');
+                const errorEl = document.createElement('p');
+                errorEl.className = 'text-red-500 text-xs mt-1 form-error-message';
+                errorEl.textContent = errorText;
+                input.parentElement.appendChild(errorEl);
+            }
+        }
+    }
+
+    // HANDLER
+    async function handleAddFormSubmit(event) {
+        event.preventDefault();
+        addVenueSubmitBtn.disabled = true;
+        addVenueSubmitBtn.textContent = 'Saving...';
+
+        const formData = new FormData(addVenueForm);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch(ADD_VENUE_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                hideModal('addVenueModal');
+                fetchVenuesFromServer(); 
+            } else {
+                const errorData = await response.json();
+                displayFormErrors(addVenueForm, errorData); // Tampilkan error validasi
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('An unexpected error occurred. Please try again.');
+        } finally {
+            addVenueSubmitBtn.disabled = false;
+            addVenueSubmitBtn.textContent = 'Add Venue';
+        }
+    }
+
+    async function handleEditFormSubmit(event) {
+        event.preventDefault();
+        editVenueSubmitBtn.disabled = true;
+        editVenueSubmitBtn.textContent = 'Saving...';
+
+        const formData = new FormData(editVenueForm);
+        const data = Object.fromEntries(formData.entries());
+        const venueId = data.id; // Ambil dari hidden input
+
+        try {
+            const response = await fetch(`${EDIT_VENUE_API_URL_BASE}${venueId}/`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                hideModal('editVenueModal');
+                fetchVenuesFromServer();
+            } else {
+                const errorData = await response.json();
+                displayFormErrors(editVenueForm, errorData); // Tampilkan error validasi
+            }
+        } catch (error) {
+            console.error('Error submitting edit form:', error);
+            alert('An unexpected error occurred. Please try again.');
+        } finally {
+            editVenueSubmitBtn.disabled = false;
+            editVenueSubmitBtn.textContent = 'Save Changes';
+        }
+    }
+
+    async function handleDeleteConfirm() {
+        const venueId = deleteVenueHiddenId.value;
+        if (!venueId) return;
+
+        deleteVenueConfirmBtn.disabled = true;
+        deleteVenueConfirmBtn.textContent = 'Deleting...';
+
+        try {
+            const response = await fetch(`${DELETE_VENUE_API_URL_BASE}${venueId}/`, {
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': CSRF_TOKEN },
+            });
+
+            if (response.ok) {
+                hideModal('deleteVenueModal');
+                fetchVenuesFromServer(); 
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to delete: ${errorData.detail || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error deleting venue:', error);
+            alert('An unexpected error occurred while deleting.');
+        } finally {
+            deleteVenueConfirmBtn.disabled = false;
+            deleteVenueConfirmBtn.textContent = 'Yes, Delete';
+            deleteVenueHiddenId.value = '';
+        }
+    }
+
     // INISIALISASI & EVENT LISTENERS
     document.addEventListener('DOMContentLoaded', () => {
         // Listener untuk semua filter (on change)
@@ -338,21 +541,39 @@
         // Ambil data pertama kali saat halaman load
         fetchVenuesFromServer();
         
-        // MODAL dan CRUD
-        
-        // venuesGridContainer.addEventListener('click', (e) => {
-        //    const target = e.target;
-        //    if (target.classList.contains('edit-btn')) {
-        //        const venueId = target.dataset.id; // <-- Siap dipakai
-        //        showEditVenueModal(venueId); // Panggil fungsi edit (dibuat nanti)
-        //    }
-        //    if (target.classList.contains('delete-btn')) {
-        //        const venueId = target.dataset.id; // <-- Siap dipakai
-        //        const venueName = target.closest('.group').querySelector('h3 a').textContent;
-        //        showDeleteVenueModal(venueId, venueName); // Panggil fungsi delete (dibuat nanti)
-        //    }
-        // });
-    });
+        // MODAL
+        if (IS_OWNER) {
+            // Listener untuk submit form ADD
+            if (addVenueForm) {
+                addVenueForm.addEventListener('submit', handleAddFormSubmit);
+            }
 
+            // Listener untuk submit form EDIT
+            if (editVenueForm) {
+                editVenueForm.addEventListener('submit', handleEditFormSubmit);
+            }
+
+            // Listener untuk tombol konfirmasi DELETE
+            if (deleteVenueConfirmBtn) {
+                deleteVenueConfirmBtn.addEventListener('click', handleDeleteConfirm);
+            }
+
+            // Listener untuk tombol Edit/Delete di dalam Grid
+            venuesGridContainer.addEventListener('click', (e) => {
+                const target = e.target;
+                
+                if (target.classList.contains('edit-btn')) {
+                    const venueId = target.dataset.id; 
+                    openEditModal(venueId);
+                }
+                
+                if (target.classList.contains('delete-btn')) {
+                    const venueId = target.dataset.id; 
+                    const venueName = target.closest('.group').querySelector('h3 a').textContent;
+                    openDeleteModal(venueId, venueName);
+                }
+            });
+        }
+    });
 </script>
 {% endblock extra_js %}
