@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">My Bookings</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+        <div class="mb-4 p-4 rounded {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Filter Status -->
+    <div class="mb-6 bg-white p-6 rounded-lg shadow">
+        <h3 class="font-semibold text-lg mb-4">Filter & Sorting</h3>
+        
+        <form method="GET" class="space-y-4">
+            <!-- Status Filter -->
+            <div>
+                <label class="block text-sm font-medium mb-2">Status:</label>
+                <div class="flex gap-2 flex-wrap">
+                    <a href="{% url 'booking:my_bookings' %}" class="px-4 py-2 rounded {% if not status_filter %}bg-blue-600 text-white{% else %}bg-gray-200{% endif %}">Semua</a>
+                    <a href="?status=pending" class="px-4 py-2 rounded {% if status_filter == 'pending' %}bg-blue-600 text-white{% else %}bg-gray-200{% endif %}">Pending</a>
+                    <a href="?status=confirmed" class="px-4 py-2 rounded {% if status_filter == 'confirmed' %}bg-blue-600 text-white{% else %}bg-gray-200{% endif %}">Confirmed</a>
+                    <a href="?status=completed" class="px-4 py-2 rounded {% if status_filter == 'completed' %}bg-blue-600 text-white{% else %}bg-gray-200{% endif %}">Completed</a>
+                    <a href="?status=cancelled" class="px-4 py-2 rounded {% if status_filter == 'cancelled' %}bg-blue-600 text-white{% else %}bg-gray-200{% endif %}">Cancelled</a>
+                </div>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Tanggal Dari:</label>
+                    <input type="date" name="date_from" value="{{ date_from }}" class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Tanggal Sampai:</label>
+                    <input type="date" name="date_to" value="{{ date_to }}" class="w-full px-3 py-2 border rounded">
+                </div>
+            </div>
+
+            <!-- Price Range Filter -->
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Harga Minimum (Rp):</label>
+                    <input type="number" name="min_price" value="{{ min_price }}" placeholder="0" class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Harga Maksimum (Rp):</label>
+                    <input type="number" name="max_price" value="{{ max_price }}" placeholder="999999999" class="w-full px-3 py-2 border rounded">
+                </div>
+            </div>
+
+            <!-- Sorting -->
+            <div>
+                <label class="block text-sm font-medium mb-2">Urutkan Berdasarkan:</label>
+                <select name="sort_by" class="w-full md:w-auto px-3 py-2 border rounded">
+                    <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Terbaru</option>
+                    <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Terlama</option>
+                    <option value="-booking_date" {% if sort_by == '-booking_date' %}selected{% endif %}>Tanggal Booking (Terbaru)</option>
+                    <option value="booking_date" {% if sort_by == 'booking_date' %}selected{% endif %}>Tanggal Booking (Terlama)</option>
+                    <option value="-total_price" {% if sort_by == '-total_price' %}selected{% endif %}>Harga (Tertinggi)</option>
+                    <option value="total_price" {% if sort_by == 'total_price' %}selected{% endif %}>Harga (Terendah)</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Terapkan Filter</button>
+                <a href="{% url 'booking:my_bookings' %}" class="px-6 py-2 border border-gray-300 rounded hover:bg-gray-50">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    {% if bookings %}
+    <div class="grid gap-4">
+        {% for booking in bookings %}
+        <div class="bg-white shadow rounded-lg p-6 border hover:shadow-lg transition">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <h3 class="text-xl font-semibold mb-2">{{ booking.venue.name }}</h3>
+                    <div class="space-y-1 text-gray-600">
+                        <p><span class="font-medium">Tanggal:</span> {{ booking.booking_date|date:"d F Y" }}</p>
+                        <p><span class="font-medium">Tipe:</span> {{ booking.get_date_type_display }}</p>
+                        <p><span class="font-medium">Quantity:</span> {{ booking.quantity }}</p>
+                        <p><span class="font-medium">Total Harga:</span> Rp {{ booking.total_price|floatformat:0 }}</p>
+                        <p><span class="font-medium">Status:</span> 
+                            <span class="px-2 py-1 rounded text-sm
+                                {% if booking.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% elif booking.status == 'confirmed' %}bg-blue-100 text-blue-800
+                                {% elif booking.status == 'completed' %}bg-green-100 text-green-800
+                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ booking.get_status_display }}
+                            </span>
+                        </p>
+                        <p class="text-sm text-gray-500">Dibuat: {{ booking.created_at|date:"d F Y, H:i" }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2 ml-4">
+                    <a href="{% url 'booking:detail' booking.id %}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-center">Detail</a>
+                    {% if booking.is_cancellable %}
+                    <button data-booking-id="{{ booking.id }}" class="cancel-booking-btn px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Cancel</button>
+                    {% endif %}
+                    {% if booking.is_reviewable %}
+                    <a href="{% url 'review:create' booking.id %}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-center">Review</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 bg-gray-50 rounded-lg">
+        <p class="text-gray-500 text-lg mb-4">Belum ada booking{% if status_filter %} dengan status {{ status_filter }}{% endif %}.</p>
+        <a href="{% url 'venue:list' %}" class="inline-block px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Browse Venues</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Event listener untuk semua tombol cancel
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.cancel-booking-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const bookingId = this.getAttribute('data-booking-id');
+            cancelBooking(bookingId);
+        });
+    });
+});
+
+function cancelBooking(bookingId) {
+    if (confirm('Apakah Anda yakin ingin membatalkan booking ini?')) {
+        fetch(`/booking/${bookingId}/cancel/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            alert('Terjadi kesalahan. Silakan coba lagi.');
+        });
+    }
+}
+</script>
+{% endblock %}
