@@ -75,7 +75,7 @@
         </div>
 
         <!-- STATE -->
-        <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+        <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
             {% comment %} Tampilkan loading secara default, JS akan menyembunyikannya {% endcomment %}
             <svg class="animate-spin h-10 w-10 text-Dark-Slate inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -109,6 +109,7 @@
 </div>
 
 {% include 'footer.html' %}
+
 
 <style>
   @keyframes fadeIn {
@@ -145,14 +146,18 @@
   .card-stagger-6 { animation-delay: 0.3s; opacity: 0; }
 </style>
 
+{% endblock content %}
+
 {% block extra_js %}
 <script>
     const VENUES_API_URL = "{% url 'venue:api_get_venues' %}";
-    
-    // const VENUE_DETAIL_URL_BASE = "{% url 'venue:venue_detail' 9999 %}".replace('9999', '');
-    // const VENUE_DETAIL_API_URL_BASE = "{% url 'venue:api_get_venue_detail' 9999 %}".replace('9999', '');
-    // const EDIT_VENUE_API_URL_BASE = "{% url 'venue:api_edit_venue' 9999 %}".replace('9999', '');
-    // const DELETE_VENUE_API_URL_BASE = "{% url 'venue:api_delete_venue' 9999 %}".replace('9999', '');
+
+    const VENUE_DETAIL_URL_BASE = "{% url 'venue:venue_detail' 9999 %}".replace('9999', '');
+    const VENUE_DETAIL_API_URL_BASE = "{% url 'venue:api_get_venue_detail' 9999 %}".replace('9999', '');
+    const ADD_VENUE_API_URL = "{% url 'venue:api_add_venue' %}";
+    const EDIT_VENUE_API_URL_BASE = "{% url 'venue:api_edit_venue' 9999 %}".replace('9999', '');
+    const DELETE_VENUE_API_URL_BASE = "{% url 'venue:api_delete_venue' 9999 %}".replace('9999', '');
+    const PLACEHOLDER_IMG_URL = "{% static 'image/no-venues.png' %}";
 
     const CURRENT_USER_PROFILE_PK = "{{ profile.pk|default_if_none:'' }}";
     const IS_OWNER = {{ is_owner_role|yesno:"true,false" }};
@@ -176,10 +181,10 @@
     let allVenuesData = []; 
     let currentFilters = { 
         owner: ownerFilterSelect ? ownerFilterSelect.value : 'all',
-        city: cityFilterSelect.value,
-        category: categoryFilterSelect.value,
-        type: typeFilterSelect.value,
-        search: searchInput.value
+        city: cityFilterSelect ? cityFilterSelect.value : '',
+        category: categoryFilterSelect ? categoryFilterSelect.value : '',
+        type: typeFilterSelect ? typeFilterSelect.value : '',
+        search: searchInput ? searchInput.value : ''
     };
 
     // Mengambil data terbaru dari server

@@ -11,9 +11,9 @@ urlpatterns = [
     path('detail/<int:venue_id>/', show_details, name='venue_detail'),
     path('api/venues/', get_venues_json, name='api_get_venues'),
 
-    # path('api/venue/<uuid:venue_uuid>/', get_venue_json_by_id, name='api_get_venue_detail'),
-    # path('api/venues/add/', add_venue_ajax, name='api_add_venue'),
-    # path('api/venues/edit/<uuid:venue_uuid>/', edit_venue_ajax, name='api_edit_venue'),
-    # path('api/venues/delete/<uuid:venue_uuid>/', delete_venue_ajax, name='api_delete_venue'),
-    # path('detail/<uuid:venue_uuid>/', venue_detail_view, name='venue_detail'),
+    path('api/venue/<int:venue_id>/', get_venue_json_by_id, name='api_get_venue_detail'),
+    path('api/venues/add/', add_venue_ajax, name='api_add_venue'),
+    path('api/venues/edit/<int:venue_id>/', edit_venue_ajax, name='api_edit_venue'),
+    path('api/venues/delete/<int:venue_id>/', delete_venue_ajax, name='api_delete_venue'),
+    path('details/<int:venue_id>/', show_details, name='venue_detail'),
 ]

@@ -5,14 +5,14 @@ from .models import Venue, City, Category
 from account.models import Profile
 
 # Create your views here.
-@login_required(login_url='/login')
+@login_required(login_url='/auth/login')
 def show_main(request): 
     try:
         user_profile = request.user.profile
     except Profile.DoesNotExist:
         return redirect('/register') 
 
-    is_owner_role = user_profile.is_owner() if user_profile else False
+    is_owner_role = user_profile.is_owner if user_profile else False
 
     cities = City.objects.all().order_by('name')
     categories = Category.objects.all().order_by('name')
