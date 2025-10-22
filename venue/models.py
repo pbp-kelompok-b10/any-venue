@@ -18,20 +18,6 @@ class Category(models.Model):
 
 class Venue(models.Model):
 
-    # CATEGORY_CHOICES = [
-    #     ('Padel', 'Padel'),
-    #     ('Tenis', 'Tenis'),
-    #     ('Mini Soccer', 'Mini Soccer'),
-    #     ('Sepak Bola', 'Sepak Bola'),
-    #     ('Badminton', 'Badminton'),
-    #     ('Pickleball', 'Pickleball'),
-    #     ('Basket', 'Basket'),
-    #     ('Futsal', 'Futsal'),
-    #     ('Golf', 'Golf'),
-    #     ('Tenis Meja', 'Tenis Meja'),
-    #     ('Squash', 'Squash'),
-    # ]
-
     TYPE_CHOICES = [
         ('Indoor', 'Indoor'),
         ('Outdoor', 'Outdoor'),

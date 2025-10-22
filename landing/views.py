@@ -1,8 +1,7 @@
 from django.shortcuts import render
 
 # Create your views here.
-
-def show_main(request):
+def show_landing(request):
     return render(request, "landing.html")
 
 def features_preview(request):
@@ -14,5 +13,5 @@ def header_test(request):
 def features_review(request):
     return render(request, "sections/features_review.html")
 
-def booking_preview_test(request):
+def booking_preview(request):
     return render(request, "sections/booking_preview.html")
