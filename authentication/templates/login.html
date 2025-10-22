@@ -18,7 +18,7 @@
                 </div>
                 <div class="flex flex-wrap justify-center items-center gap-1 sm:gap-[5px]">
                     <div class="text-center text-Flash-White text-base font-normal font-['Roboto'] leading-normal">Don't have an account?</div>
-                    <a href="#" class="text-center text-Flash-White text-base font-normal font-['Roboto'] underline leading-normal">Register Now</a>
+                    <a href="{% url 'register' %}" class="text-center text-Flash-White text-base font-normal font-['Roboto'] underline leading-normal">Register Now</a>
                 </div>
             </div>
         </div>
@@ -43,14 +43,15 @@
 
             <!-- FORM LOGIN AJAX -->
             <form id="loginForm" class="w-full max-w-[580px] p-6 sm:p-8 bg-white/70 outline outline-1 outline-offset-[-1px] outline-Color-Scheme-1-Border flex flex-col justify-start items-start gap-4 sm:gap-6 rounded-lg">
+                {% csrf_token %}
                 <div class="w-full flex flex-col justify-start items-start gap-4 sm:gap-6">
                     <div class="w-full flex flex-col justify-start items-start gap-2">
                         <label class="text-Color-Scheme-1-Text text-base font-normal font-['Roboto'] leading-normal">Username</label>
-                        <input type="text" name="username" class="w-full p-3 outline outline-1 outline-Color-Neutral-Darkest bg-transparent focus:bg-Flash-White rounded-md" required>
+                        <input type="text" id="username" name="username" class="w-full p-3 outline outline-1 outline-Color-Neutral-Darkest bg-transparent focus:bg-Flash-White rounded-md" required>
                     </div>
                     <div class="w-full flex flex-col justify-start items-start gap-2">
                         <label class="text-Color-Scheme-1-Text text-base font-normal font-['Roboto'] leading-normal">Password</label>
-                        <input type="password" name="password" class="w-full p-3 outline outline-1 outline-Color-Neutral-Darkest bg-transparent focus:bg-Flash-White rounded-md" required>
+                        <input type="password" id="password" name="password" class="w-full p-3 outline outline-1 outline-Color-Neutral-Darkest bg-transparent focus:bg-Flash-White rounded-md" required>
                     </div>
                 </div>
                 <div id="loginMessage" class="text-red-600 text-sm"></div>
@@ -77,20 +78,30 @@
 <!-- SCRIPT -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script>
-$("#loginForm").submit(function(e){
-    e.preventDefault();
-    $.ajax({
-        type: "POST",
-        url: "{% url 'login' %}",
-        data: $(this).serialize(),
-        success: function(response){
-            $("#loginMessage").text(response.message);
-            if(response.success){
-                window.location.href = "{% url 'landing:show_main' %}";
+    $("#loginForm").submit(function(e){
+        e.preventDefault();
+        const data = {
+            username: $("#username").val(),
+            password: $("#password").val(),
+            csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'login' %}",
+            data: data,
+            success: function(response){
+                if(response.success){
+                    window.location.href = "{% url 'landing:show_landing' %}";
+                } else {
+                    $("#loginMessage").text(response.message);
+                }
+            },
+            error: function(xhr){
+                $("#loginMessage").text("Server error: " + xhr.status);
             }
-        }
+        });
     });
-});
 </script>
 
 {% endblock content %}

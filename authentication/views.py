@@ -27,13 +27,15 @@ def register_view(request):
 
         # Create user
         user = User.objects.create_user(username=username, password=password1)
-        user.profile.is_owner = is_owner  # kalau model profile ada field ini
-        user.profile.save()
+        profile = user.profile  # auto dibuat lewat signal
+        profile.role = 'OWNER' if is_owner else 'USER'
+        profile.save()
 
         return JsonResponse({"success": True, "message": "Account created successfully!"})
 
     return render(request, "register.html")
 
+@csrf_exempt
 def login_view(request):
     if request.method == "POST":
         username = request.POST["username"]
