@@ -156,11 +156,11 @@
 {% block extra_js %}
 <script>
     const VENUES_API_URL = "{% url 'venue:api_get_venues' %}";
-    const VENUE_DETAIL_URL_BASE = "{% url 'venue:venue_detail' 9999 %}".replace('9999', '');
-    const VENUE_DETAIL_API_URL_BASE = "{% url 'venue:api_get_venue_detail' 9999 %}".replace('9999', '');
+    const VENUE_DETAIL_URL_BASE = "{% url 'venue:venue_detail' 9999 %}".replace('/9999/', '/');
+    const VENUE_DETAIL_API_URL_BASE = "{% url 'venue:api_get_venue_detail' 9999 %}".replace('/9999/', '/');
     const ADD_VENUE_API_URL = "{% url 'venue:api_add_venue' %}";
-    const EDIT_VENUE_API_URL_BASE = "{% url 'venue:api_edit_venue' 9999 %}".replace('9999', '');
-    const DELETE_VENUE_API_URL_BASE = "{% url 'venue:api_delete_venue' 9999 %}".replace('9999', '');
+    const EDIT_VENUE_API_URL_BASE = "{% url 'venue:api_edit_venue' 9999 %}".replace('/9999/', '/');
+    const DELETE_VENUE_API_URL_BASE = "{% url 'venue:api_delete_venue' 9999 %}".replace('/9999/', '/');
 
     const CURRENT_USER_PROFILE_PK = "{{ profile.pk|default_if_none:'' }}";
     const IS_OWNER = {{ is_owner_role|yesno:"true,false" }};

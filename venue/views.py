@@ -63,8 +63,8 @@ def get_venues_json(request):
     return JsonResponse(data, safe=False)
 
 @require_http_methods(["GET"])
-def get_venue_json_by_id(request, venue_id):
-    venue = get_object_or_404(Venue, pk=venue_id)
+def get_venue_json_by_id(request, id):
+    venue = get_object_or_404(Venue, pk=id)
     
     data = {
         'id': venue.id,
@@ -103,7 +103,7 @@ def add_venue_ajax(request):
 
 @login_required(login_url='/auth/login')
 @require_http_methods(["PUT"])
-def edit_venue_ajax(request, venue_uuid):
+def edit_venue_ajax(request, id):
     try:
         venue = get_object_or_404(Venue, pk=id)
     except Venue.DoesNotExist:
@@ -127,7 +127,7 @@ def edit_venue_ajax(request, venue_uuid):
 
 @login_required(login_url='/auth/login')
 @require_http_methods(["DELETE"])
-def delete_venue_ajax(request, venue_uuid):
+def delete_venue_ajax(request, id):
     try:
         venue = get_object_or_404(Venue, pk=id)
     except Venue.DoesNotExist:
