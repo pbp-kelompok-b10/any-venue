@@ -1,6 +1,6 @@
 from django.db import models
 from venue.models import Venue
-from user.models import Profile
+from authentication.models import Profile
 
 class Review(models.Model):
     RATING_CHOICES = [
