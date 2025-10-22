@@ -13,8 +13,10 @@ class Profile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
     def is_owner(self):
-        return self.role == self.Role.OWNER
+        return self.role == 'OWNER'
 
     def __str__(self):
-        return f"{self.username} ({self.role})"
+        return f"{self.user.username} ({self.role})"
+
