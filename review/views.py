@@ -48,7 +48,7 @@ def add_review(request, venue_id):
                 'comment': review.comment,
                 'user': review.user.user.username,
                 'created_at': review.created_at.strftime('%B %d, %Y'),
-                'last_modified': review.created_at.strftime('%B %d, %Y')
+                'last_modified': review.last_modified.strftime('%B %d, %Y')
             }
         }, status=201)
     else:
@@ -79,14 +79,15 @@ def edit_review(request, review_id):
     form = ReviewForm(request.POST, instance=review)
 
     if form.is_valid():
-        form.save()
+        review = form.save()
         return JsonResponse({
             'status': 'success',
             'message': 'Review updated successfully.',
             'review': {
                 'id': review.id,
                 'rating': review.rating,
-                'comment': review.comment
+                'comment': review.comment,
+                'last_modified': review.last_modified.strftime('%B %d, %Y')
             }
         }, status=200)
     else:
@@ -134,7 +135,7 @@ def get_reviews_json(request):
             'rating': review.rating,
             'comment': review.comment,
             'user': review.user.user.username,
-            'user_profile_id': review.user.id,
+            'user_profile_id': review.user.user.id,
             'venue_id': review.venue.id,
             'venue_name': review.venue.name,
             'created_at': review.created_at.strftime('%B %d, %Y'),
@@ -160,7 +161,7 @@ def get_review_json_by_id(request, review_id):
         'rating': review.rating,
         'comment': review.comment,
         'user': review.user.user.username,
-        'user_profile_id': review.user.id,
+        'user_profile_id': review.user.user.id,
         'venue_id': review.venue.id,
         'venue_name': review.venue.name,
         'created_at': review.created_at.strftime('%B %d, %Y'),
