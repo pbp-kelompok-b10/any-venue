@@ -22,5 +22,16 @@
 
 <!-- Footer Section -->
 {% include "footer.html" %}
+<script>
+document.querySelectorAll('[data-scroll]').forEach(btn => {
+    btn.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.getElementById(btn.dataset.scroll);
+        if(target){
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+</script>
 
 {% endblock content %}
