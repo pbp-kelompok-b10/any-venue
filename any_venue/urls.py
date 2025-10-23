@@ -24,4 +24,5 @@ urlpatterns = [
     path('venue/', include('venue.urls')),
     path('review/', include('review.urls', namespace='review')),
     path('account/', include('account.urls'))
+    path('booking/', include('booking.urls')),
 ]

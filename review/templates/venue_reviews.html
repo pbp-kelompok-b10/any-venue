@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Venue Reviews</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %} <div class="bg-gray-100 w-full pt-16 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <div class="mb-8 flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">What Our Users Say</h1>
+                <p class="text-gray-600">Real feedback from our venue users.</p>
+            </div>
+            <button id="refreshReviews" type="button" 
+                class="flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+                title="Refresh Reviews">
+                <svg id="refreshIcon" class="w-5 h-5 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+        </div>
+
+        <div id="loadingReviews" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+            <svg class="animate-spin h-8 w-8 text-cyan-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            <p class="text-gray-600 mt-3">Loading reviews...</p>
+        </div>
+
+        <div id="errorReviews" class="hidden text-center text-red-500 font-medium bg-red-100 border border-red-300 rounded-lg p-6">
+            Error loading reviews. Please try again.
+        </div>
+
+        <div id="reviewGrid" class="hidden">
+            </div>
+
+        <div id="emptyReviews" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+            <div class="w-32 h-32 mx-auto mb-4 opacity-50">
+                 <svg class="w-full h-full text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No reviews found</h3>
+            <p class="text-gray-500">Be the first to leave a review for one of our venues!</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- PENYESUAIAN KONTEKS ---
+    // Pastikan 'review:get_reviews_json' adalah nama URL yang benar di urls.py Anda
+    const REVIEWS_API_ENDPOINT = "{% url 'review:get_reviews_json' %}";
+    // -------------------------
+
+    // DOM elements
+    const loadingReviews = document.getElementById('loadingReviews');
+    const errorReviews = document.getElementById('errorReviews');
+    const emptyReviews = document.getElementById('emptyReviews');
+    const reviewGridContainer = document.getElementById('reviewGrid');
+    const refreshButton = document.getElementById('refreshReviews');
+    const refreshIcon = document.getElementById('refreshIcon');
+
+    let allReviews = [];
+
+    // Show/hide page sections
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+        loadingReviews.classList.toggle('hidden', !showLoading);
+        errorReviews.classList.toggle('hidden', !showError);
+        emptyReviews.classList.toggle('hidden', !showEmpty);
+        reviewGridContainer.classList.toggle('hidden', !showGrid);
+
+        if (showGrid) {
+            // Mengatur grid agar 3 kolom di layar medium, sesuai gambar
+            reviewGridContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8';
+        }
+    }
+
+    // Helper function to generate star icons
+    function generateStars(rating) {
+        let starsHTML = '<div class="flex items-center mb-4">';
+        // SVG untuk bintang, mudah diwarnai dengan text-color
+        const starSVG = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.959a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.446a1 1 0 00-.364 1.118l1.286 3.959c.3.921-.755 1.688-1.538 1.118l-3.368-2.446a1 1 0 00-1.175 0l-3.368 2.446c-.783.57-1.838-.197-1.538-1.118l1.286-3.959a1 1 0 00-.364-1.118L2.063 9.386c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"></path></svg>`;
+        
+        const numericRating = Number(rating);
+        for (let i = 1; i <= 5; i++) {
+            if (i <= numericRating) {
+                // Bintang terisi (kuning)
+                starsHTML += `<span class="text-yellow-400">${starSVG}</span>`;
+            } else {
+                // Bintang kosong (abu-abu)
+                starsHTML += `<span class="text-gray-600">${starSVG}</span>`;
+            }
+        }
+        starsHTML += '</div>';
+        return starsHTML;
+    }
+
+    // Build review card HTML
+    // Disesuaikan agar cocok dengan gambar dan data JSON dari views.py Anda
+    function buildReviewCard(review) {
+        // Data dari get_reviews_json: id, rating, comment, user, venue_name
+        
+        const cardHTML = `
+            <article class="bg-slate-800 rounded-lg shadow-xl p-6 text-gray-300 flex flex-col h-full">
+                ${generateStars(review.rating)}
+
+                <blockquote class="flex-grow">
+                    <p class="italic text-gray-300 text-base leading-relaxed mb-4">
+                        "${review.comment}"
+                    </p>
+                </blockquote>
+
+                <div class="mt-auto border-t border-slate-700 pt-4">
+                    <p class="font-semibold text-white">${review.user}</p>
+                    <p class="text-sm text-gray-400">Review for ${review.venue_name}</p>
+                </div>
+            </article>
+            `;
+        return cardHTML;
+    }
+
+    // Render review cards
+    function renderReviews(reviews) {
+        reviewGridContainer.innerHTML = reviews.map(buildReviewCard).join('');
+    }
+
+    // Fetch reviews
+    async function fetchReviews() {
+        try {
+            displayPageSection({ showLoading: true });
+            const response = await fetch(REVIEWS_API_ENDPOINT);
+            if (!response.ok) throw new Error("Failed to fetch review data");
+            
+            const data = await response.json();
+            allReviews = data;
+            
+            if (allReviews.length === 0) {
+                displayPageSection({ showEmpty: true });
+            } else {
+                renderReviews(allReviews);
+                displayPageSection({ showGrid: true });
+            }
+        } catch (error) {
+            console.error(error);
+            displayPageSection({ showError: true });
+            errorReviews.textContent = "Error loading reviews. Please check the console and try refreshing.";
+        }
+    }
+
+    // Refresh button handler (diambil dari contoh Anda)
+    function handleRefreshReviewsClick() {
+        if (!refreshButton) return;
+
+        // Tambahkan animasi spin
+        refreshIcon.classList.add('animate-spin');
+        refreshButton.disabled = true;
+        refreshButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+        // (Optional) Jika Anda punya fungsi toast:
+        // if (typeof showToast !== 'undefined') {
+        //     showToast('Refreshing', 'Fetching the latest reviews...', 'normal', 1500);
+        // }
+
+        fetchReviews().finally(() => {
+            // Hapus animasi spin
+            refreshIcon.classList.remove('animate-spin');
+            refreshButton.disabled = false;
+            refreshButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        });
+    }
+
+    // --- Initial Load & Event Listeners ---
+    
+    // Muat data saat halaman dibuka
+    fetchReviews();
+
+    // Tambahkan listener ke tombol refresh
+    if (refreshButton) { 
+        refreshButton.addEventListener('click', handleRefreshReviewsClick);
+    }
+</script>
+{% endblock content %}

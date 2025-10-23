@@ -19,4 +19,4 @@ class Review(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.user.username} - {self.venue.name} ({self.rating}/5)'
+        return f'{self.user.user.username} - {self.venue.name} ({self.rating}/5)'
