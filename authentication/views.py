@@ -50,6 +50,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    if request.is_ajax():
+    # Check if request is AJAX by looking at HTTP_X_REQUESTED_WITH header
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({"success": True, "message": "Logout berhasil"})
-    return redirect("login")
+    return redirect("landing:show_landing")

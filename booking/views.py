@@ -19,12 +19,14 @@ def get_slots(request, venue_id):
         return JsonResponse([], safe=False)
     date = datetime.strptime(date_str, "%Y-%m-%d").date()
     slots = BookingSlot.objects.filter(venue_id=venue_id, date=date).order_by("start_time")
+    user_bookings = Booking.objects.filter(user=request.user, slot__venue_id=venue_id, slot__date=date).values_list('slot_id', flat=True)
     return JsonResponse([
         {
             "id": s.id,
             "start_time": s.start_time.strftime("%H:%M"),
             "end_time": s.end_time.strftime("%H:%M"),
             "is_booked": s.is_booked,
+            "is_booked_by_user": s.id in user_bookings,
             "price": s.venue.price,
         } for s in slots
     ], safe=False)
@@ -42,7 +44,7 @@ def create_booking(request):
             total += slot.venue.price
             slot.is_booked = True
             slot.save()
-            Booking.objects.create(user=user, slot=slot, total_price=slot.venue.price_per_hour)
+            Booking.objects.create(user=user, slot=slot, total_price=slot.venue.price)
         return JsonResponse({"status": "success", "total": total})
     return JsonResponse({"status": "error"})
 

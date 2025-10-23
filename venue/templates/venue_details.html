@@ -148,19 +148,24 @@
 
                     <!-- Action Buttons -->
                     <div class="self-stretch flex flex-col items-start gap-4 pt-2">
-                        <button type="submit" class="self-stretch px-6 py-3 bg-Color-Neutral-Darkest text-Color-White outline outline-1 outline-Color-Neutral-Darkest text-base font-normal font-['Roboto'] leading-normal rounded hover:bg-opacity-90 transition-colors">
-                            Booking Venue
-                        </button>
-                        <button type="button" class="self-stretch px-6 py-3 text-Color-Neutral-Darkest outline outline-1 outline-Color-Neutral-Darkest text-base font-normal font-['Roboto'] leading-normal rounded hover:bg-gray-100 transition-colors">
-                            Review Now
-                        </button>
-                        <span class="self-stretch text-center text-white text-xs font-normal font-['Roboto'] leading-none">
-                            Free shipping over $50
-                        </span>
-                    </div>
-                </div>
+    <!-- Tombol Booking Venue -->
+    <a href="{% url 'booking:booking_page' venue.id %}"
+       class="self-stretch text-center px-6 py-3 bg-Color-Neutral-Darkest text-Color-White outline outline-1 outline-Color-Neutral-Darkest text-base font-normal font-['Roboto'] leading-normal rounded hover:bg-opacity-90 transition-colors">
+       Booking Venue
+    </a>
 
-            </div>
+    <!-- Tombol Review Now (belum dihubungkan, bisa ke review nanti) -->
+    <button type="button"
+        class="self-stretch px-6 py-3 text-Color-Neutral-Darkest outline outline-1 outline-Color-Neutral-Darkest text-base font-normal font-['Roboto'] leading-normal rounded hover:bg-gray-100 transition-colors">
+        Review Now
+    </button>
+
+    <!-- Info tambahan -->
+    <span class="self-stretch text-center text-white text-xs font-normal font-['Roboto'] leading-none">
+        Free shipping over $50
+    </span>
+</div>
+
 
             <!-- TESTIMONIALS SECTION -->
             <div class="w-full flex flex-col items-center gap-6 pt-10">
