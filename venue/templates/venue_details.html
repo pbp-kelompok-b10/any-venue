@@ -1,295 +1,327 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block content %}
+{% block title %}{{ venue.name }} – AnyVenue{% endblock title %}
 
+{% block content %}
 {% include "navbar.html" %}
 
-<div class="w-full max-w-[1440px] mx-auto bg-white overflow-hidden">
-    
-    <!-- HERO SECTION -->
-    <div class="w-full px-6 py-16 sm:py-28 bg-gradient-to-b from-Light-Navy to-Flash-White flex flex-col items-center gap-12 sm:gap-20">
-        <div class="w-full max-w-[1280px] flex flex-col items-start gap-12 sm:gap-20">
-            
-            <!-- HEADER SECTION -->
-            <div class="w-full flex flex-col lg:flex-row justify-start items-center lg:items-start gap-8 lg:gap-16">
-                
-                <!-- LEFT COLUMN: Details -->
-                <div class="flex-1 w-full flex flex-col items-start gap-8">
-                    <div class="self-stretch flex flex-col items-start gap-6">
-                        
-                        <!-- Breadcrumb -->
-                        <nav aria-label="Breadcrumb" class="self-stretch flex items-center gap-2 text-sm text-Flash-White">
-                            <a href="#" class="hover:underline font-normal font-['Roboto'] leading-tight">All Venue</a>
-                            <svg class="size-4 shrink-0" width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M6.25854 5.34814L9.72534 8.71729C9.77811 8.7816 9.78589 8.80029 9.80151 8.8833C9.78589 8.96631 9.77807 8.98506 9.72534 9.04932L6.41187 12.3618C6.3161 12.4282 6.19961 12.424 6.08765 12.3452C6.01538 12.2415 6.01545 12.1073 6.08765 12.0044L9.20874 8.8833L6.07104 5.74463C6.00562 5.64885 6.00987 5.53237 6.08765 5.42041C6.14502 12.4026 6.19961 12.424 6.26245 12.4263C6.3161 12.4282 6.36016 12.4134 6.41187 12.3618L9.72534 9.04932C9.76134 9.0133 9.77807 8.98506 9.78589 8.96631C9.79576 8.94264 9.80147 8.9157 9.80151 8.8833C9.80151 8.85089 9.79571 8.82397 9.78589 8.80029C9.77811 8.7816 9.76116 8.75319 9.72534 8.71729L6.42847 5.42041C6.37656 5.36868 6.32559 5.34816 6.25854 5.34814Z" fill="currentColor" stroke="currentColor" stroke-width="0.666667"/>
-                            </svg>
-                            <span class="font-semibold font-['Roboto'] leading-tight">{{ venue.name }}</span>
-                        </nav>
+<div class="w-full pt-24 pb-16 bg-gradient-to-b from-Light-Navy to-Flash-White flex flex-col items-center">
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-start gap-6">
+        
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-Flash-White opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]">
+            <a href="{% url 'venue:venue_main' %}" class="hover:underline font-normal leading-tight">All Venues</a>
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M6 12.5L10 8.5L6 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="font-semibold leading-tight">{{ venue.name }}</span>
+        </nav>
 
-                        <!-- Title -->
-                        <h1 class="self-stretch text-Flash-White text-4xl font-bold font-['Roboto'] leading-[48px]">
-                            {{ venue.name }}
-                        </h1>
-
-                        <!-- Price & Rating -->
-                        <div class="inline-flex items-center gap-4">
-                            <span class="text-white text-2xl font-bold font-['Roboto'] leading-loose">
-                                Rp{{ venue.price }} 
-                                <span class="text-sm text-Flash-White font-light">/jam</span>
-                            </span>
-                            
-                            <span class="h-10 w-px bg-Color-Scheme-1-Border" aria-hidden="true"></span>
-                            
-                            <div class="inline-flex flex-col items-start gap-1">
-                                <div class="flex items-center gap-1">
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="..."/>
-                                    </svg>
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="..."/>
-                                    </svg>
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="..."/>
-                                    </svg>
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="..." stroke="currentColor"/>
-                                    </svg>
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd" d="..."/>
-                                    </svg>
-                                </div>
-                                <span class="text-center text-white text-sm font-normal font-['Roboto'] leading-tight">
-                                    (3.5 stars) • 10 reviews
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <!-- Details Section -->
-                        <div class="self-stretch flex flex-col items-start gap-6">
-                            <div class="w-fit pt-2 border-b border-black">
-                                <div class="inline-flex flex-col items-start gap-2">
-                                    <span class="text-white text-base font-normal font-['Roboto'] leading-normal">Details</span>
-                                    <div class="w-full h-0.5 bg-Color-Scheme-1-Accent"></div> 
-                                </div>
-                            </div>
-                            <div class="self-stretch text-white text-base font-normal font-['Roboto'] leading-normal">
-                                {{ venue.description }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CENTER COLUMN: Image -->
-                <div class="w-full max-w-[490px] lg:w-[490px] flex flex-col items-start gap-4">
-                    <div class="self-stretch">
-                        <img class="w-full h-auto aspect-square object-cover" src="{{ venue.image_url }}" alt="Venue Image" />
-                    </div>
-                </div>
-
-                <!-- RIGHT COLUMN: Location & Booking -->
-                <div class="flex-1 w-full flex flex-col items-start gap-6">
-                    
-                    <!-- Location Section -->
-                    <div class="self-stretch flex flex-col items-start gap-6">
-                        <div class="w-fit pt-2 border-b border-black">
-                            <div class="inline-flex flex-col items-start gap-2">
-                                <span class="text-white text-base font-normal font-['Roboto'] leading-normal">Location</span>
-                                <div class="w-full h-0.5 bg-Color-Scheme-1-Accent"></div>
-                            </div>
-                        </div>
-                        <div class="self-stretch text-white text-base font-normal font-['Roboto'] leading-normal">
-                            {{ venue.address }}
-                        </div>
-                    </div>
-                    
-                    <!-- Type & Variant Section -->
-                    <div class="self-stretch flex flex-col items-start gap-6">
-                        
-                        <!-- Type -->
-                        <div class="self-stretch flex items-start gap-8">
-                            <span class="text-white text-base font-normal font-['Roboto'] leading-normal mt-2">Type</span>
-                            <div class="flex-1 flex flex-wrap gap-4">
-                                <button type="button" class="px-4 py-2 outline outline-1 outline-Color-Neutral-Darkest text-Color-Neutral-Darkest text-base font-normal font-['Roboto'] leading-normal">
-                                    {{ venue.type }}
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Variant & Quantity -->
-                        <div class="self-stretch flex flex-col sm:flex-row items-start gap-4">
-                            
-                            <!-- Variant Dropdown -->
-                            <div class="flex-1 w-full sm:w-auto inline-flex flex-col items-start gap-2">
-                                <label for="venue-variant-select" class="self-stretch text-white text-base font-normal font-['Roboto'] leading-normal">
-                                    Variant
-                                </label>
-                                <div class="relative self-stretch">
-                                    <select id="venue-variant-select" class="w-full appearance-none p-3 outline outline-1 outline-Color-Neutral-Darkest text-Color-Neutral-Darkest text-base font-normal font-['Roboto'] leading-normal bg-white rounded">
-                                        <option value="">Select</option>
-                                    </select>
-                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
-                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Quantity Input -->
-                            <div class="w-full sm:w-auto inline-flex flex-col items-start gap-2">
-                                <label for="venue-quantity" class="self-stretch text-white text-base font-normal font-['Roboto'] leading-normal">
-                                    Qty
-                                </label>
-                                <input type="number" id="venue-quantity" value="1" min="1" class="w-16 p-3 outline outline-1 outline-Color-Neutral-Darkest text-white text-base font-normal font-['Roboto'] leading-normal rounded">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="self-stretch flex flex-col items-start gap-4 pt-2">
-                        <button type="submit" class="self-stretch px-6 py-3 bg-Color-Neutral-Darkest text-Color-White outline outline-1 outline-Color-Neutral-Darkest text-base font-normal font-['Roboto'] leading-normal rounded hover:bg-opacity-90 transition-colors">
-                            Booking Venue
-                        </button>
-                        <button type="button" class="self-stretch px-6 py-3 text-Color-Neutral-Darkest outline outline-1 outline-Color-Neutral-Darkest text-base font-normal font-['Roboto'] leading-normal rounded hover:bg-gray-100 transition-colors">
-                            Review Now
-                        </button>
-                        <span class="self-stretch text-center text-white text-xs font-normal font-['Roboto'] leading-none">
-                            Free shipping over $50
-                        </span>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- TESTIMONIALS SECTION -->
-            <div class="w-full flex flex-col items-center gap-6 pt-10">
-                
-                <!-- Section Header -->
-                <div class="w-full max-w-[768px] text-center flex flex-col items-center gap-6">
-                    <h2 class="self-stretch text-white text-5xl font-bold font-['Roboto'] leading-[57.60px]">
-                        Customer testimonials
-                    </h2>
-                    <p class="self-stretch text-white text-lg font-normal font-['Roboto'] leading-relaxed">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    </p>
-                </div>
-                
-                <!-- Testimonials Grid -->
-                <div class="self-stretch grid grid-cols-1 md:grid-cols-3 gap-8 pt-6">
-                    
-                    <!-- Testimonial 1 -->
-                    <div class="flex flex-col items-start gap-8">
-                        <div class="inline-flex items-start gap-1 text-white">
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                        </div>
-                        <blockquote class="self-stretch text-white text-xl font-bold font-['Roboto'] leading-7">
-                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare."
-                        </blockquote>
-                        <div class="flex flex-col items-start gap-4">
-                            <div class="flex flex-col items-start">
-                                <cite class="not-italic text-white text-base font-semibold font-['Roboto'] leading-normal">
-                                    Name Surname
-                                </cite>
-                                <span class="text-white text-base font-normal font-['Roboto'] leading-normal">
-                                    Position, Company name
-                                </span>
-                            </div>
-                            <div class="w-28 h-12 bg-gray-200"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Testimonial 2 -->
-                    <div class="flex flex-col items-start gap-8">
-                        <div class="inline-flex items-start gap-1 text-white">
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                        </div>
-                        <blockquote class="self-stretch text-white text-xl font-bold font-['Roboto'] leading-7">
-                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare."
-                        </blockquote>
-                        <div class="flex flex-col items-start gap-4">
-                            <div class="flex flex-col items-start">
-                                <cite class="not-italic text-white text-base font-semibold font-['Roboto'] leading-normal">
-                                    Name Surname
-                                </cite>
-                                <span class="text-white text-base font-normal font-['Roboto'] leading-normal">
-                                    Position, Company name
-                                </span>
-                            </div>
-                            <div class="w-28 h-12 bg-gray-200"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Testimonial 3 -->
-                    <div class="flex flex-col items-start gap-8">
-                        <div class="inline-flex items-start gap-1 text-white">
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                            <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="..."/>
-                            </svg>
-                        </div>
-                        <blockquote class="self-stretch text-white text-xl font-bold font-['Roboto'] leading-7">
-                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare."
-                        </blockquote>
-                        <div class="flex flex-col items-start gap-4">
-                            <div class="flex flex-col items-start">
-                                <cite class="not-italic text-white text-base font-semibold font-['Roboto'] leading-normal">
-                                    Name Surname
-                                </cite>
-                                <span class="text-white text-base font-normal font-['Roboto'] leading-normal">
-                                    Position, Company name
-                                </span>
-                            </div>
-                            <div class="w-28 h-12 bg-gray-200"></div>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-
-        </div>
+        <h1 class="text-Flash-White text-4xl sm:text-5xl font-bold leading-tight opacity-0 animate-[fadeIn_0.6s_ease-out_0.1s_forwards]">
+            {{ venue.name }}
+        </h1>
     </div>
+</div>
+
+<div class="w-full bg-Flash-White">
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+            
+            <div class="lg:col-span-2 opacity-0 animate-[fadeIn_0.6s_ease-out_0.2s_forwards]">
+                <img class="w-full h-auto aspect-video object-cover border border-gray-300 shadow-lg" 
+                     src="{{ venue.image_url|default:'{% static "image/placeholder.png" %}' }}" 
+                     alt="{{ venue.name }}" />
+            </div>
+
+            <div class="lg:col-span-1 flex flex-col gap-6 opacity-0 animate-[fadeIn_0.6s_ease-out_0.3s_forwards]">
+                
+                <div class="bg-white border border-gray-200 p-6 shadow-md flex-grow">
+                    <div class="flex flex-col gap-5">
+                        
+                        <div class="flex flex-col gap-3 pb-5 border-b border-gray-200">
+                             <div class="flex items-baseline gap-2">
+                                 <span class="text-gray-900 text-3xl font-bold">Rp {{ venue.price|floatformat:0 }}</span>
+                                 <span class="text-gray-600 text-sm font-normal">/ sesi</span>
+                             </div>
+                             <div class="flex items-center gap-2">
+                                 <div class="flex items-center gap-0.5 text-yellow-500" title="Rating (Coming Soon)">
+                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                                     <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                                 </div>
+                                 <span class="text-sm text-gray-600">(Review module coming soon)</span>
+                             </div>
+                        </div>
+
+                        <div class="flex flex-col gap-4">
+                            <h2 class="text-lg font-bold text-gray-900">Venue Information</h2>
+                            
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-gray-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                <div>
+                                    <span class="block text-xs text-gray-500 uppercase font-medium tracking-wider">Category</span>
+                                    <span class="block text-gray-900 font-medium">{{ venue.category.name }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-gray-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                                <div>
+                                    <span class="block text-xs text-gray-500 uppercase font-medium tracking-wider">Type</span>
+                                    <span class="block text-gray-900 font-medium">{{ venue.type }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-gray-500 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                                <div>
+                                    <span class="block text-xs text-gray-500 uppercase font-medium tracking-wider">Location</span>
+                                    <address class="text-gray-900 font-medium not-italic leading-snug">
+                                        {{ venue.address }}<br>
+                                        {{ venue.city.name }}
+                                    </address>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+
+        <div class="mt-8 lg:mt-12 bg-white border border-gray-200 p-6 shadow-md opacity-0 animate-[fadeIn_0.6s_ease-out_0.4s_forwards]">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200">Description</h2>
+            <p class="text-gray-700 text-base leading-relaxed whitespace-pre-line">{{ venue.description|linebreaksbr }}</p>
+        </div>
+
+        <div class="mt-8 bg-white border border-gray-200 p-6 shadow-md opacity-0 animate-[fadeIn_0.6s_ease-out_0.5s_forwards]">
+            {% if user.is_authenticated and venue.owner.user == user %}
+                <h3 class="text-lg font-bold text-gray-900 mb-4 text-center border-b pb-3">Manage Your Venue</h3>
+                <div class="flex flex-col gap-3 pt-3">
+                    <button type="button" onclick="showEditModal('{{ venue.pk }}')" 
+                        class="w-full px-6 py-2.5 bg-Light-Navy text-white text-center text-sm font-semibold hover:bg-Dark-Slate transition-colors  shadow-sm">
+                        Edit Venue Details
+                    </button>
+                    <button type="button" onclick="showDeleteModal('{{ venue.pk }}', '{{ venue.name|escapejs }}')" 
+                        class="w-full px-6 py-2.5 border-2 border-red-600 text-red-600 text-sm font-semibold hover:bg-red-600 hover:text-white transition-colors ">
+                        Delete Venue
+                    </button>
+                </div>
+            {% else %}
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{% url 'booking:booking_page' venue.pk %}" 
+                       class="flex-1 text-center min-w-0 sm:min-w-[180px] px-6 py-3 bg-gray-800 text-white text-base font-semibold border border-gray-900 shadow-sm transition-colors hover:bg-gray-700 "> {# <-- HAPUS DISABLED, SESUAIKAN STYLE #}
+                        Book Now 
+                    </a>
+                    <button type="button" 
+                            onclick="showAddReviewModal('{{ venue.pk }}')" 
+                            class="flex-1 min-w-0 sm:min-w-[180px] px-6 py-3 border-2 border-gray-800 text-gray-800 text-base font-semibold transition-colors hover:bg-gray-100 "> {# <-- HAPUS DISABLED, SESUAIKAN STYLE #}
+                        Write a Review 
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+
+    </div> 
 </div>
 
 {% include "footer.html" %}
 
+{% if user.is_authenticated and venue.owner.user == user %}
+    {% include 'modal/edit_venue.html' %}
+    {% include 'modal/delete_venue.html' %}
+{% endif %}
+
+<style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
 {% endblock content %}
+
+{% block extra_js %}
+{% if user.is_authenticated and venue.owner.user == user %}
+<script>
+    const VENUE_DETAIL_API_URL_BASE = "{% url 'venue:api_get_venue_detail' 9999 %}".replace('/9999/', '/');
+    const EDIT_VENUE_API_URL_BASE = "{% url 'venue:api_edit_venue' 9999 %}".replace('/9999/', '/');
+    const DELETE_VENUE_API_URL_BASE = "{% url 'venue:api_delete_venue' 9999 %}".replace('/9999/', '/');
+    const CSRF_TOKEN = "{{ csrf_token }}";
+
+    function showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        const modalContent = modal.querySelector('[id$="ModalContent"]');
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        setTimeout(() => { if (modalContent) modalContent.classList.add('opacity-100', 'scale-100'); }, 10);
+    }
+
+    function hideModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        const modalContent = modal.querySelector('[id$="ModalContent"]');
+        if (modalContent) { modalContent.classList.remove('opacity-100', 'scale-100'); modalContent.classList.add('opacity-0', 'scale-90'); }
+        setTimeout(() => { modal.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }, 300);
+    }
+
+    async function showEditModal(venueId) {
+        const editVenueForm = document.getElementById('editVenueForm');
+        const editVenueHiddenId = document.getElementById('edit-venue-id'); 
+        if (!editVenueForm || !editVenueHiddenId) return;
+
+        editVenueForm.reset();
+        editVenueForm.querySelectorAll('.form-error-message').forEach(el => el.remove());
+        
+        showModal('editVenueModal');
+        document.getElementById('editVenueModal-title').textContent = 'Loading data...';
+
+        try {
+            const response = await fetch(`${VENUE_DETAIL_API_URL_BASE}${venueId}/`);
+            if (!response.ok) throw new Error('Failed to fetch venue details.');
+            const venue = await response.json();
+
+            editVenueHiddenId.value = venue.id;
+            document.getElementById('edit-venue-name').value = venue.name;
+            document.getElementById('edit-venue-price').value = venue.price;
+            
+            const typeRadio = editVenueForm.querySelector(`input[name="type"][value="${venue.type}"]`);
+            if (typeRadio) typeRadio.checked = true;
+            
+            document.getElementById('edit-venue-city').value = venue.city; 
+            document.getElementById('edit-venue-category').value = venue.category; 
+            
+            document.getElementById('edit-venue-address').value = venue.address;
+            document.getElementById('edit-venue-description').value = venue.description;
+            document.getElementById('edit-venue-image_url').value = venue.image_url;
+
+            document.getElementById('editVenueModal-title').textContent = 'Edit Venue';
+        } catch (error) {
+            console.error('Error fetching venue for edit:', error);
+            document.getElementById('editVenueModal-title').textContent = 'Error loading data';
+        }
+    }
+
+    function showDeleteModal(venueId, venueName) {
+        const deleteVenueNameSpan = document.getElementById('venue-name-to-delete'); 
+        const deleteVenueHiddenId = document.getElementById('delete-venue-id'); 
+        if(deleteVenueNameSpan) deleteVenueNameSpan.textContent = `"${venueName}"`;
+        if(deleteVenueHiddenId) deleteVenueHiddenId.value = venueId;
+        showModal('deleteVenueModal');
+    }
+
+    function displayFormErrors(formElement, errors) {
+        formElement.querySelectorAll('.form-error-message').forEach(el => el.remove());
+        for (const field in errors) {
+            const input = formElement.querySelector(`[name="${field}"]`);
+            if (input) {
+                if (input.type === 'radio') {
+                    const radioGroupContainer = input.closest('.flex.flex-wrap.gap-x-4'); // Adjust selector as needed for your radio group
+                    if (radioGroupContainer && !radioGroupContainer.querySelector('.form-error-message')) {
+                        const errorText = errors[field].join(' ');
+                        const errorEl = document.createElement('p');
+                        errorEl.className = 'text-red-500 text-xs mt-1 form-error-message';
+                        errorEl.textContent = errorText;
+                        radioGroupContainer.insertAdjacentElement('afterend', errorEl);
+                    }
+                } else if (input.tagName === 'SELECT') { // Handle select elements
+                    const errorText = errors[field].join(' ');
+                    const errorEl = document.createElement('p');
+                    errorEl.className = 'text-red-500 text-xs mt-1 form-error-message';
+                    errorEl.textContent = errorText;
+                    input.insertAdjacentElement('afterend', errorEl);
+                } else { 
+                    const errorText = errors[field].join(' ');
+                    const errorEl = document.createElement('p');
+                    errorEl.className = 'text-red-500 text-xs mt-1 form-error-message';
+                    errorEl.textContent = errorText;
+                    input.insertAdjacentElement('afterend', errorEl);
+                }
+            } else {
+                 console.warn(`Input field named "${field}" not found for error display.`);
+            }
+        }
+    }
+
+    async function handleEditFormSubmit(event) {
+        event.preventDefault();
+        const editVenueSubmitBtn = document.getElementById('editVenueSubmitBtn'); 
+        const editVenueForm = document.getElementById('editVenueForm'); 
+
+        editVenueSubmitBtn.disabled = true;
+        editVenueSubmitBtn.textContent = 'Saving...';
+
+        const formData = new FormData(editVenueForm);
+        const data = Object.fromEntries(formData.entries());
+        const venueId = data.id; 
+
+        try {
+            const response = await fetch(`${EDIT_VENUE_API_URL_BASE}${venueId}/`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                hideModal('editVenueModal');
+                window.location.reload(); 
+            } else {
+                const errorData = await response.json();
+                displayFormErrors(editVenueForm, errorData);
+            }
+        } catch (error) {
+            console.error('Error submitting edit form:', error);
+            alert('An unexpected error occurred. Please check console.');
+        } finally {
+            editVenueSubmitBtn.disabled = false;
+            editVenueSubmitBtn.textContent = 'Save Changes';
+        }
+    }
+
+    async function handleDeleteConfirm() {
+        const deleteVenueHiddenId = document.getElementById('delete-venue-id'); 
+        const deleteVenueConfirmBtn = document.getElementById('confirmDeleteBtn'); 
+
+        const venueId = deleteVenueHiddenId.value;
+        if (!venueId) return;
+
+        deleteVenueConfirmBtn.disabled = true;
+        deleteVenueConfirmBtn.textContent = 'Deleting...';
+
+        try {
+            const response = await fetch(`${DELETE_VENUE_API_URL_BASE}${venueId}/`, {
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': CSRF_TOKEN },
+            });
+
+            if (response.ok) {
+                hideModal('deleteVenueModal');
+                window.location.href = "{% url 'venue:venue_main' %}"; 
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to delete: ${errorData.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error deleting venue:', error);
+            alert('An unexpected error occurred while deleting.');
+        } finally {
+            deleteVenueConfirmBtn.disabled = false;
+            deleteVenueConfirmBtn.textContent = 'Yes, Delete';
+            deleteVenueHiddenId.value = '';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const editVenueForm = document.getElementById('editVenueForm');
+        if (editVenueForm) {
+            editVenueForm.addEventListener('submit', handleEditFormSubmit);
+        }
+
+        const deleteVenueConfirmBtn = document.getElementById('confirmDeleteBtn');
+        if (deleteVenueConfirmBtn) {
+            deleteVenueConfirmBtn.addEventListener('click', handleDeleteConfirm);
+        }
+    });
+
+</script>
+{% endif %}
+{% endblock extra_js %}

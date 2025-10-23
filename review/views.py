@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
@@ -117,3 +117,63 @@ def delete_review(request, review_id):
         'status': 'success',
         'message': 'Review deleted successfully.'
     }, status=200)
+
+@require_http_methods(["GET"])
+def get_reviews_json(request):
+    """
+    Returns JSON data for all reviews, optimized with select_related.
+    Mirrors the get_venues_json pattern from the venue app.
+    """
+    # Optimized query to pre-fetch related user and venue details
+    reviews = Review.objects.select_related('user__user', 'venue').all().order_by('-created_at')
+    
+    data = []
+    for review in reviews:
+        data.append({
+            'id': review.id,
+            'rating': review.rating,
+            'comment': review.comment,
+            'user': review.user.user.username,
+            'user_profile_id': review.user.id,
+            'venue_id': review.venue.id,
+            'venue_name': review.venue.name,
+            'created_at': review.created_at.strftime('%B %d, %Y'),
+            'last_modified': review.last_modified.strftime('%B %d, %Y')
+        })
+        
+    return JsonResponse(data, safe=False)
+
+@require_http_methods(["GET"])
+def get_review_json_by_id(request, review_id):
+    """
+    Returns JSON data for a single review by its ID.
+    Mirrors the get_venue_json_by_id pattern from the venue app.
+    """
+    # Optimized query to pre-fetch related user and venue details
+    review = get_object_or_404(
+        Review.objects.select_related('user__user', 'venue'), 
+        pk=review_id
+    )
+    
+    data = {
+        'id': review.id,
+        'rating': review.rating,
+        'comment': review.comment,
+        'user': review.user.user.username,
+        'user_profile_id': review.user.id,
+        'venue_id': review.venue.id,
+        'venue_name': review.venue.name,
+        'created_at': review.created_at.strftime('%B %d, %Y'),
+        'last_modified': review.last_modified.strftime('%B %d, %Y')
+    }
+    return JsonResponse(data)
+
+def show_review_page(request):
+    """
+    A simple view that just renders the HTML page.
+    The page itself will use JavaScript to fetch the review data.
+    """
+    # Assuming you named the file 'review_section.html'
+    # and put it in 'review/templates/review/'
+    # Adjust the path if you saved it elsewhere.
+    return render(request, 'venue_reviews.html')

@@ -22,37 +22,54 @@
 </nav>
 
 <script>
-    window.addEventListener('scroll', function() {
+    document.addEventListener('DOMContentLoaded', function() { // Pastikan DOM siap
         const navbar = document.getElementById('navbar');
         const brandLink = document.getElementById('brand-link');
         const navLinks = document.querySelectorAll('.nav-link');
         const loginButton = document.getElementById('login-button');
+        
+        const isSolidNavbarPage = document.body.classList.contains('navbar-solid');
 
-        if (window.scrollY > 50) {
+        function applySolidStyles() {
             navbar.classList.add('bg-white', 'shadow-md');
             brandLink.classList.remove('text-white');
             brandLink.classList.add('text-[#000456]');
-            
             navLinks.forEach(link => {
                 link.classList.remove('text-white/80', 'hover:text-white');
                 link.classList.add('text-[#000456]/80', 'hover:text-[#000456]');
             });
-
             loginButton.classList.remove('border-white', 'text-white', 'hover:bg-white', 'hover:text-[#000456]');
             loginButton.classList.add('border-[#000456]', 'text-[#000456]', 'hover:bg-[#000456]', 'hover:text-white');
+        }
 
-        } else {
+        function applyTransparentStyles() {
             navbar.classList.remove('bg-white', 'shadow-md');
             brandLink.classList.add('text-white');
             brandLink.classList.remove('text-[#000456]');
-            
             navLinks.forEach(link => {
                 link.classList.add('text-white/80', 'hover:text-white');
                 link.classList.remove('text-[#000456]/80', 'hover:text-[#000456]');
             });
-            
             loginButton.classList.add('border-white', 'text-white', 'hover:bg-white', 'hover:text-[#000456]');
             loginButton.classList.remove('border-[#000456]', 'text-[#000456]', 'hover:bg-[#000456]', 'hover:text-white');
+        }
+
+        if (isSolidNavbarPage) {
+            applySolidStyles(); 
+        } else {
+            if (window.scrollY > 50) {
+                 applySolidStyles();
+            } else {
+                 applyTransparentStyles();
+            }
+
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    applySolidStyles();
+                } else {
+                    applyTransparentStyles();
+                }
+            });
         }
     });
 </script>
