@@ -1,90 +1,220 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}AnyVenue – Profile Page{% endblock %}
+{% block title %}AnyVenue – Profile{% endblock %}
 
 {% block content %}
 {% include 'navbar.html' %}
 
-<div class="w-full px-16 py-28 flex flex-col items-center gap-20 bg-gradient-to-b from-Light-Navy to-Flash-White">
-    <div class="w-full max-w-[1280px] flex flex-col gap-20">
+<div class="min-h-screen w-full px-8 md:px-16 py-28 flex flex-col items-center bg-gradient-to-b from-Light-Navy to-Flash-White">
+    <div class="w-full max-w-[1100px] flex flex-col gap-10">
 
-        {% if profile %}
-        <!-- Profile Info -->
-        <div class="flex justify-between items-end">
-            <div class="flex-1 flex flex-col gap-4">
-                <div class="text-Flash-White text-5xl font-bold">{{ profile.user.username }}</div>
-                <div class="text-white text-lg">{{ profile.role }}</div>
-
-                {% if user.is_authenticated %}
-                    <div class="text-white text-base">Last Login: {{ profile.last_login }}</div>
-                {% else %}
-                    <div class="text-white text-base">Info terbatas, login untuk melihat detail</div>
-                {% endif %}
-            </div>
-            <div class="flex gap-4">
-                <a href="#" class="px-6 py-3 outline outline-1 outline-Flash-White text-Flash-White">Edit Profile</a>
-            </div>
-        </div>
-
-        {% if user.is_authenticated %}
-            {% if profile.is_owner %}
-            <h2 class="text-2xl font-bold text-white">Venue yang kamu miliki</h2>
-            <div class="flex flex-col gap-6">
-                {% for venue in venues %}
-                <div class="p-4 bg-white rounded shadow">
-                    <div class="text-xl font-bold">{{ venue.name }}</div>
-                    <div>Kota: {{ venue.city.name }}</div>
-                    <div>Kategori: {{ venue.category.name }}</div>
-                    <div>Harga: {{ venue.price }}</div>
-                </div>
-                {% empty %}
-                <div class="text-white">Belum ada venue.</div>
-                {% endfor %}
-            </div>
+        <!-- Header -->
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-Dark-Navy">My Profile</h1>
+            {% if profile %}
+                <p class="text-gray-600 mt-2">Welcome back, {{ profile.user.username }} 👋</p>
             {% else %}
-            <h2 class="text-2xl font-bold text-white">Booking yang kamu lakukan</h2>
-            <div class="flex flex-col gap-6">
-                {% for booking in bookings %}
-                <div class="p-4 bg-white rounded shadow">
-                    <div>{{ booking.slot_info.date }} | {{ booking.slot_info.start }}-{{ booking.slot_info.end }}</div>
-                    <div>Venue: {{ booking.slot_info.venue }} ({{ booking.slot_info.venue_type }})</div>
-                    <div>Court: {{ booking.slot_info.court }}</div>
-                    <div>Total Harga: {{ booking.slot_info.price }}</div>
-                </div>
-                {% empty %}
-                <div class="text-white">Belum ada booking.</div>
-                {% endfor %}
+                <p class="text-gray-600 mt-2">Guest Profile (Please login)</p>
+            {% endif %}
+        </div>
+
+        {% if profile and profile.is_owner %}
+        <!-- OWNER VIEW -->
+        <div>
+            <h2 class="text-2xl font-semibold text-Dark-Navy mb-4">My Venues</h2>
+
+            <div id="owner-filter" class="flex justify-end mb-4">
+                <button id="refresh-owner" class="bg-Dark-Navy hover:bg-Navy text-white px-4 py-2 rounded-xl transition">Refresh</button>
             </div>
 
-            <h2 class="text-2xl font-bold text-white mt-8">Review yang kamu buat</h2>
-            <div class="flex flex-col gap-6">
-                {% for review in reviews %}
-                <div class="p-4 bg-white rounded shadow">
-                    <div>Venue: {{ review.venue.name }}</div>
-                    <div>Rating: {{ review.rating }}</div>
-                    <div>Comment: {{ review.comment }}</div>
+            <div id="loading" class="text-center py-8 hidden">
+                <p class="animate-pulse text-gray-500">Loading...</p>
+            </div>
+            <div id="empty" class="text-center py-8 hidden">
+                <p class="text-gray-500">No venue available.</p>
+            </div>
+
+            <div id="venue-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for venue in venues %}
+                <div class="venue-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
+                    <h3 class="text-xl font-semibold text-Dark-Navy">{{ venue.name }}</h3>
+                    <p class="text-gray-600 mt-1">{{ venue.city }}</p>
+                    <p class="text-gray-500 text-sm mt-1">{{ venue.category }}</p>
                 </div>
                 {% empty %}
-                <div class="text-white">Belum ada review.</div>
+                <p class="text-center text-gray-500 col-span-full">No venues found.</p>
                 {% endfor %}
             </div>
-            {% endif %}
-        {% endif %}
-        {% if not profile %}
-        <div class="text-white">
-            Silakan login untuk melihat profil.
-            <a href="{% url 'login' %}" class="px-4 py-2 bg-blue-600 text-white rounded">Login</a>
         </div>
-        {% endif %}
+
+        {% elif profile %}
+        <!-- USER VIEW -->
+        <div>
+            <!-- Tabs -->
+            <div class="flex justify-center gap-4 mb-4">
+                <button id="tab-booking" class="tab-btn bg-Dark-Navy text-white px-4 py-2 rounded-xl font-semibold">My Bookings</button>
+                <button id="tab-review" class="tab-btn bg-white text-Dark-Navy border border-Dark-Navy px-4 py-2 rounded-xl font-semibold">My Reviews</button>
+            </div>
+
+            <!-- Filter -->
+            <div id="filter-section" class="flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <label for="filter-sort" class="text-gray-600 font-semibold">Sort By:</label>
+                    <select id="filter-sort" class="border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-Light-Navy">
+                        <option value="asc">Ascending</option>
+                        <option value="desc" selected>Descending</option>
+                    </select>
+                </div>
+                <button id="refresh-btn" class="bg-Dark-Navy hover:bg-Navy text-white px-4 py-2 rounded-xl transition">Refresh</button>
+            </div>
+
+            <!-- Card Grid -->
+            <div id="card-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6"></div>
+        </div>
 
         {% else %}
-        <div class="text-white">Silakan login untuk melihat profil</div>
-        <a href="{% url 'login' %}" class="px-6 py-3 outline outline-1 outline-Flash-White text-Flash-White">Login</a>
+        <!-- GUEST VIEW -->
+        <p class="text-center text-gray-500 mt-10">Please login to see your profile.</p>
         {% endif %}
-
     </div>
 </div>
 
-{% include 'footer.html' %}
 {% endblock content %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    loadData();
+    const isOwner = {{ profile.is_owner|yesno:"true,false" }};
+    const loading = document.getElementById("loading");
+    const empty = document.getElementById("empty");
+
+    if (isOwner) {
+        // Animasi venue owner
+        gsap.from(".venue-card", {
+            opacity: 0, y: 30, duration: 0.4, stagger: 0.1, ease: "power2.out"
+        });
+        document.getElementById("refresh-owner").addEventListener("click", () => {
+            loading.classList.remove("hidden");
+            setTimeout(() => {
+                loading.classList.add("hidden");
+                gsap.from(".venue-card", {opacity: 0, y: 30, duration: 0.4, stagger: 0.1});
+            }, 800);
+        });
+        return;
+    }
+
+    // Untuk user biasa
+    let bookings = [];
+    let reviews = [];
+
+    async function loadData() {
+        if (isOwner) {
+            const res = await fetch("/account/api/venues/");
+            const venues = await res.json();
+            renderOwnerVenues(venues);
+            return;
+        }
+
+        const [bookRes, revRes] = await Promise.all([
+            fetch("/account/api/bookings/"),
+            fetch("/account/api/reviews/"),
+        ]);
+        bookings = await bookRes.json();
+        reviews = await revRes.json();
+        renderCards();
+    }
+
+    const tabBooking = document.getElementById("tab-booking");
+    const tabReview = document.getElementById("tab-review");
+    const filterSort = document.getElementById("filter-sort");
+    const refreshBtn = document.getElementById("refresh-btn");
+    const cardGrid = document.getElementById("card-grid");
+
+    let currentTab = "booking";
+
+    function renderCards() {
+        cardGrid.innerHTML = "";
+        let dataToDisplay = currentTab === "booking" ? [...bookings] : [...reviews];
+
+        if (currentTab === "booking") {
+            dataToDisplay.sort((a, b) => {
+                const diff = new Date(a.date) - new Date(b.date);
+                return filterSort.value === "asc" ? diff : -diff;
+            });
+        } else {
+            dataToDisplay.sort((a, b) => {
+                return filterSort.value === "asc" ? a.rating - b.rating : b.rating - a.rating;
+            });
+        }
+
+        if (!dataToDisplay.length) {
+            cardGrid.innerHTML = `<p class="text-center text-gray-500 col-span-full">No ${currentTab}s found.</p>`;
+            return;
+        }
+
+        const cardsHTML = dataToDisplay.map(item => {
+            if (currentTab === "booking") {
+                return `
+                <div class="card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
+                    <h3 class="text-xl font-semibold text-Dark-Navy">${item.venue_name}</h3>
+                    <p class="text-gray-500 mt-1">Date: ${item.date}</p>
+                    <p class="text-gray-600 mt-1 font-medium">Status: ${item.status}</p>
+                </div>`;
+            } else {
+                return `
+                <div class="card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
+                    <h3 class="text-xl font-semibold text-Dark-Navy">${item.venue_name}</h3>
+                    <p class="text-yellow-500 mt-2">${"⭐".repeat(item.rating)}</p>
+                    <p class="text-gray-600 mt-1 italic">"${item.comment}"</p>
+                </div>`;
+            }
+        }).join("");
+
+        cardGrid.innerHTML = cardsHTML;
+
+        gsap.from(".card", {
+            opacity: 0, y: 30, duration: 0.4, stagger: 0.1, ease: "power2.out"
+        });
+    }
+
+    // Tab switching
+    tabBooking.addEventListener("click", () => {
+        currentTab = "booking";
+        tabBooking.classList.add("bg-Dark-Navy", "text-white");
+        tabReview.classList.remove("bg-Dark-Navy", "text-white");
+        tabReview.classList.add("bg-white", "text-Dark-Navy", "border");
+        filterSort.innerHTML = `
+            <option value="asc">Date Ascending</option>
+            <option value="desc" selected>Date Descending</option>
+        `;
+        renderCards();
+    });
+
+    tabReview.addEventListener("click", () => {
+        currentTab = "review";
+        tabReview.classList.add("bg-Dark-Navy", "text-white");
+        tabBooking.classList.remove("bg-Dark-Navy", "text-white");
+        tabBooking.classList.add("bg-white", "text-Dark-Navy", "border");
+        filterSort.innerHTML = `
+            <option value="asc">Lowest Rating</option>
+            <option value="desc" selected>Highest Rating</option>
+        `;
+        renderCards();
+    });
+
+    // Refresh button
+    refreshBtn.addEventListener("click", () => {
+        gsap.from(".card", {opacity: 0, y: 30, duration: 0.4, stagger: 0.1});
+    });
+
+    // Sort change
+    filterSort.addEventListener("change", renderCards);
+
+    // Initial render
+    renderCards();
+});
+</script>
+{% endblock extra_js %}
