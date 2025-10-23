@@ -20,7 +20,7 @@
         <div class="w-full max-w-3xl mx-auto flex items-center gap-3 opacity-0 animate-[fadeIn_0.6s_ease-out_0.1s_forwards]">
             <div class="relative flex-1">
                 <input type="search" id="search-input" name="search"
-                       class="block w-full p-3.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-Sunrise-Orange focus:border-Sunrise-Orange"
+                       class="block w-full p-3.5 pl-10 text-sm text-gray-900 border border-gray-300 bg-white focus:ring-Sunrise-Orange focus:border-Sunrise-Orange"
                        placeholder="Cari nama venue, lokasi...">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -28,44 +28,44 @@
             </div>
             {% if is_owner_role %}
                 <button onclick="showAddModal()" {% comment %} Ini akan memanggil JS modal nanti {% endcomment %}
-                        class="flex-shrink-0 group inline-flex items-center gap-2 px-5 py-3 bg-Sunrise-Orange text-white font-semibold rounded-lg hover:bg-Orange transition-all duration-300 hover:scale-105 shadow">
+                        class="flex-shrink-0 group inline-flex items-center gap-2 px-5 py-3 bg-black text-white font-semibold hover:bg-Dark-Slate transition-all duration-300 hover:scale-105 shadow">
                     <svg class="w-5 h-5 transition-transform duration-300 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     <span class="hidden sm:inline">Add Venue</span>
                 </button>
             {% endif %}
             <button id="refresh-venues-btn" title="Refresh List"
-                    class="flex-shrink-0 group inline-flex items-center justify-center p-3.5 h-[50px] w-[50px] bg-white text-gray-800 border border-gray-300 rounded-lg transition-all duration-300 hover:bg-gray-100 hover:shadow-md">
+                    class="flex-shrink-0 group inline-flex items-center justify-center p-3.5 h-[50px] w-[50px] bg-white text-gray-800 border rounded-full border-gray-300 transition-all duration-300 hover:bg-gray-100 hover:shadow-md">
                 <svg class="w-5 h-5 text-Dark-Slate transition-transform duration-700 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8M21 3v5h-5"></path></svg>
             </button>
         </div>
     </div>
 </div>
 
-<div class="w-full min-h-screen bg-gray-50 -mt-16 z-10 relative rounded-t-2xl">
+<div class="w-full min-h-screen bg-gradient-to-b from-Flash-White to-Light-Navy -mt-16 z-10 relative rounded-t-2xl">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex flex-col gap-4 mb-8 bg-white rounded-lg border border-gray-200 p-4 sm:p-5 shadow opacity-0 animate-[fadeIn_0.6s_ease-out_0.2s_forwards]">
+        <div class="flex flex-col gap-4 mb-8 bg-white border border-gray-200 p-4 sm:p-5 shadow opacity-0 animate-[fadeIn_0.6s_ease-out_0.2s_forwards]">
             <div class="w-full flex flex-col sm:flex-row flex-wrap gap-3">
                 
                 {% if is_owner_role %}
-                    <select id="filter-owner" name="owner_filter" class="flex-1 min-w-[150px] p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-Sunrise-Orange focus:border-Sunrise-Orange">
+                    <select id="filter-owner" name="owner_filter" class="flex-1 min-w-[150px] p-2.5 border border-gray-300 text-sm focus:ring-Sunrise-Orange focus:border-Sunrise-Orange">
                         <option value="all" selected>All Venues</option>
                         <option value="my_venues">My Venues</option>
                     </select>
                 {% endif %}
 
-                <select id="filter-city" name="city" class="flex-1 min-w-[150px] p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-Sunrise-Orange focus:border-Sunrise-Orange">
+                <select id="filter-city" name="city" class="flex-1 min-w-[150px] p-2.5 border border-gray-300 text-sm focus:ring-Sunrise-Orange focus:border-Sunrise-Orange">
                     <option value="" selected>All Cities</option>
                     {% for city in cities %}
                         <option value="{{ city.name }}">{{ city.name }}</option>
                     {% endfor %}
                 </select>
-                <select id="filter-category" name="category" class="flex-1 min-w-[150px] p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-Sunrise-Orange focus:border-Sunrise-Orange">
+                <select id="filter-category" name="category" class="flex-1 min-w-[150px] p-2.5 border border-gray-300  text-sm focus:ring-Sunrise-Orange focus:border-Sunrise-Orange">
                     <option value="" selected>All Categories</option>
                     {% for category in categories %}
                         <option value="{{ category.name }}">{{ category.name }}</option>
                     {% endfor %}
                 </select>
-                <select id="filter-type" name="type" class="flex-1 min-w-[150px] p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-Sunrise-Orange focus:border-Sunrise-Orange">
+                <select id="filter-type" name="type" class="flex-1 min-w-[150px] p-2.5 border border-gray-300  text-sm focus:ring-Sunrise-Orange focus:border-Sunrise-Orange">
                     <option value="" selected>All Types</option>
                     {% for value, display in types %}
                         <option value="{{ value }}">{{ display }}</option>
@@ -75,7 +75,7 @@
         </div>
 
         <!-- STATE -->
-        <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+        <div id="loading" class="bg-white  border border-gray-200 p-12 text-center hidden">
             {% comment %} Tampilkan loading secara default, JS akan menyembunyikannya {% endcomment %}
             <svg class="animate-spin h-10 w-10 text-Dark-Slate inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -84,20 +84,20 @@
             <p class="text-gray-600 mt-3 font-medium">Loading venues...</p>
         </div>
 
-        <div id="error" class="hidden bg-red-100 border border-red-300 text-red-700 p-4 rounded-lg">
+        <div id="error" class="hidden bg-red-100 border border-red-300 text-red-700 p-4 ">
             </div>
 
         <div id="venue-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             </div>
 
-        <div id="empty" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+        <div id="empty" class="bg-white  border border-gray-200 p-12 text-center hidden">
             <div class="w-28 h-28 mx-auto mb-4">
                 <img src="{% static 'image/no-venues.png' %}" alt="No venue available" class="w-full h-full object-contain">
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No venues found</h3>
             {% if is_owner_role %}
                 <p class="text-gray-500 mb-6">Start by adding your first venue.</p>
-                <button onclick="showAddModal()" class="inline-flex items-center px-4 py-2 bg-Sunrise-Orange hover:bg-Orange text-white rounded-md transition-all duration-300 hover:scale-105">
+                <button onclick="showAddModal()" class="inline-flex items-center px-4 py-2 bg-black hover:bg-Dark-Slate text-white transition-all duration-300 hover:scale-105">
                     Add Venue
                 </button>
             {% else %}
@@ -257,7 +257,7 @@
     // Membuat HTML untuk satu kartu venue
     function buildVenueCardElement(venue) {
         const article = document.createElement('article');
-        article.className = 'group bg-white rounded-lg border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col card-animate';
+        article.className = 'group bg-white border border-Dark-Slate hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col card-animate';
         const detailUrl = `${VENUE_DETAIL_URL_BASE}${venue.id}/`; 
         const priceFormatted = venue.price ? `Rp ${venue.price}` : 'N/A'; // Harga tanpa format koma
         const descriptionShort = (venue.description && venue.description.length > 100) ? venue.description.substring(0, 100) + '...' : (venue.description || 'No description available.');
@@ -266,42 +266,90 @@
         let actionButtons = '';
         if (IS_OWNER && venue.owner_profile_pk === CURRENT_USER_PROFILE_PK) {
             actionButtons = `
-                <div class='flex gap-3'>
-                    <button type='button' class='text-blue-600 hover:text-blue-800 text-sm font-medium edit-btn' data-id='${venue.id}'>Edit</button>
-                    <button type='button' class='text-red-600 hover:text-red-800 text-sm font-medium delete-btn' data-id='${venue.id}'>Delete</button>
+                <div class='flex gap-2'>
+                    <button type='button' 
+                            title='Edit venue'
+                            class='inline-flex items-center justify-center w-10 h-10 border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors duration-300 edit-btn' 
+                            data-id='${venue.id}' data-name='${venue.name}'>
+                        <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </button>
+                    <button type='button' 
+                            title='Delete venue'
+                            class='inline-flex items-center justify-center w-10 h-10 border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-colors duration-300 delete-btn' 
+                            data-id='${venue.id}' data-name='${venue.name}'>
+                        <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
                 </div>
             `;
         }
 
-        article.innerHTML = `
+        const imageSection = `
             <a href="${detailUrl}" class="block aspect-[16/9] relative overflow-hidden">
                 <img src="${venue.image_url || '{% static "image/placeholder.png" %}'}" alt="${venue.name}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                 <div class="absolute top-3 left-3 flex gap-2">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-Pale-Cerulean text-Dark-Slate">${venue.category_name}</span>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">${venue.type}</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800">${venue.category_name}</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800">${venue.type}</span>
                 </div>
             </a>
-            <div class="p-5 flex flex-col flex-1">
-                <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                    <span class="inline-flex items-center gap-1">
-                        <svg class="w-4 h-4 fill-current text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 20s-8-6.15-8-12a8 8 0 0116 0c0 5.85-8 12-8 12zm0-9a3 3 0 100-6 3 3 0 000 6z"/></svg>
-                        ${venue.city_name}
-                    </span>
-                    <span>By: ${venue.owner_username}</span>
+        `;
+
+        const locationIcon = `
+            <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+            </svg>
+        `;
+        const typeIcon = `
+            <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+            </svg>
+        `;
+
+        const contentSection = `
+            <div class="p-6 flex flex-col flex-1 gap-6"> <div class="self-stretch flex flex-col justify-start items-start gap-4">
+                    
+                    <div class="self-stretch flex flex-col justify-start items-start gap-2">
+                        <div class="self-stretch inline-flex justify-start items-center gap-2">
+                            <div class="flex-1 text-gray-900 text-xl font-bold leading-7">${venue.name}</div>
+                        </div>
+                        <div class="self-stretch text-gray-700 text-base font-normal leading-normal line-clamp-3">${descriptionShort}</div>
+                    </div>
+
+                    <div class="self-stretch inline-flex justify-start items-center gap-4 flex-wrap content-center">
+                        <div class="flex justify-start items-center gap-2">
+                            ${locationIcon}
+                            <div class="text-gray-700 text-sm font-normal leading-tight">${venue.city_name}</div>
+                        </div>
+                        <div class="flex justify-start items-center gap-2">
+                            ${typeIcon}
+                            <div class="text-gray-700 text-sm font-normal leading-tight">${venue.type}</div>
+                        </div>
+                    </div>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 leading-tight">
-                    <a href="${detailUrl}" class="hover:text-Sunrise-Orange transition-colors">${venue.name}</a>
-                </h3>
-                <p class="text-gray-800 font-bold text-lg mb-3">
-                    ${priceFormatted} <span class="text-xs text-gray-500 font-light">/jam</span>
-                </p>
-                <p class="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4 flex-1">${descriptionShort}</p>
-                <div class="pt-4 border-t border-gray-100 flex items-center justify-between mt-auto">
-                    <a href="${detailUrl}" class="text-Sunrise-Orange hover:text-Orange font-semibold text-sm transition-colors">View More</a>
-                    ${actionButtons}
+
+                <div class="self-stretch inline-flex justify-between items-end gap-4 mt-auto">
+                    
+                    <div class="flex-1 flex justify-start items-end gap-1">
+                        <div>
+                            <span class="text-gray-900 text-2xl font-bold leading-loose">${priceFormatted}</span>
+                            <span class="text-gray-700 text-base font-normal leading-normal"> / sesi</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        ${actionButtons} <a href="${detailUrl}" class="px-5 py-2 bg-black text-white text-base font-normal leading-normal hover:bg-Dark-Slate transition-colors">
+                            View More
+                        </a>
+                    </div>
                 </div>
             </div>
         `;
+
+        article.innerHTML = imageSection + contentSection;
+
         return article;
     }
 
