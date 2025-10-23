@@ -72,8 +72,6 @@
     const addReviewModal = document.getElementById('addReviewModal');
     const addReviewModalContent = document.getElementById('addReviewModalContent');
     const addReviewForm = document.getElementById('addReviewForm');
-    const stars = document.querySelectorAll('.star');
-    const ratingValue = document.getElementById('ratingValue');
 
     function showAddReviewModal(venueId) {
         addReviewForm.action = `/review/add/${venueId}/`;
@@ -93,46 +91,77 @@
         }, 150);
     }
 
-    function highlightStars(rating) {
-        stars.forEach(s => {
-            if (s.getAttribute('data-value') <= rating) {
-                s.classList.add('text-yellow-400');
-                s.classList.remove('text-gray-300');
-            } else {
-                s.classList.add('text-gray-300');
-                s.classList.remove('text-yellow-400');
+    document.addEventListener("DOMContentLoaded", () => {
+        const stars = document.querySelectorAll('.star');
+        const ratingValue = document.getElementById('ratingValue');
+
+        function highlightStars(rating) {
+            stars.forEach(s => {
+                if (s.dataset.value <= rating) {
+                    s.classList.add('text-yellow-400');
+                    s.classList.remove('text-gray-300');
+                } else {
+                    s.classList.add('text-gray-300');
+                    s.classList.remove('text-yellow-400');
+                }
+            });
+        }
+
+        stars.forEach(star => {
+            // hover effect
+            star.addEventListener('mouseover', () => highlightStars(star.dataset.value));
+            
+            // restore selection
+            star.addEventListener('mouseout', () => highlightStars(ratingValue.value || 0));
+            
+            // store value when clicked
+            star.addEventListener('click', () => {
+                ratingValue.value = star.dataset.value;
+                highlightStars(star.dataset.value);
+            });
+        });
+
+        // default
+        highlightStars(0);
+
+        addReviewForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+        
+            if (!ratingValue.value) {
+                alert("Please select a rating first!");
+                return;
+            }
+        
+            const formData = new FormData(addReviewForm);
+            const actionUrl = addReviewForm.action;
+        
+            try {
+                const response = await fetch(actionUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest', 
+                    },
+                });
+        
+                const data = await response.json();
+        
+                if (response.ok) {
+                    alert(data.message);
+                    hideAddReviewModal();
+                    window.location.reload();
+                } else {
+                    let errorMessage = data.message || "An unknown error occurred.";
+                    if (data.errors) {
+                        errorMessage = Object.values(data.errors).join("\n");
+                    }
+                    alert(errorMessage);
+                }
+            } catch (error) {
+                console.error("Form submission error:", error);
+                alert("An error occurred. Please try again.");
             }
         });
-    }
-
-    stars.forEach(star => {
-        // hover effect
-        star.addEventListener('mouseover', () => {
-            const rating = star.getAttribute('data-value');
-            highlightStars(rating);
-        });
-
-        // restore selection
-        star.addEventListener('mouseout', () => {
-            highlightStars(ratingValue.value || 0);
-        });
-
-        // click to select
-        star.addEventListener('click', () => {
-            const rating = star.getAttribute('data-value');
-            ratingValue.value = rating;
-            highlightStars(rating);
-        });
-    });
-
-    // default (no rating selected)
-    highlightStars(0);
-
-    addReviewForm.addEventListener("submit", function (e) {
-        if (!ratingValue.value) {
-            alert("Please select a rating first!");
-            e.preventDefault();
-        }
     });
 
 </script>

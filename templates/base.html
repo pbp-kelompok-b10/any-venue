@@ -59,7 +59,7 @@
     </style>
 
 </head>
-<body >
+<body class="{% block body_class %}{% endblock %}">
     {% block content %}{% endblock %}
     {% block extra_js %}{% endblock extra_js %}
     {% include 'add_review.html' %}
