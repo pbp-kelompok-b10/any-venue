@@ -1,101 +1,65 @@
-import json
-from datetime import date, time
-
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
-from django.utils.dateparse import parse_date
-from django.views.decorators.http import require_POST
-
-from .models import Court, BookingSlot, Booking
-
-
-@login_required
-def booking_ajax(request, court_id):
-	court = get_object_or_404(Court, pk=court_id)
-	return render(request, "booking/booking_ajax.html", {"court": court})
-
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from venue.models import Venue
+from .models import BookingSlot, Booking
+import json
+from datetime import datetime
 
 @login_required
-def get_slots(request, court_id):
-	selected_date = parse_date(request.GET.get("date")) or date.today()
-	court = get_object_or_404(Court, pk=court_id)
-
-	start_hour, end_hour = 8, 22
-	existing_slots = BookingSlot.objects.filter(court=court, date=selected_date)
-	if not existing_slots.exists():
-		for h in range(start_hour, end_hour):
-			BookingSlot.objects.create(
-				court=court,
-				date=selected_date,
-				start_time=time(hour=h),
-				end_time=time(hour=h + 1),
-			)
-
-	slots = BookingSlot.objects.filter(court=court, date=selected_date).order_by("start_time")
-	data = [{
-		"id": s.id,
-		"start_time": s.start_time.strftime("%H:%M"),
-		"end_time": s.end_time.strftime("%H:%M"),
-		"is_booked": s.is_booked,
-	} for s in slots]
-	return JsonResponse({"slots": data})
-
+def booking_page(request, venue_id):
+    venue = get_object_or_404(Venue, id=venue_id)
+    return render(request, "booking/booking_ajax.html", {"venue": venue})
 
 @login_required
-@require_POST
-def make_booking(request, court_id):
-	if hasattr(request.user, 'profile') and getattr(request.user.profile, 'role', None) == 'OWNER':
-		return JsonResponse({"error": "Owner tidak bisa booking."}, status=403)
+def get_slots(request, venue_id):
+    date_str = request.GET.get("date")
+    if not date_str:
+        return JsonResponse([], safe=False)
+    date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    slots = BookingSlot.objects.filter(venue_id=venue_id, date=date).order_by("start_time")
+    return JsonResponse([
+        {
+            "id": s.id,
+            "start_time": s.start_time.strftime("%H:%M"),
+            "end_time": s.end_time.strftime("%H:%M"),
+            "is_booked": s.is_booked,
+            "price": s.venue.price,
+        } for s in slots
+    ], safe=False)
 
-	try:
-		payload = json.loads(request.body.decode("utf-8"))
-	except Exception:
-		payload = {}
-
-	slot_ids = payload.get("slots", [])
-	court = get_object_or_404(Court, pk=court_id)
-	price_per_hour = getattr(court.venue, "price", 0)
-
-	total_price = 0
-	booked = []
-	for sid in slot_ids:
-		slot = BookingSlot.objects.filter(pk=sid, court=court, is_booked=False).first()
-		if slot:
-			slot.is_booked = True
-			slot.save()
-			Booking.objects.create(user=request.user, slot=slot, total_price=price_per_hour)
-			total_price += price_per_hour
-			booked.append(slot.id)
-
-	return JsonResponse({
-		"success": True,
-		"total_price": total_price,
-		"booked": booked,
-		"redirect_url": f"/venue/detail/{court.venue.id}/"
-	})
-
-
+@csrf_exempt
 @login_required
-@require_POST
-def cancel_booking(request, court_id):
-	try:
-		payload = json.loads(request.body.decode("utf-8"))
-	except Exception:
-		payload = {}
+def create_booking(request):
+    if request.method == "POST":
+        payload = json.loads(request.body)
+        slot_ids = payload.get("slots", [])
+        user = request.user
+        total = 0
+        for sid in slot_ids:
+            slot = get_object_or_404(BookingSlot, id=sid, is_booked=False)
+            total += slot.venue.price
+            slot.is_booked = True
+            slot.save()
+            Booking.objects.create(user=user, slot=slot, total_price=slot.venue.price_per_hour)
+        return JsonResponse({"status": "success", "total": total})
+    return JsonResponse({"status": "error"})
 
-	slot_ids = payload.get("slots", [])
-	court = get_object_or_404(Court, pk=court_id)
+@csrf_exempt
+@login_required
+def cancel_booking(request):
+    if request.method == "POST":
+        payload = json.loads(request.body)
+        slot_id = payload.get("slot_id")
+        try:
+            slot = BookingSlot.objects.get(id=slot_id)
+            booking = Booking.objects.get(user=request.user, slot=slot)
+            booking.delete()
+            slot.is_booked = False
+            slot.save()
+            return JsonResponse({"status": "success"})
+        except Booking.DoesNotExist:
+            return JsonResponse({"status": "not_found"})
+    return JsonResponse({"status": "error"})
 
-	cancelled = []
-	for sid in slot_ids:
-		slot = BookingSlot.objects.filter(pk=sid, court=court).first()
-		if slot:
-			booking = Booking.objects.filter(user=request.user, slot=slot).first()
-			if booking:
-				booking.delete()
-				slot.is_booked = False
-				slot.save()
-				cancelled.append(slot.id)
-
-	return JsonResponse({"success": True, "cancelled": cancelled})
