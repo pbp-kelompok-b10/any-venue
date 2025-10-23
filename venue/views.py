@@ -6,6 +6,7 @@ from django.views.decorators.http import require_http_methods
 from .models import Venue, City, Category
 from .forms import VenueForm
 from account.models import Profile
+from django.db.models import Avg, Count
 
 # Create your views here.
 @login_required(login_url='/auth/login')
@@ -36,11 +37,17 @@ def show_details(request, id):
     venue = get_object_or_404(Venue, pk=id)
     cities = City.objects.all().order_by('name')
     categories = Category.objects.all().order_by('name')
+    review_agg = venue.reviews.aggregate(average_rating=Avg('rating'), review_count=Count('id')) 
+    average_rating = review_agg['average_rating'] or 0 
+    review_count = review_agg['review_count'] or 0
+
     context = {
         'venue': venue,
         'user': request.user,
         'cities': cities,
         'categories': categories,
+        'average_rating': average_rating,
+        'review_count': review_count,
     }
     return render(request, "venue_details.html", context)
 
