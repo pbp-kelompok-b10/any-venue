@@ -4,6 +4,7 @@
     <div id="addReviewModalContent"
         class="bg-white shadow-xl
         w-[85%] sm:w-[60%] md:w-[45%] lg:w-[40%]
+        max-h-[90vh] overflow-y-auto
         px-10 py-10 relative font-['Roboto']
         transform transition-all duration-300 opacity-0 scale-95">
 
@@ -25,17 +26,21 @@
             class="w-full flex flex-col gap-6">
             {% csrf_token %}
 
-            <!-- Rating -->
-            <div class="flex flex-col gap-2">
-                <label class="text-s text-black">Rate Venue</label>
-                <div class="flex gap-1">
-                    <span class="cursor-pointer text-gray-300 text-xl hover:text-yellow-400">★</span>
-                    <span class="cursor-pointer text-gray-300 text-xl hover:text-yellow-400">★</span>
-                    <span class="cursor-pointer text-gray-300 text-xl hover:text-yellow-400">★</span>
-                    <span class="cursor-pointer text-gray-300 text-xl hover:text-yellow-400">★</span>
-                    <span class="cursor-pointer text-gray-300 text-xl hover:text-yellow-400">★</span>
-                </div>
+        <!-- Rating -->
+        <div class="flex flex-col gap-2">
+            <label class="text-s text-black">Rate Venue</label>
+
+            <div id="starContainer" class="flex gap-1">
+                <span data-value="1" class="star cursor-pointer text-gray-300 text-2xl">★</span>
+                <span data-value="2" class="star cursor-pointer text-gray-300 text-2xl">★</span>
+                <span data-value="3" class="star cursor-pointer text-gray-300 text-2xl">★</span>
+                <span data-value="4" class="star cursor-pointer text-gray-300 text-2xl">★</span>
+                <span data-value="5" class="star cursor-pointer text-gray-300 text-2xl">★</span>
             </div>
+
+            <!-- Hidden input for form -->
+            <input type="hidden" name="rating" id="ratingValue" required>
+        </div>
 
             <!-- Review Comment -->
             <div class="flex flex-col gap-2">
@@ -83,4 +88,42 @@
             modal.classList.add('hidden');
         }, 150);
     }
+
+    const stars = document.querySelectorAll('.star');
+    const ratingValue = document.getElementById('ratingValue');
+
+    function highlightStars(rating) {
+        stars.forEach(s => {
+            if (s.getAttribute('data-value') <= rating) {
+                s.classList.add('text-yellow-400');
+                s.classList.remove('text-gray-300');
+            } else {
+                s.classList.add('text-gray-300');
+                s.classList.remove('text-yellow-400');
+            }
+        });
+    }
+
+    stars.forEach(star => {
+        // hover effect
+        star.addEventListener('mouseover', () => {
+            const rating = star.getAttribute('data-value');
+            highlightStars(rating);
+        });
+
+        // restore selection
+        star.addEventListener('mouseout', () => {
+            highlightStars(ratingValue.value || 0);
+        });
+
+        // click to select
+        star.addEventListener('click', () => {
+            const rating = star.getAttribute('data-value');
+            ratingValue.value = rating;
+            highlightStars(rating);
+        });
+    });
+
+    // default (no rating selected)
+    highlightStars(0);
 </script>
