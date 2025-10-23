@@ -6,8 +6,8 @@
 {% block content %}
 {% include "navbar.html" %}
 
-<div class="w-full pt-24 pb-16 bg-gradient-to-b from-Light-Navy to-Flash-White flex flex-col items-center">
-    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-start gap-6">
+<div class="w-full pt-28 pb-8 bg-gradient-to-b from-Light-Navy to-Flash-White flex flex-col items-center">
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-start gap-4">
         
         <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-Flash-White opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]">
             <a href="{% url 'venue:venue_main' %}" class="hover:underline font-normal leading-tight">All Venues</a>
@@ -17,7 +17,7 @@
             <span class="font-semibold leading-tight">{{ venue.name }}</span>
         </nav>
 
-        <h1 class="text-Flash-White text-4xl sm:text-5xl font-bold leading-tight opacity-0 animate-[fadeIn_0.6s_ease-out_0.1s_forwards]">
+        <h1 class="text-white text-4xl sm:text-5xl font-bold leading-tight opacity-0 animate-[fadeIn_0.6s_ease-out_0.1s_forwards]">
             {{ venue.name }}
         </h1>
     </div>
@@ -116,7 +116,7 @@
                     </a>
                     <button type="button" 
                             onclick="showAddReviewModal('{{ venue.pk }}')" 
-                            class="flex-1 min-w-0 sm:min-w-[180px] px-6 py-3 border-2 border-gray-800 text-gray-800 text-base font-semibold transition-colors hover:bg-gray-100 "> {# <-- HAPUS DISABLED, SESUAIKAN STYLE #}
+                            class="flex-1 min-w-0 sm:min-w-[180px] px-6 py-3 border border-gray-800 text-gray-800 text-base font-semibold transition-colors hover:bg-gray-100 "> {# <-- HAPUS DISABLED, SESUAIKAN STYLE #}
                         Write a Review 
                     </button>
                 </div>
