@@ -10,7 +10,6 @@ urlpatterns = [
     path('', show_main, name='venue_main'),
     path('detail/<int:id>/', show_details, name='venue_detail'),
     path('api/venues/', get_venues_json, name='api_get_venues'),
-
     path('api/venue/<int:id>/', get_venue_json_by_id, name='api_get_venue_detail'),
     path('api/venues/add/', add_venue_ajax, name='api_add_venue'),
     path('api/venues/edit/<int:id>/', edit_venue_ajax, name='api_edit_venue'),
