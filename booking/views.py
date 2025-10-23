@@ -5,10 +5,50 @@ from django.views.decorators.csrf import csrf_exempt
 from venue.models import Venue
 from .models import BookingSlot, Booking
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+
+def cleanup_old_slots_and_create_new():
+    """
+    Delete slots older than today and create new slots for 7 days ahead if they don't exist
+    """
+    current_date = datetime.now().date()
+    
+    # Delete old slots (older than today)
+    old_slots = BookingSlot.objects.filter(date__lt=current_date)
+    old_bookings_count = Booking.objects.filter(slot__date__lt=current_date).count()
+    
+    # Delete associated bookings first
+    Booking.objects.filter(slot__date__lt=current_date).delete()
+    old_slots.delete()
+    
+    # Create new slots for 7 days ahead for all venues
+    venues = Venue.objects.all()
+    for venue in venues:
+        for day_offset in range(7):
+            target_date = current_date + timedelta(days=day_offset)
+            
+            # Check if slots already exist for this date
+            existing_slots = BookingSlot.objects.filter(venue=venue, date=target_date).exists()
+            
+            if not existing_slots:
+                # Create slots from 8:00 to 22:00 (every hour)
+                for hour in range(8, 22):
+                    start_time = f"{hour:02d}:00:00"
+                    end_time = f"{hour+1:02d}:00:00"
+                    
+                    BookingSlot.objects.create(
+                        venue=venue,
+                        date=target_date,
+                        start_time=start_time,
+                        end_time=end_time,
+                        is_booked=False
+                    )
 
 @login_required
 def booking_page(request, venue_id):
+    # Clean up old slots and create new ones
+    cleanup_old_slots_and_create_new()
+    
     venue = get_object_or_404(Venue, id=venue_id)
     return render(request, "booking/booking_ajax.html", {"venue": venue})
 
