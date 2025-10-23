@@ -5,10 +5,11 @@
 
 <div class="bg-gray-100 min-h-screen py-8">
   <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow p-6">
-    <h1 class="text-2xl font-bold mb-4">{{ court.name }}</h1>
+    <h1 class="text-2xl font-bold mb-4">{{ venue.name }}</h1>
     <p class="text-gray-600 mb-6">
-      Venue: <span class="font-semibold">{{ court.venue.name }}</span><br>
-      Type: {{ court.venue.type|title }} ({{ court.venue.location }})
+      Type: <span class="font-semibold">{{ venue.type|title }}</span><br>
+      Lokasi: {{ venue.location }}<br>
+      Harga per jam: <span class="text-green-600 font-semibold">Rp{{ venue.price_per_hour }}</span>
     </p>
 
     <!-- Date picker -->
@@ -45,7 +46,7 @@ let selectedSlots = [];
 
 // Load slot saat tanggal dipilih
 datePicker.addEventListener('change', () => {
-  fetch(`/booking/slots/{{ court.id }}/?date=${datePicker.value}`)
+  fetch(`/booking/slots/{{ venue.id }}/?date=${datePicker.value}`)
     .then(res => res.json())
     .then(data => renderSlots(data));
 });
@@ -61,39 +62,45 @@ function renderSlots(slots) {
     const div = document.createElement('div');
     div.className = `
       p-3 rounded-lg text-center border cursor-pointer transition
-      ${slot.is_booked ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-green-100 hover:bg-green-200'}
+      ${slot.is_booked_by_user ? 'bg-blue-100 border-blue-400 text-blue-700'
+      : slot.is_booked ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+      : 'bg-green-100 hover:bg-green-200'}
     `;
     div.textContent = `${slot.start_time} - ${slot.end_time}`;
     div.dataset.id = slot.id;
     div.dataset.price = slot.price;
 
-    if (!slot.is_booked) {
-      div.addEventListener('click', () => toggleSlot(div));
+    if (!slot.is_booked || slot.is_booked_by_user) {
+      div.addEventListener('click', () => toggleSlot(div, slot.is_booked_by_user));
     }
 
     slotContainer.appendChild(div);
   });
 }
 
-// Pilih slot
-function toggleSlot(el) {
+// Toggle select / cancel
+function toggleSlot(el, isBookedByUser = false) {
   const id = el.dataset.id;
   const price = parseInt(el.dataset.price);
 
-  if (selectedSlots.includes(id)) {
-    selectedSlots = selectedSlots.filter(s => s !== id);
-    el.classList.remove('bg-green-300');
-    el.classList.add('bg-green-100');
+  if (isBookedByUser) {
+    // Cancel booking
+    cancelBooking(id);
   } else {
-    selectedSlots.push(id);
-    el.classList.remove('bg-green-100');
-    el.classList.add('bg-green-300');
+    if (selectedSlots.includes(id)) {
+      selectedSlots = selectedSlots.filter(s => s !== id);
+      el.classList.remove('bg-green-300');
+      el.classList.add('bg-green-100');
+    } else {
+      selectedSlots.push(id);
+      el.classList.remove('bg-green-100');
+      el.classList.add('bg-green-300');
+    }
+    updateTotal();
   }
-
-  updateTotal();
 }
 
-// Hitung total harga
+// Update total
 function updateTotal() {
   const total = Array.from(document.querySelectorAll('.bg-green-300'))
                      .reduce((sum, el) => sum + parseInt(el.dataset.price), 0);
@@ -115,7 +122,7 @@ bookButton.addEventListener('click', () => {
   .then(data => {
     if (data.status === 'success') {
       showToast('Booking berhasil!', 'success');
-      datePicker.dispatchEvent(new Event('change')); // refresh slot
+      datePicker.dispatchEvent(new Event('change'));
     } else {
       showToast('Gagal melakukan booking.', 'error');
     }
@@ -123,7 +130,29 @@ bookButton.addEventListener('click', () => {
   .catch(() => showToast('Terjadi kesalahan server.', 'error'));
 });
 
-// Toast notification
+// Cancel booking AJAX
+function cancelBooking(slotId) {
+  fetch('/booking/cancel/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrftoken,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ slot_id: slotId }),
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      showToast('Booking dibatalkan.', 'error');
+      datePicker.dispatchEvent(new Event('change'));
+    } else {
+      showToast('Gagal membatalkan booking.', 'error');
+    }
+  })
+  .catch(() => showToast('Terjadi kesalahan server.', 'error'));
+}
+
+// Toast
 function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
@@ -133,7 +162,6 @@ function showToast(message, type = 'success') {
   `;
   toast.textContent = message;
   container.appendChild(toast);
-
   setTimeout(() => {
     toast.classList.add('opacity-0', 'translate-y-2');
     setTimeout(() => toast.remove(), 300);
@@ -147,9 +175,7 @@ document.head.insertAdjacentHTML("beforeend", `
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-in-down {
-  animation: fade-in-down 0.3s ease-out;
-}
+.animate-fade-in-down { animation: fade-in-down 0.3s ease-out; }
 </style>
 `);
 </script>
