@@ -6,8 +6,8 @@
 {% block content %}
 {% include "navbar.html" %}
 
-<div class="w-full pt-24 pb-16 bg-gradient-to-b from-Light-Navy to-Flash-White flex flex-col items-center">
-    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-start gap-6">
+<div class="w-full pt-28 pb-8 bg-gradient-to-b from-Light-Navy to-Flash-White flex flex-col items-center">
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-start gap-4">
         
         <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-Flash-White opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]">
             <a href="{% url 'venue:venue_main' %}" class="hover:underline font-normal leading-tight">All Venues</a>
@@ -17,7 +17,7 @@
             <span class="font-semibold leading-tight">{{ venue.name }}</span>
         </nav>
 
-        <h1 class="text-Flash-White text-4xl sm:text-5xl font-bold leading-tight opacity-0 animate-[fadeIn_0.6s_ease-out_0.1s_forwards]">
+        <h1 class="text-white text-4xl sm:text-5xl font-bold leading-tight opacity-0 animate-[fadeIn_0.6s_ease-out_0.1s_forwards]">
             {{ venue.name }}
         </h1>
     </div>
@@ -37,22 +37,37 @@
                 
                 <div class="bg-white border border-gray-200 p-6 shadow-md flex-grow">
                     <div class="flex flex-col gap-5">
-                        
+                
                         <div class="flex flex-col gap-3 pb-5 border-b border-gray-200">
-                             <div class="flex items-baseline gap-2">
-                                 <span class="text-gray-900 text-3xl font-bold">Rp {{ venue.price|floatformat:0 }}</span>
-                                 <span class="text-gray-600 text-sm font-normal">/ sesi</span>
-                             </div>
-                             <div class="flex items-center gap-2">
-                                 <div class="flex items-center gap-0.5 text-yellow-500" title="Rating (Coming Soon)">
-                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                                     <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                                 </div>
-                                 <span class="text-sm text-gray-600">(Review module coming soon)</span>
-                             </div>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-gray-900 text-3xl font-bold">Rp {{ venue.price|floatformat:0 }}</span>
+                                <span class="text-gray-600 text-sm font-normal">/ sesi</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                {% if review_count > 0 %}
+                                    <div class="flex gap-1" title="{{ average_rating|floatformat:1 }} stars"> 
+                                        {% for i in "12345" %}
+                                            {% with i_int=i|add:"0" %} 
+                                                {% if average_rating >= i_int %}
+                                                    <span class="text-yellow-400 text-2xl">★</span> {# Bintang Penuh #}
+                                                {% else %}
+                                                    {% comment %} 
+                                                    {% with decimal_part=average_rating|stringformat:".1f"|slice:"-1:" %}
+                                                    {% if average_rating > i_int|add:"-1" and average_rating < i_int and decimal_part == "5" %}
+                                                        <span class="text-yellow-400 text-2xl relative">☆<span class="absolute left-0 top-0 overflow-hidden w-1/2">★</span></span>
+                                                    {% else %} 
+                                                    {% endcomment %}
+                                                        <span class="text-gray-300 text-2xl">★</span> {# Bintang Kosong (ganti ☆ jika mau) #}
+                                                    {% comment %} {% endif %} {% endcomment %}
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% endfor %}
+                                    </div>
+                                    <span class="text-sm text-gray-600">({{ average_rating|floatformat:1 }}) • {{ review_count }} review{{ review_count|pluralize }}</span>
+                                {% else %}
+                                    <span class="text-sm text-gray-500">No reviews yet</span>
+                                {% endif %}
+                            </div>
                         </div>
 
                         <div class="flex flex-col gap-4">
@@ -95,34 +110,37 @@
             <p class="text-gray-700 text-base leading-relaxed whitespace-pre-line">{{ venue.description|linebreaksbr }}</p>
         </div>
 
-        <div class="mt-8 bg-white border border-gray-200 p-6 shadow-md opacity-0 animate-[fadeIn_0.6s_ease-out_0.5s_forwards]">
-            {% if user.is_authenticated and venue.owner.user == user %}
-                <h3 class="text-lg font-bold text-gray-900 mb-4 text-center border-b pb-3">Manage Your Venue</h3>
-                <div class="flex flex-col gap-3 pt-3">
-                    <button type="button" onclick="showEditModal('{{ venue.pk }}')" 
-                        class="w-full px-6 py-2.5 bg-Light-Navy text-white text-center text-sm font-semibold hover:bg-Dark-Slate transition-colors  shadow-sm">
-                        Edit Venue Details
-                    </button>
-                    <button type="button" onclick="showDeleteModal('{{ venue.pk }}', '{{ venue.name|escapejs }}')" 
-                        class="w-full px-6 py-2.5 border-2 border-red-600 text-red-600 text-sm font-semibold hover:bg-red-600 hover:text-white transition-colors ">
-                        Delete Venue
-                    </button>
-                </div>
-            {% else %}
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{% url 'booking:booking_page' venue.pk %}" 
-                       class="flex-1 text-center min-w-0 sm:min-w-[180px] px-6 py-3 bg-gray-800 text-white text-base font-semibold border border-gray-900 shadow-sm transition-colors hover:bg-gray-700 "> {# <-- HAPUS DISABLED, SESUAIKAN STYLE #}
-                        Book Now 
-                    </a>
-                    <button type="button" 
-                            onclick="showAddReviewModal('{{ venue.pk }}')" 
-                            class="flex-1 min-w-0 sm:min-w-[180px] px-6 py-3 border-2 border-gray-800 text-gray-800 text-base font-semibold transition-colors hover:bg-gray-100 "> {# <-- HAPUS DISABLED, SESUAIKAN STYLE #}
-                        Write a Review 
-                    </button>
-                </div>
-            {% endif %}
-        </div>
-
+        {% if not user.is_authenticated or not user.profile.is_owner or venue.owner.user == user %}
+            <div class="mt-8 bg-white border border-gray-200 p-6 shadow-md opacity-0 animate-[fadeIn_0.6s_ease-out_0.5s_forwards]">
+                {% if user.is_authenticated %}
+                    {% if venue.owner.user == user %}
+                        <h3 class="text-lg font-bold text-gray-900 mb-4 text-center border-b pb-3">Manage Your Venue</h3>
+                        <div class="flex flex-col gap-3 pt-3">
+                            <button type="button" onclick="showEditModal('{{ venue.pk }}')" 
+                                class="w-full px-6 py-2.5 bg-Light-Navy text-white text-center text-sm font-semibold hover:bg-Dark-Slate transition-colors  shadow-sm">
+                                Edit Venue Details
+                            </button>
+                            <button type="button" onclick="showDeleteModal('{{ venue.pk }}', '{{ venue.name|escapejs }}')" 
+                                class="w-full px-6 py-2.5 border border-red-600 text-red-600 text-sm font-semibold hover:bg-red-600 hover:text-white transition-colors ">
+                                Delete Venue
+                            </button>
+                        </div>
+                    {% elif not user.profile.is_owner %} 
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <a href="{% url 'booking:booking_page' venue.pk %}" 
+                            class="flex-1 text-center min-w-0 sm:min-w-[180px] px-6 py-3 bg-gray-800 text-white text-base font-semibold border border-gray-900 shadow-sm transition-colors hover:bg-gray-700 ">
+                                Book Now 
+                            </a>
+                            <button type="button" 
+                                    onclick="showAddReviewModal('{{ venue.pk }}')" 
+                                    class="flex-1 min-w-0 sm:min-w-[180px] px-6 py-3 border border-gray-800 text-gray-800 text-base font-semibold transition-colors hover:bg-gray-100 ">
+                                Write a Review 
+                            </button>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endif %}
     </div> 
 </div>
 
