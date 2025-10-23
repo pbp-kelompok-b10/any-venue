@@ -1,115 +1,423 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-{% include 'navbar.html' %}
 
-<div class="bg-gray-100 min-h-screen py-8">
-  <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow p-6">
-    <h1 class="text-2xl font-bold mb-4">{{ venue.name }}</h1>
-    <p class="text-gray-600 mb-6">
-      Type: <span class="font-semibold">{{ venue.type|title }}</span><br>
-      Lokasi: {{ venue.location }}<br>
-      Harga per jam: <span class="text-green-600 font-semibold">Rp{{ venue.price_per_hour }}</span>
-    </p>
+<!-- Navbar -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md font-['Roboto'] px-6">
+  <div class="mx-auto flex max-w-7xl items-center justify-between py-4">
+    <!-- Brand/Logo -->
+    <a href="/" class="text-2xl font-bold text-[#000456] tracking-wide">AnyVenue</a>
 
-    <!-- Date picker -->
-    <div class="mb-6">
-      <label class="block font-medium text-gray-700 mb-2">Pilih Tanggal:</label>
-      <input type="date" id="datePicker"
-             class="border border-gray-300 rounded-lg px-4 py-2 w-60 focus:ring focus:ring-blue-200 focus:outline-none"
-             min="{{ today|date:'Y-m-d' }}" />
+    <!-- Desktop Navigation Links -->
+    <div class="hidden items-center gap-10 md:flex">
+      <a href="{% url 'venue:venue_main' %}" class="text-base text-[#000456]/80 hover:text-[#000456] transition-colors duration-300">Booking</a>
+      <a href="#event" class="text-base text-[#000456]/80 hover:text-[#000456] transition-colors duration-300">Event</a>
     </div>
 
-    <!-- Slot container -->
-    <div id="slotContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+    <!-- Desktop Action Button -->
+    <div class="hidden md:flex items-center gap-4">
+      {% if user.is_authenticated %}
+      <span class="text-sm text-gray-600">{{ user.username }}</span>
+      <a href="/auth/logout" class="px-6 py-2 border border-[#000456] text-base font-normal text-[#000456] hover:bg-[#000456] hover:text-white transition-colors duration-300">
+        Logout
+      </a>
+      {% else %}
+      <a href="/auth/login" class="px-6 py-2 border border-[#000456] text-base font-normal text-[#000456] hover:bg-[#000456] hover:text-white transition-colors duration-300">
+        Login
+      </a>
+      {% endif %}
+    </div>
 
-    <!-- Button -->
-    <div class="mt-6 flex items-center justify-between">
-      <p class="font-semibold text-lg">Total: <span id="totalPrice">Rp0</span></p>
+    <!-- Mobile Menu Button (Hamburger) -->
+    <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg border-2 border-gray-400 hover:bg-gray-100 transition-colors">
+      <svg class="w-6 h-6 text-[#000456]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Dropdown Menu -->
+  <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+    <div class="px-4 py-4 space-y-3">
+      <a href="{% url 'venue:venue_main' %}" class="block py-2 text-base text-gray-600 hover:text-[#000456]">Booking</a>
+      <a href="#event" class="block py-2 text-base text-gray-600 hover:text-[#000456]">Event</a>
+      {% if user.is_authenticated %}
+      <div class="pt-3 border-t border-gray-200">
+        <p class="text-sm text-gray-600 mb-2">{{ user.username }}</p>
+        <a href="/auth/logout" class="block w-full px-4 py-2 text-center border border-[#000456] text-base text-[#000456] hover:bg-[#000456] hover:text-white transition-colors">
+          Logout
+        </a>
+      </div>
+      {% else %}
+      <div class="pt-3 border-t border-gray-200">
+        <a href="/auth/login" class="block w-full px-4 py-2 text-center border border-[#000456] text-base text-[#000456] hover:bg-[#000456] hover:text-white transition-colors">
+          Login
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<div class="bg-white min-h-screen pt-32 pb-8">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    
+    {% if not user.is_authenticated %}
+    <!-- Login Required Notice -->
+    <div class="bg-red-50 border border-red-200 p-5 mb-6 rounded">
+      <div class="flex items-start gap-4">
+        <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        <div class="flex-1">
+          <h3 class="text-base font-semibold text-[#000456] mb-1">Login Diperlukan</h3>
+          <p class="text-sm text-gray-700 mb-3">Anda harus login terlebih dahulu untuk melakukan booking lapangan.</p>
+          <a href="/auth/login?next={{ request.path }}" class="inline-block px-5 py-2 bg-[#3D5A80] text-white text-sm rounded hover:bg-[#2d4460] transition font-medium">
+            Login Sekarang
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-gray-600 mb-4">
+      <a href="/" class="hover:text-[#3D5A80]">Home</a>
+      <span>/</span>
+      <a href="/venue/" class="hover:text-[#3D5A80]">Venue</a>
+      <span>/</span>
+      <span class="text-[#000456] font-medium">Product name</span>
+    </div>
+
+    <!-- Product Header -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold mb-2 text-[#000456]">{{ venue.name }}</h1>
+      <div class="text-2xl font-bold text-[#000456] mb-4">Rp{{ venue.price|floatformat:0 }} <span class="text-base font-normal text-gray-500">/ per jam</span></div>
+    </div>
+
+    <!-- Details Section -->
+    <div class="bg-gray-50 rounded p-4 mb-6">
+      <h3 class="font-semibold text-[#000456] mb-3">Details</h3>
+      <p class="text-sm text-gray-700 leading-relaxed">
+        Type: <span class="font-medium">{{ venue.type|title }}</span><br>
+        Lokasi: {{ venue.address }}
+      </p>
+    </div>
+
+    <!-- Week day selector -->
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+      <button class="day-btn flex-shrink-0 bg-[#3D5A80] text-white px-5 py-2.5 rounded font-medium hover:bg-[#2d4460] transition text-sm" data-offset="0">
+        <div class="text-xs opacity-80">Kam</div>
+        <div class="text-base font-bold" id="day-0">23 Okt</div>
+      </button>
+      <button class="day-btn flex-shrink-0 bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-medium hover:bg-gray-50 transition text-sm" data-offset="1">
+        <div class="text-xs opacity-70">Jum</div>
+        <div class="text-base font-bold" id="day-1">24 Okt</div>
+      </button>
+      <button class="day-btn flex-shrink-0 bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-medium hover:bg-gray-50 transition text-sm" data-offset="2">
+        <div class="text-xs opacity-70">Sab</div>
+        <div class="text-base font-bold" id="day-2">25 Okt</div>
+      </button>
+      <button class="day-btn flex-shrink-0 bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-medium hover:bg-gray-50 transition text-sm" data-offset="3">
+        <div class="text-xs opacity-70">Min</div>
+        <div class="text-base font-bold" id="day-3">26 Okt</div>
+      </button>
+      <button class="day-btn flex-shrink-0 bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-medium hover:bg-gray-50 transition text-sm" data-offset="4">
+        <div class="text-xs opacity-70">Sen</div>
+        <div class="text-base font-bold" id="day-4">27 Okt</div>
+      </button>
+      <button class="day-btn flex-shrink-0 bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-medium hover:bg-gray-50 transition text-sm" data-offset="5">
+        <div class="text-xs opacity-70">Sel</div>
+        <div class="text-base font-bold" id="day-5">28 Okt</div>
+      </button>
+      <button class="day-btn flex-shrink-0 bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-medium hover:bg-gray-50 transition text-sm" data-offset="6">
+        <div class="text-xs opacity-70">Rab</div>
+        <div class="text-base font-bold" id="day-6">29 Okt</div>
+      </button>
+      <button class="calendar-btn flex-shrink-0 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded hover:bg-gray-50 transition flex items-center justify-center">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Time slots grid -->
+    <div id="slotContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-8">
+      <!-- Slots will be loaded here dynamically -->
+    </div>
+
+    <!-- Action buttons -->
+    <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+      <div>
+        <p class="text-sm text-gray-600 mb-1">Total:</p>
+        <p class="text-3xl font-bold text-[#000456]" id="totalPrice">Rp0</p>
+      </div>
       <button id="bookButton"
-              class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              disabled>Booking Sekarang</button>
+              class="bg-[#3D5A80] text-white px-10 py-3 rounded font-semibold hover:bg-[#2d4460] disabled:bg-gray-300 disabled:cursor-not-allowed transition text-sm"
+              {% if not user.is_authenticated %}disabled title="Login diperlukan untuk booking"{% else %}disabled{% endif %}>
+        {% if user.is_authenticated %}Booking Now{% else %}Login untuk Booking{% endif %}
+      </button>
     </div>
   </div>
 </div>
 
 <!-- Toast container -->
-<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+<div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 space-y-2 w-full max-w-md px-4"></div>
+
+<!-- Custom Confirmation Modal -->
+<div id="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-fade-in">
+    <h3 class="text-xl font-bold text-[#000456] mb-3">Batalkan Booking</h3>
+    <p class="text-gray-700 mb-6" id="confirmMessage">Apakah Anda yakin ingin membatalkan booking untuk slot ini?</p>
+    <div class="flex gap-3 justify-end">
+      <button id="cancelBtn" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+        Tidak
+      </button>
+      <button id="confirmBtn" class="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium">
+        Ya, Batalkan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden date input for calendar picker -->
+<input type="date" id="hiddenDatePicker" class="hidden" />
+
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+</style>
 
 <script>
 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-const datePicker = document.getElementById('datePicker');
 const slotContainer = document.getElementById('slotContainer');
 const totalPriceEl = document.getElementById('totalPrice');
 const bookButton = document.getElementById('bookButton');
+const hiddenDatePicker = document.getElementById('hiddenDatePicker');
+const confirmModal = document.getElementById('confirmModal');
+const confirmBtn = document.getElementById('confirmBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+const confirmMessage = document.getElementById('confirmMessage');
+const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
 let selectedSlots = [];
+let currentDate = new Date();
+let pendingCancelId = null;
 
-// Load slot saat tanggal dipilih
-datePicker.addEventListener('change', () => {
-  fetch(`/booking/slots/{{ venue.id }}/?date=${datePicker.value}`)
-    .then(res => res.json())
-    .then(data => renderSlots(data));
+// Initialize dates
+function initializeDates() {
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dayEl = document.getElementById(`day-${i}`);
+    if (dayEl) {
+      dayEl.textContent = `${date.getDate()} ${monthNames[date.getMonth()]}`;
+    }
+  }
+  loadSlots(today);
+}
+
+// Mobile menu toggle
+const mobileMenuButton = document.getElementById('mobile-menu-button');
+const mobileMenu = document.getElementById('mobile-menu');
+
+mobileMenuButton.addEventListener('click', () => {
+  mobileMenu.classList.toggle('hidden');
 });
 
-// Render slot
+// Close mobile menu when clicking outside
+document.addEventListener('click', (e) => {
+  if (!mobileMenuButton.contains(e.target) && !mobileMenu.contains(e.target)) {
+    mobileMenu.classList.add('hidden');
+  }
+});
+
+// Format date to YYYY-MM-DD
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Day button click handlers
+document.querySelectorAll('.day-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    // Remove active class from all buttons
+    document.querySelectorAll('.day-btn').forEach(b => {
+      b.classList.remove('bg-[#3D5A80]', 'text-white');
+      b.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-700');
+    });
+    // Add active class to clicked button
+    this.classList.remove('bg-white', 'border', 'border-gray-300', 'text-gray-700');
+    this.classList.add('bg-[#3D5A80]', 'text-white');
+    
+    const offset = parseInt(this.dataset.offset);
+    const today = new Date();
+    currentDate = new Date(today);
+    currentDate.setDate(today.getDate() + offset);
+    loadSlots(currentDate);
+  });
+});
+
+// Calendar button handler
+document.querySelector('.calendar-btn').addEventListener('click', () => {
+  hiddenDatePicker.click();
+});
+
+hiddenDatePicker.addEventListener('change', (e) => {
+  const selectedDate = new Date(e.target.value + 'T00:00:00');
+  currentDate = selectedDate;
+  loadSlots(selectedDate);
+  // Deactivate day buttons
+  document.querySelectorAll('.day-btn').forEach(b => {
+    b.classList.remove('bg-[#3D5A80]', 'text-white');
+    b.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-700');
+  });
+});
+
+// Load slots from server
+function loadSlots(date) {
+  const dateStr = formatDate(date);
+  fetch(`/booking/slots/{{ venue.id }}/?date=${dateStr}`)
+    .then(res => res.json())
+    .then(data => renderSlots(data))
+    .catch(err => {
+      console.error('Error loading slots:', err);
+      showToast('Gagal memuat jadwal', 'error');
+    });
+}
+
+// Render slot buttons
 function renderSlots(slots) {
   slotContainer.innerHTML = '';
   selectedSlots = [];
   totalPriceEl.textContent = 'Rp0';
-  bookButton.disabled = true;
+  {% if user.is_authenticated %}
+    bookButton.disabled = true;
+  {% else %}
+    bookButton.disabled = true;
+  {% endif %}
+  bookButton.textContent = '{% if user.is_authenticated %}Booking Now{% else %}Login untuk Booking{% endif %}';
+
+  if (slots.length === 0) {
+    slotContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">Tidak ada jadwal tersedia untuk tanggal ini</p>';
+    return;
+  }
 
   slots.forEach(slot => {
     const div = document.createElement('div');
-    div.className = `
-      p-3 rounded-lg text-center border cursor-pointer transition
-      ${slot.is_booked_by_user ? 'bg-blue-100 border-blue-400 text-blue-700'
-      : slot.is_booked ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-      : 'bg-green-100 hover:bg-green-200'}
-    `;
-    div.textContent = `${slot.start_time} - ${slot.end_time}`;
+    
+    if (slot.is_booked_by_user) {
+      div.className = 'p-3 rounded-lg text-center border-2 border-[#3D5A80] bg-[#3D5A80]/10 text-[#3D5A80] cursor-pointer transition hover:bg-[#3D5A80]/20';
+      div.innerHTML = `
+        <div class="text-sm font-semibold">${slot.start_time} - ${slot.end_time}</div>
+        <div class="text-xs mt-1">Booked by you</div>
+      `;
+      div.addEventListener('click', () => toggleSlot(div, slot, true));
+    } else if (slot.is_booked) {
+      div.className = 'p-3 rounded-lg text-center bg-gray-200 text-gray-500 cursor-not-allowed';
+      div.innerHTML = `
+        <div class="text-sm font-semibold">${slot.start_time} - ${slot.end_time}</div>
+        <div class="text-xs mt-1">Booked</div>
+      `;
+    } else {
+      div.className = 'slot-available p-3 rounded text-center border border-gray-300 bg-white hover:border-[#3D5A80] hover:bg-gray-50 cursor-pointer transition';
+      div.innerHTML = `
+        <div class="text-sm font-semibold text-[#000456]">${slot.start_time} - ${slot.end_time}</div>
+        <div class="text-xs mt-1 text-[#000456] font-medium">Rp${parseInt(slot.price).toLocaleString('id-ID')}</div>
+      `;
+      div.addEventListener('click', () => toggleSlot(div, slot, false));
+    }
+    
     div.dataset.id = slot.id;
     div.dataset.price = slot.price;
-
-    if (!slot.is_booked || slot.is_booked_by_user) {
-      div.addEventListener('click', () => toggleSlot(div, slot.is_booked_by_user));
-    }
-
     slotContainer.appendChild(div);
   });
 }
 
-// Toggle select / cancel
-function toggleSlot(el, isBookedByUser = false) {
+// Toggle slot selection or cancel booking
+function toggleSlot(el, slot, isBookedByUser) {
   const id = el.dataset.id;
-  const price = parseInt(el.dataset.price);
-
+  
   if (isBookedByUser) {
-    // Cancel booking
-    cancelBooking(id);
+    // Show custom confirmation modal
+    const startTime = slot.start_time.substring(0, 5);
+    const endTime = slot.end_time.substring(0, 5);
+    confirmMessage.textContent = `Apakah Anda yakin ingin membatalkan booking untuk slot ${startTime} - ${endTime}?`;
+    pendingCancelId = id;
+    confirmModal.classList.remove('hidden');
   } else {
-    if (selectedSlots.includes(id)) {
+    // Toggle selection
+    if (el.classList.contains('selected')) {
       selectedSlots = selectedSlots.filter(s => s !== id);
-      el.classList.remove('bg-green-300');
-      el.classList.add('bg-green-100');
+      el.classList.remove('selected', 'border-[#3D5A80]', 'bg-[#3D5A80]/10');
+      el.classList.add('border-gray-300', 'bg-white');
     } else {
       selectedSlots.push(id);
-      el.classList.remove('bg-green-100');
-      el.classList.add('bg-green-300');
+      el.classList.add('selected', 'border-[#3D5A80]', 'bg-[#3D5A80]/10');
+      el.classList.remove('border-gray-300', 'bg-white');
     }
     updateTotal();
   }
 }
 
-// Update total
+// Modal event listeners
+confirmBtn.addEventListener('click', () => {
+  if (pendingCancelId) {
+    cancelBooking(pendingCancelId);
+    confirmModal.classList.add('hidden');
+    pendingCancelId = null;
+  }
+});
+
+cancelBtn.addEventListener('click', () => {
+  confirmModal.classList.add('hidden');
+  pendingCancelId = null;
+});
+
+// Close modal when clicking outside
+confirmModal.addEventListener('click', (e) => {
+  if (e.target === confirmModal) {
+    confirmModal.classList.add('hidden');
+    pendingCancelId = null;
+  }
+});
+
+// Update total price
 function updateTotal() {
-  const total = Array.from(document.querySelectorAll('.bg-green-300'))
+  const total = Array.from(document.querySelectorAll('.selected'))
                      .reduce((sum, el) => sum + parseInt(el.dataset.price), 0);
-  totalPriceEl.textContent = `Rp${total.toLocaleString()}`;
-  bookButton.disabled = selectedSlots.length === 0;
+  totalPriceEl.textContent = `Rp${total.toLocaleString('id-ID')}`;
+  
+  {% if user.is_authenticated %}
+    bookButton.disabled = selectedSlots.length === 0;
+  {% else %}
+    bookButton.disabled = true;
+  {% endif %}
 }
 
-// Booking AJAX
+// Create booking
 bookButton.addEventListener('click', () => {
+  if (selectedSlots.length === 0) return;
+  
+  {% if not user.is_authenticated %}
+    showToast('Silakan login terlebih dahulu untuk booking', 'error');
+    setTimeout(() => {
+      window.location.href = '/auth/login?next={{ request.path }}';
+    }, 1500);
+    return;
+  {% endif %}
+  
+  bookButton.disabled = true;
+  bookButton.textContent = 'Processing...';
+  
   fetch('/booking/create/', {
     method: 'POST',
     headers: {
@@ -122,15 +430,22 @@ bookButton.addEventListener('click', () => {
   .then(data => {
     if (data.status === 'success') {
       showToast('Booking berhasil!', 'success');
-      datePicker.dispatchEvent(new Event('change'));
+      loadSlots(currentDate);
+      bookButton.textContent = 'Booking Now';
     } else {
       showToast('Gagal melakukan booking.', 'error');
+      bookButton.disabled = false;
+      bookButton.textContent = 'Booking Now';
     }
   })
-  .catch(() => showToast('Terjadi kesalahan server.', 'error'));
+  .catch(() => {
+    showToast('Terjadi kesalahan server.', 'error');
+    bookButton.disabled = false;
+    bookButton.textContent = 'Booking Now';
+  });
 });
 
-// Cancel booking AJAX
+// Cancel booking
 function cancelBooking(slotId) {
   fetch('/booking/cancel/', {
     method: 'POST',
@@ -143,8 +458,8 @@ function cancelBooking(slotId) {
   .then(res => res.json())
   .then(data => {
     if (data.status === 'success') {
-      showToast('Booking dibatalkan.', 'error');
-      datePicker.dispatchEvent(new Event('change'));
+      showToast('Booking berhasil dibatalkan.', 'success');
+      loadSlots(currentDate);
     } else {
       showToast('Gagal membatalkan booking.', 'error');
     }
@@ -152,32 +467,40 @@ function cancelBooking(slotId) {
   .catch(() => showToast('Terjadi kesalahan server.', 'error'));
 }
 
-// Toast
+// Toast notification
 function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
   toast.className = `
-    px-4 py-3 rounded-lg shadow-lg text-white animate-fade-in-down
-    ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}
+    px-6 py-4 rounded-lg shadow-lg text-white text-center animate-fade-in-down
+    ${type === 'success' ? 'bg-[#3D5A80]' : 'bg-red-600'}
   `;
   toast.textContent = message;
   container.appendChild(toast);
   setTimeout(() => {
-    toast.classList.add('opacity-0', 'translate-y-2');
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-10px)';
     setTimeout(() => toast.remove(), 300);
   }, 3000);
 }
 
-// Animasi fade
+// Initialize on page load
+initializeDates();
+
+// Animation styles
 document.head.insertAdjacentHTML("beforeend", `
 <style>
 @keyframes fade-in-down {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-in-down { animation: fade-in-down 0.3s ease-out; }
+.animate-fade-in-down { 
+  animation: fade-in-down 0.3s ease-out; 
+  transition: opacity 0.3s, transform 0.3s;
+}
 </style>
 `);
 </script>
 
 {% endblock content %}
+

@@ -19,15 +19,44 @@ def get_slots(request, venue_id):
         return JsonResponse([], safe=False)
     date = datetime.strptime(date_str, "%Y-%m-%d").date()
     slots = BookingSlot.objects.filter(venue_id=venue_id, date=date).order_by("start_time")
-    return JsonResponse([
-        {
+    user_bookings = Booking.objects.filter(user=request.user, slot__venue_id=venue_id, slot__date=date).values_list('slot_id', flat=True)
+    
+    # Get current date and time
+    now = datetime.now()
+    current_date = now.date()
+    current_time = now.time()
+    
+    # Filter out past slots and clean up past bookings
+    available_slots = []
+    for s in slots:
+        # If the date is today, check if the slot time has passed
+        if s.date == current_date and s.end_time < current_time:
+            # Remove past bookings automatically
+            if s.is_booked:
+                Booking.objects.filter(slot=s).delete()
+                s.is_booked = False
+                s.save()
+            continue  # Skip this slot, don't show it
+        
+        # If date is in the past, clean up and skip
+        if s.date < current_date:
+            if s.is_booked:
+                Booking.objects.filter(slot=s).delete()
+                s.is_booked = False
+                s.save()
+            continue
+        
+        # Add slot to available list
+        available_slots.append({
             "id": s.id,
             "start_time": s.start_time.strftime("%H:%M"),
             "end_time": s.end_time.strftime("%H:%M"),
             "is_booked": s.is_booked,
+            "is_booked_by_user": s.id in user_bookings,
             "price": s.venue.price,
-        } for s in slots
-    ], safe=False)
+        })
+    
+    return JsonResponse(available_slots, safe=False)
 
 @csrf_exempt
 @login_required
@@ -42,7 +71,7 @@ def create_booking(request):
             total += slot.venue.price
             slot.is_booked = True
             slot.save()
-            Booking.objects.create(user=user, slot=slot, total_price=slot.venue.price_per_hour)
+            Booking.objects.create(user=user, slot=slot, total_price=slot.venue.price)
         return JsonResponse({"status": "success", "total": total})
     return JsonResponse({"status": "error"})
 
