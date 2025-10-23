@@ -47,7 +47,8 @@ def add_review(request, venue_id):
                 'rating': review.rating,
                 'comment': review.comment,
                 'user': review.user.user.username,
-                'created_at': review.created_at.strftime('%B %d, %Y')
+                'created_at': review.created_at.strftime('%B %d, %Y'),
+                'last_modified': review.created_at.strftime('%B %d, %Y')
             }
         }, status=201)
     else:
