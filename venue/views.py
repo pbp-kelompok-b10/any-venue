@@ -34,9 +34,13 @@ def show_main(request):
 
 def show_details(request, id):
     venue = get_object_or_404(Venue, pk=id)
+    cities = City.objects.all().order_by('name')
+    categories = Category.objects.all().order_by('name')
     context = {
         'venue': venue,
         'user': request.user,
+        'cities': cities,
+        'categories': categories,
     }
     return render(request, "venue_details.html", context)
 
