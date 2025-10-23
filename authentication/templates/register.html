@@ -18,7 +18,7 @@
                 </div>
                 <div class="flex flex-wrap justify-center items-center gap-1 sm:gap-[5px]">
                     <div class="text-center text-Flash-White text-base font-normal font-['Roboto'] leading-normal">Already have an account?</div>
-                    <a href="{% url 'login' %}" class="text-center text-Flash-White text-base font-normal font-['Roboto'] underline leading-normal">Login Now</a>
+                    <a href="{% url 'authentication:login' %}" class="text-center text-Flash-White text-base font-normal font-['Roboto'] underline leading-normal">Login Now</a>
                 </div>
             </div>
         </div>
@@ -110,12 +110,12 @@
 
         $.ajax({
             type: "POST",
-            url: "{% url 'register' %}",  // ganti sesuai URL pattern kamu
+            url: "{% url 'authentication:register' %}",  // ganti sesuai URL pattern kamu
             data: data,
             success: function (response) {
                 if (response.success) {
                     alert(response.message);
-                    window.location.href = "{% url 'login' %}";
+                    window.location.href = "{% url 'authentication:login' %}";
                 } else {
                     $("#registerMessage").text(response.error || "Failed to register.");
                 }
