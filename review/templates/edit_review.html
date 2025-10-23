@@ -19,7 +19,7 @@
             <p class="text-xs text-gray-600 mt-1">Update your previously submitted review.</p>
         </div>
 
-        <form id="editReviewForm" method="POST" action="#"
+        <form id="editReviewForm" method="POST" action=""
             class="w-full flex flex-col gap-6">
             {% csrf_token %} <input type="hidden" name="review_id" id="editReviewId">
 
@@ -68,13 +68,16 @@
     const editRatingValue = document.getElementById('editRatingValue');
     const editReviewContent = document.getElementById('edit_review_content');
     const editReviewId = document.getElementById('editReviewId');
+    const editReviewForm = document.getElementById('editReviewForm');
 
     function showEditReviewModal(reviewId, currentRating, currentComment) {
         // isi form dengan data yang ada
         editReviewId.value = reviewId;
         editRatingValue.value = currentRating;
         editReviewContent.value = currentComment;
-        highlightEditStars(currentRating); // set tampilan stars sesuai rating
+        highlightStars(currentRating); // set tampilan stars sesuai rating
+
+        editReviewForm.action = `/review/edit/${reviewId}/`;
 
         // show modal
         editReviewModal.classList.remove('hidden');
@@ -92,7 +95,7 @@
         }, 150);
     }
 
-    function highlightEditStars(rating) {
+    function highlightStars(rating) {
         editStars.forEach(s => {
             if (s.getAttribute('data-value') <= rating) {
                 s.classList.add('text-yellow-400');
@@ -107,17 +110,17 @@
     editStars.forEach(star => {
         star.addEventListener('mouseover', () => {
             const rating = star.getAttribute('data-value');
-            highlightEditStars(rating);
+            highlightStars(rating);
         });
 
         star.addEventListener('mouseout', () => {
-            highlightEditStars(editRatingValue.value || 0);
+            highlightStars(editRatingValue.value || 0);
         });
 
         star.addEventListener('click', () => {
             const rating = star.getAttribute('data-value');
             editRatingValue.value = rating;
-            highlightEditStars(rating);
+            highlightStars(rating);
         });
     });
 
