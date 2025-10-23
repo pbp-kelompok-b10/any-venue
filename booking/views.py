@@ -59,7 +59,7 @@ def get_slots(request, venue_id):
         return JsonResponse([], safe=False)
     date = datetime.strptime(date_str, "%Y-%m-%d").date()
     slots = BookingSlot.objects.filter(venue_id=venue_id, date=date).order_by("start_time")
-    user_bookings = Booking.objects.filter(user=request.user, slot__venue_id=venue_id, slot__date=date).values_list('slot_id', flat=True)
+    user_bookings = Booking.objects.filter(user=request.user.profile, slot__venue_id=venue_id, slot__date=date).values_list('slot_id', flat=True)
     
     # Get current date and time
     now = datetime.now()
@@ -104,14 +104,14 @@ def create_booking(request):
     if request.method == "POST":
         payload = json.loads(request.body)
         slot_ids = payload.get("slots", [])
-        user = request.user
+        user_profile = request.user.profile
         total = 0
         for sid in slot_ids:
             slot = get_object_or_404(BookingSlot, id=sid, is_booked=False)
             total += slot.venue.price
             slot.is_booked = True
             slot.save()
-            Booking.objects.create(user=user, slot=slot, total_price=slot.venue.price)
+            Booking.objects.create(user=user_profile, slot=slot, total_price=slot.venue.price)
         return JsonResponse({"status": "success", "total": total})
     return JsonResponse({"status": "error"})
 
@@ -123,7 +123,7 @@ def cancel_booking(request):
         slot_id = payload.get("slot_id")
         try:
             slot = BookingSlot.objects.get(id=slot_id)
-            booking = Booking.objects.get(user=request.user, slot=slot)
+            booking = Booking.objects.get(user=request.user.profile, slot=slot)
             booking.delete()
             slot.is_booked = False
             slot.save()
