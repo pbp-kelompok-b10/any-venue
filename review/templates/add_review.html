@@ -22,6 +22,7 @@
         </div>
 
         <!-- Form -->
+        <!-- action ganti jadi "{% url 'add_review' venue.id %} n make sure udh ada path di urls.py(?)" -->
         <form id="addReviewForm" method="POST" action="#"
             class="w-full flex flex-col gap-6">
             {% csrf_token %}
@@ -45,7 +46,7 @@
             <!-- Review Comment -->
             <div class="flex flex-col gap-2">
                 <label for="review_content" class="text-s text-black">Review</label>
-                <textarea id="review_content" name="review" rows="5"
+                <textarea id="review_content" name="comment" rows="5"
                     class="w-full p-3 border border-gray-700 resize-none"
                     placeholder="How was your experience?" required></textarea>
             </div>
@@ -126,4 +127,12 @@
 
     // default (no rating selected)
     highlightStars(0);
+
+    document.getElementById("addReviewForm").addEventListener("submit", function (e) {
+        if (!ratingValue.value) {
+            alert("Please select a rating first!");
+            e.preventDefault();
+        }
+    });
+
 </script>
