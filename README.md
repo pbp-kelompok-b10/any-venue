@@ -62,3 +62,5 @@ Sumber Dataset -> [AYO - Super Sport Community App](https://ayo.co.id/venues)
 
 ## Tautan untuk menuju AnyVenue
 [https://keisha-vania-anyvenue.pbp.cs.ui.ac.id/](https://keisha-vania-anyvenue.pbp.cs.ui.ac.id/)
+## Prototype AnyVenue
+[https://www.figma.com/design/hP4cysHH7mBI8mqyb1ZbYY/AnyVenue?node-id=24-1886&m=dev]
