@@ -23,6 +23,7 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('venue/', include('venue.urls')),
     path('review/', include('review.urls', namespace='review')),
+    path('account/', include('account.urls')),
     path('booking/', include('booking.urls')),
     path('events/', include('event.urls')),
 ]

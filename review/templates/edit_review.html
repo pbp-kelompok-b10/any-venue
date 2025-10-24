@@ -16,7 +16,7 @@
 
         <div class="w-full text-center mb-6">
             <h2 class="text-3xl font-bold text-black">Edit Review</h2>
-            <p class="text-xs text-gray-600 mt-1">Update your previously submitted review.</p>
+            <p class="text-sm text-gray-600 mt-1">Your story can evolve — update your review whenever you’d like.</p>
         </div>
 
         <form id="editReviewForm" method="POST" action=""
@@ -124,10 +124,45 @@
         });
     });
 
-    document.getElementById("editReviewForm").addEventListener("submit", function (e) {
+    editReviewForm.addEventListener("submit", async function (e) {
+        e.preventDefault(); // Stop the default form submission
+    
         if (!editRatingValue.value) {
             alert("Please select a rating first!");
-            e.preventDefault();
+            return; // Stop if no rating is selected
+        }
+    
+        const formData = new FormData(editReviewForm);
+        const actionUrl = editReviewForm.action;
+    
+        try {
+            const response = await fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest', // Important for Django to detect AJAX
+                },
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                // Success: show message, hide modal, and reload the page
+                alert(data.message || "Review updated successfully!");
+                hideEditReviewModal();
+                window.location.reload(); // This reloads the venue page
+            } else {
+                // Error: show error message from the server
+                let errorMessage = data.message || "An unknown error occurred.";
+                if (data.errors) {
+                    errorMessage = Object.values(data.errors).join("\n");
+                }
+                alert(errorMessage);
+            }
+        } catch (error) {
+            // Network or other fetch-related error
+            console.error("Form submission error:", error);
+            alert("An error occurred while updating the review. Please try again.");
         }
     });
 

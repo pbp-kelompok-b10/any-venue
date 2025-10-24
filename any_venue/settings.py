@@ -33,6 +33,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "keisha-vania-anyvenue.pbp.cs.ui.ac.id"]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://keisha-vania-anyvenue.pbp.cs.ui.ac.id"
+]
 
 # Application definition
 
@@ -43,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authentication.apps.AuthenticationConfig',
+    'authentication',
     'landing',
     'venue',
     'booking',
@@ -138,7 +141,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# Use Jakarta time so past slots today are calculated correctly for Indonesia users
+TIME_ZONE = 'Asia/Jakarta'
 
 USE_I18N = True
 
