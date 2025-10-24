@@ -63,10 +63,12 @@ class VenueTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_venue_details_using_detail_template(self):
+        self.client.login(username='testowner', password='password123')
         response = self.client.get(reverse('venue:venue_detail', args=[self.venue.id]))
         self.assertTemplateUsed(response, 'venue_details.html')
 
     def test_venue_detail_nonexistent(self):
+        self.client.login(username='testowner', password='password123')
         response = self.client.get(reverse('venue:venue_detail', args=[999]))
         self.assertEqual(response.status_code, 404)
 
