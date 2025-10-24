@@ -148,50 +148,48 @@
     // HTML for the star rating display.
     function generateStars(rating) {
         let starsHTML = '<div class="flex items-center gap-0.5 mb-3">';
-        const starSVG = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.959a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.446a1 1 0 00-.364 1.118l1.286 3.959c.3.921-.755 1.688-1.538 1.118l-3.368-2.446a1 1 0 00-1.175 0l-3.368 2.446c-.783.57-1.838-.197-1.538-1.118l1.286-3.959a1 1 0 00-.364-1.118L2.063 9.386c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"></path></svg>`;
+        const starChar = `★`; 
 
         const numericRating = Number(rating);
         for (let i = 1; i <= 5; i++) {
             if (i <= numericRating) {
-                starsHTML += `<span class="text-yellow-500">${starSVG}</span>`;
+                starsHTML += `<span class="text-yellow-400 text-2xl">${starChar}</span>`;
             } else {
-                starsHTML += `<span class="text-gray-300">${starSVG}</span>`;
+                starsHTML += `<span class="text-gray-300 text-2xl">${starChar}</span>`;
             }
         }
         starsHTML += '</div>';
         return starsHTML;
     }
 
-    // HTML for a single review card
+// HTML for a single review card
     function buildReviewCard(review) {
         const isOwnReview = IS_AUTHENTICATED && review.user === CURRENT_USERNAME;
 
         const actionButtons = isOwnReview ? `
-            <div class="flex items-center gap-3 mt-3 pt-3 border-t border-gray-200">
+            <div class="absolute top-6 right-6 flex items-center gap-2">
                 <button
                     onclick="handleEditReview('${review.id}')"
-                    class="flex-1 px-3 py-1.5 text-sm font-semibold text-gray-800 bg-white border border-gray-800 hover:bg-gray-800 hover:text-white transition-colors shadow-sm"
+                    class="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded transition-colors"
                     aria-label="Edit review">
-                    <svg class="w-4 h-4 inline-block mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
-                    Edit
                 </button>
                 <button
                     onclick="handleDeleteReview('${review.id}')"
-                    class="flex-1 px-3 py-1.5 text-sm font-semibold text-red-600 bg-white border border-red-600 hover:bg-red-600 hover:text-white transition-colors shadow-sm"
+                    class="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                     aria-label="Delete review">
-                    <svg class="w-4 h-4 inline-block mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
-                    Delete
                 </button>
             </div>
         ` : '';
 
         return `
             <div class="flex-shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] scroll-snap-align-start">
-                <article class="bg-gray-50 border border-gray-200 p-6 h-full flex flex-col hover:border-gray-300 transition-colors">
+                <article class="bg-gray-50 border border-gray-200 p-6 h-full flex flex-col hover:border-gray-300 transition-colors relative">
                     ${generateStars(review.rating)}
                     <blockquote class="flex-grow mb-4">
                         
@@ -208,7 +206,7 @@
             </div>
         `;
     }
-
+    
     function renderReviews(reviews) {
         if (!reviewTrack) return;
         reviewTrack.innerHTML = reviews.map(buildReviewCard).join('');
