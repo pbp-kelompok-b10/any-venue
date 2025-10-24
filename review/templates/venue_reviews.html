@@ -112,6 +112,32 @@
     .filter-btn:disabled:hover {
         background-color: #f9fafb;
     }
+    
+    .review-comment {
+        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        word-break: break-word;
+    }
+
+    .review-comment.collapsed {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .toggle-comment {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 4px 0;
+        transition: all 0.2s ease;
+    }
+
+    .comment-text {
+        display: block;
+        transition: opacity 0.2s ease;
+    }
+    
 </style>
 {% endblock content %}
 
@@ -119,8 +145,8 @@
 <script>
     // global cache & constants
     let venueReviewsCache = [];
-    let allReviewsData = []; // Store all reviews from API
-    let currentFilter = 'all'; // Track current filter state
+    let allReviewsData = [];
+    let currentFilter = 'all';
     
     const REVIEWS_API_ENDPOINT = "{% url 'review:get_reviews_json' %}";
     const CURRENT_VENUE_NAME = "{{ venue.name|escapejs|default:'' }}";
@@ -163,15 +189,16 @@
         return starsHTML;
     }
 
-// HTML for a single review card
+    function truncateComment(text, maxLength = 100) {
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength).trim() + '…';
+    }
+
+    // HTML for a single review card
     function buildReviewCard(review) {
         const isOwnReview = IS_AUTHENTICATED && review.user === CURRENT_USERNAME;
-
         const isEdited = review.created_at !== review.last_modified;
-
-        const editedTag = isEdited
-        ? `<span class="text-xs text-gray-500 ml-2">(edited)</span>`
-        : '';
+        const editedTag = isEdited ? `<span class="text-xs text-gray-500 ml-2">(edited)</span>` : '';
 
         const actionButtons = isOwnReview ? `
             <div class="absolute top-6 right-6 flex items-center gap-2">
@@ -194,21 +221,34 @@
             </div>
         ` : '';
 
+        const needsToggle = review.comment.length > 100;
+        const commentId = `comment-${review.id}`;
+
         return `
             <div class="flex-shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] scroll-snap-align-start">
-                <article class="bg-gray-50 border border-gray-200 p-6 h-full flex flex-col hover:border-gray-300 transition-colors relative">
-                    ${actionButtons}
+                <article class="bg-gray-50 border border-gray-200 p-6 flex flex-col hover:border-gray-300 transition-colors relative">                    ${actionButtons}
                     <div class="flex items-center gap-0.5">
                         ${generateStars(review.rating)}
                         ${editedTag}
                     </div>
 
                     <blockquote class="flex-grow mb-4">
-                        
-                        <p class="text-gray-700 text-sm leading-relaxed break-words whitespace-pre-line">
-                            "${review.comment}"
-                        </p>
-                        </blockquote>
+                        <div>
+                            <p id="${commentId}" class="review-comment ${needsToggle ? 'collapsed' : ''} text-gray-700 text-sm leading-relaxed break-words whitespace-pre-line">
+                                <span class="comment-text">${review.comment}</span>
+                            </p>
+                            ${needsToggle ? 
+                                `<button 
+                                    class="toggle-comment text-blue-500 text-sm font-medium hover:text-blue-900 focus:outline-none"
+                                    data-comment-id="${commentId}"
+                                    data-full-text="${review.comment.replace(/"/g, '&quot;')}"
+                                    data-short-text="${truncateComment(review.comment, 100).replace(/"/g, '&quot;')}">
+                                    Read More
+                                </button>` : ''
+                            }
+                        </div>
+                    </blockquote>
+                    
                     <div class="mt-auto pt-4 border-t border-gray-200">
                         <p class="font-semibold text-gray-900 text-sm">${review.user}</p>
                         <p class="text-xs text-gray-500 mt-1">Last modified: ${review.last_modified}</p>
@@ -221,8 +261,33 @@
     function renderReviews(reviews) {
         if (!reviewTrack) return;
         reviewTrack.innerHTML = reviews.map(buildReviewCard).join('');
-        
-        // Wait for DOM to fully render before checking arrow visibility
+
+        // toggle functionality
+        reviewTrack.querySelectorAll('.toggle-comment').forEach(button => {
+            button.addEventListener('click', function() {
+                const commentId = this.getAttribute('data-comment-id');
+                const commentEl = document.getElementById(commentId);
+                const textSpan = commentEl.querySelector('.comment-text');
+                const fullText = this.getAttribute('data-full-text');
+                const shortText = this.getAttribute('data-short-text');
+                const isExpanded = this.classList.contains('expanded');
+
+                if (isExpanded) {
+                    // collapse
+                    commentEl.classList.add('collapsed');
+                    textSpan.textContent = fullText; // keep full text, CSS handles truncation
+                    this.textContent = 'Read More';
+                    this.classList.remove('expanded');
+                } else {
+                    // expand
+                    commentEl.classList.remove('collapsed');
+                    textSpan.textContent = fullText;
+                    this.textContent = 'Show Less';
+                    this.classList.add('expanded');
+                }
+            });
+        });
+
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 updateArrowVisibility();
@@ -230,11 +295,11 @@
         });
     }
 
-    // Filter reviews based on selected filter
+    // filter reviews based on selected filter
     function filterReviews(filterType) {
         currentFilter = filterType;
         
-        // Update button states
+        // update button states
         if (filterAllBtn && filterMyBtn) {
             filterAllBtn.classList.toggle('active', filterType === 'all');
             filterMyBtn.classList.toggle('active', filterType === 'my');
@@ -242,17 +307,15 @@
 
         let filteredReviews = [...allReviewsData];
 
-        // Apply venue filter if on specific venue page
         if (CURRENT_VENUE_NAME) {
             filteredReviews = filteredReviews.filter(review => review.venue_name === CURRENT_VENUE_NAME);
         }
 
-        // Apply user filter
         if (filterType === 'my' && IS_AUTHENTICATED) {
             filteredReviews = filteredReviews.filter(review => review.user === CURRENT_USERNAME);
         }
 
-        // Update cache and display
+        // update cache and display
         venueReviewsCache = filteredReviews;
 
         if (filteredReviews.length === 0) {
