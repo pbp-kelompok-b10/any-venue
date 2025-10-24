@@ -27,15 +27,15 @@ Platform website "AnyVenue" dirancang untuk memudahkan pengguna dalam mencari da
       Setiap section dilengkapi dengan tombol navigasi yang akan mengarahkan pengguna langsung ke halaman fitur terkait, sehingga landing page berfungsi sebagai pusat orientasi sekaligus pintu masuk ke seluruh modul utama dalam aplikasi.
 
 3. *Venue* (Keisha Vania Laurent):
-   - Menampilkan detail *venue* seperti deskripsi, lokasi, harga, kategori, dan review atau ulasan yang diberikan oleh pengguna. Modul ini juga menyediakan navigasi ke modul `Booking` dan `Review`.
+   - *Venue* memiliki hubungan dengan modul *Review* dan *Booking*, di mana satu venue dapat memiliki banyak review dan banyak booking. Modul ini juga menyediakan halaman untuk menampilkan daftar semua venue serta halaman detail setiap venue. Selain itu, tersedia fitur CRUD untuk pengelolaan data venue.
 
 4. *Booking* (Fakhri Husaini Romza):
    - Menampilkan halaman untuk melakukan *booking* kepada venue yang dipilih. Memiliki `User` yang bisa melakukan *booking* sebuah `Venue`, field `created_at` untuk tanggal *booking*.
 
-5. *User* (Alya Nabilla Khamil):
+5. *Account* (Alya Nabilla Khamil):
    - Berfungsi untuk mengelola data dan aktivitas pengguna dalam sistem, yang terdiri dari dua jenis peran utama, yaitu `User` (pengguna biasa) dan `Owner` (pemilik venue). Halaman profil pengguna yang menampilkan informasi aktivitas masing-masing peran. Integrasi dengan modul `Venue` dan `Event` untuk menampilkan data terkait. Berikut detail halaman profil sesuai *role*:
-        - User (Pengguna Biasa): Dapat melihat daftar *venue* yang sudah di-*booking*, dapat melihat *event* atau kompetisi yang diikuti, dapat melihat serta mengelola *review* yang telah dibuat terhadap venue.
-        - Owner (Pemilik Venue): Memiliki kemampuan untuk melakukan CRUD (*Create, Read, Update, Delete*) terhadap data *venue*. Relasi bersifat *one-to-many*, di mana satu *owner* dapat memiliki lebih dari satu *venue*, dapat melakukan CRUD terhadap *event* yang diselenggarakan. Relasi juga bersifat *one-to-many*, di mana satu *owner* dapat membuat beberapa *event*.
+        - User (Pengguna Biasa): Dapat melihat daftar *venue* yang sudah di-*booking*, dapat melihat *review* yang telah dibuat terhadap venue.
+        - Owner (Pemilik Venue): Dapat melihat daftar *venue* dan detail *venue* yang dimilikinya.
 
 6. *Review* (Sahila Khairatul Athia):
    - Memungkinkan `User` untuk memberikan `Review` terhadap suatu `Venue`. User dapat mengisi form *review* untuk *venue* tertentu dengan komentar/ulasan serta *rating* (1-5 bintang). *Review* yang dikirimkan akan ditampilkan di halaman detail *venue*, bersamaan dengan *review* dari *user* lainnya.
