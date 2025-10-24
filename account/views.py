@@ -7,6 +7,7 @@ from review.models import Review
 from venue.models import Venue
 from django.views.decorators.csrf import csrf_exempt
 import json
+from authentication.views import logout
 
 def profile_page(request):
     if request.user.is_authenticated:
@@ -135,3 +136,16 @@ def edit_profile(request):
         "username": profile.user.username,
         "role": profile.get_role_display(),
     })
+
+@login_required
+@csrf_exempt  # karena pakai fetch
+def delete_account(request):
+    if request.method == "POST":
+        try:
+            user = request.user
+            logout(request)  # logout dulu
+            user.delete()    # hapus user
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Invalid request"})

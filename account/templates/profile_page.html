@@ -6,114 +6,145 @@
 {% block content %}
 {% include 'navbar.html' %}
 
-<div class="min-h-screen w-full px-8 md:px-16 py-28 flex flex-col items-center bg-gradient-to-b from-Light-Navy  to-Flash-White">
-    <div class="w-full max-w-[1100px] flex flex-col gap-10">
+<div class="min-h-screen w-full px-6 md:px-16 py-28 flex flex-col items-center bg-gradient-to-b from-Light-Navy to-Flash-White">
+    <div class="w-full max-w-[1200px] flex flex-col gap-12">
 
         <!-- Header -->
         <div class="text-center">
-            <h1 class="text-4xl font-bold text-Flash-White">Profile</h1>
+            <h1 class="text-5xl md:text-6xl font-extrabold text-Flash-White tracking-wide">Profile</h1>
             {% if profile %}
-                <p class="text-Flash-White text-600 mt-2">Welcome back, {{ profile.user.username }}</p>
+                <p class="text-Flash-White text-lg md:text-xl mt-3">Welcome back!!, <span class="font-semibold">{{ profile.user.username }}</span></p>
             {% else %}
-                <p class="text-Flash-White mt-2">Guest Profile (Please login)</p>
+                <p class="text-Flash-White text-lg mt-3">Guest Profile (Please login)</p>
             {% endif %}
         </div>
 
         {% if profile %}
         <!-- Profile Info -->
-        <div class="flex justify-between items-center gap-4">
-            <div class="flex flex-col gap-2">
-                <div class="text-2xl font-bold text-Flash-White">{{ profile.user.username }}</div>
-                <div class="text-Flash-White font-semibold">Role: {{ profile.get_role_display }}</div>
-                <div class="text-Flash-White">Last Login: {{ profile.last_login|date:"d M Y, H:i" }}</div>
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-10 p-6 bg-Flash-White rounded-sm shadow-lg">
+            <div class="flex flex-col gap-2 md:gap-3">
+                <div class="text-3xl md:text-4xl font-bold text-Dark-Navy">{{ profile.user.username }}</div>
+                <div class="text-gray-700 font-medium">Role: <span class="font-semibold">{{ profile.get_role_display }}</span></div>
+                <div class="text-gray-500 text-sm">Last Login: {{ profile.last_login|date:"d M Y, H:i" }}</div>
             </div>
             <div class="flex gap-4">
-                <a href="#" class="px-6 py-3 outline outline-1 outline-Flash-White text-Flash-White font-semibold hover:bg-Flash-White hover:text-Dark-Slate transition">Edit Profile</a>
-                    <!-- Modal Edit Profile -->
-                    <div id="editProfileModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-                        <div class="bg-white rounded-2xl w-[400px] p-6 shadow-xl">
-                            <h2 class="text-2xl font-bold text-Dark-Navy mb-4">Edit Profile</h2>
-                            <form id="editProfileForm" class="flex flex-col gap-4">
-                                <div>
-                                    <label class="text-gray-700 font-semibold text-sm">Username</label>
-                                    <input id="edit-username" type="text" class="w-full mt-1 px-3 py-2 border rounded-xl focus:ring-2 focus:ring-Light-Navy" value="{{ profile.user.username }}">
-                                </div>
+             <!-- Edit Profile Button -->
+                <a href="#" class="px-6 py-3 border-2 border-Light-Navy text-Light-Navy font-semibold rounded-sm hover:bg-Light-Navy hover:text-Flash-White transition-all">
+                    Edit Profile
+                </a>
 
-                                <div>
-                                    <label class="text-gray-700 font-semibold text-sm">Role</label>
-                                    <select id="edit-role" class="w-full mt-1 px-3 py-2 border rounded-xl focus:ring-2 focus:ring-Light-Navy">
-                                        <option value="USER" {% if profile.role == 'USER' %}selected{% endif %}>User</option>
-                                        <option value="OWNER" {% if profile.role == 'OWNER' %}selected{% endif %}>Owner</option>
-                                    </select>
-                                </div>
+                <!-- Modal Edit Profile -->
+                <div id="editProfileModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+                    <div class="bg-Flash-White w-[400px] rounded-sm p-6 shadow-xl">
+                        <h2 class="text-2xl font-bold text-Dark-Navy mb-4">Edit Profile</h2>
+                        <form id="editProfileForm" class="flex flex-col gap-4">
+                            <div>
+                                <label class="text-gray-700 font-semibold text-sm">Username</label>
+                                <input id="edit-username" type="text" class="w-full mt-1 px-3 py-2 border rounded-sm focus:ring-2 focus:ring-Light-Navy" value="{{ profile.user.username }}">
+                            </div>
+                            <div>
+                                <label class="text-gray-700 font-semibold text-sm">Role</label>
+                                <select id="edit-role" class="w-full mt-1 px-3 py-2 border rounded-sm focus:ring-2 focus:ring-Light-Navy">
+                                    <option value="USER" {% if profile.role == 'USER' %}selected{% endif %}>User</option>
+                                    <option value="OWNER" {% if profile.role == 'OWNER' %}selected{% endif %}>Owner</option>
+                                </select>
+                            </div>
+                            <div class="flex justify-end gap-3 mt-6">
+                                <button type="button" id="cancelEdit" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-sm hover:bg-gray-300">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="px-4 py-2 bg-Light-Navy text-Flash-White rounded-sm hover:bg-Lighy-Cyan">
+                                    Save
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
-                                <div class="flex justify-end gap-3 mt-6">
-                                    <button type="button" id="cancelEdit" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300">Cancel</button>
-                                    <button type="submit" class="px-4 py-2 bg-Dark-Navy text-white rounded-xl hover:bg-Light-Navy">Save</button>
-                                </div>
-                            </form>
+                <!-- Delete Account Button -->
+                <a href="#" id="delete-account-btn" class="px-6 py-3 bg-Light-Navy text-Flash-White font-semibold rounded-sm hover:bg-red-800 transition-all">
+                    Hapus Akun
+                </a>
+
+                <!-- Confirm Delete Modal -->
+                <div id="deleteAccountModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+                    <div class="bg-Flash-White w-[400px] rounded-sm p-6 shadow-xl">
+                        <h2 class="text-2xl font-bold text-Dark-Navy mb-4">Hapus Akun</h2>
+                        <p class="text-gray-700 mb-6">
+                            Apakah kamu yakin ingin menghapus akun ini? Tindakan ini tidak bisa dibatalkan.
+                        </p>
+                        <div class="flex justify-end gap-3">
+                            <button id="cancelDelete" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-sm hover:bg-gray-300">
+                                Batal
+                            </button>
+                            <button id="confirmDelete" class="px-4 py-2 bg-red-600 text-Flash-White rounded-sm hover:bg-red-700">
+                                Hapus
+                            </button>
                         </div>
                     </div>
-
-                <a href="#" class="px-6 py-3 bg-black text-Flash-White font-semibold hover:bg-Dark-Slate transition">Hapus Akun</a>
+                </div>
             </div>
+
         </div>
         {% endif %}
 
         {% if profile and profile.is_owner %}
         <!-- OWNER VIEW -->
-        <div>
-            <div class="mt-8 flex gap-4 mb-4 justify-between items-center">
-                <button class="tab-btn px-4 py-2 text-Flash-White outline outline-1 outline-Flash-White font-semibold">My Venues</button>
-                <div id="owner-filter" class="flex justify-end">
-                    <button id="refresh-owner" class="flex-shrink-0 group inline-flex items-center justify-center p-3.5 h-[50px] w-[50px] bg-white text-gray-800 border rounded-full border-gray-300 transition-all duration-300 hover:bg-gray-100 hover:shadow-md">
-                    <svg class="w-5 h-5 text-Dark-Slate transition-transform duration-700 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8M21 3v5h-5"></path></svg></button>
+        <div class="mt-10">
+            <div class="flex justify-between items-center mb-6">
+                <button class="tab-btn px-5 py-3 text-Flash-White font-semibold border-b-2 border-Flash-White hover:border-Light-Cyan transition-all">My Venues</button>
+                <div id="owner-filter">
+                    <button id="refresh-owner" class="p-3.5 bg-Flash-White text-gray-800 rounded-full shadow hover:bg-gray-100 hover:shadow-lg transition-all duration-300">
+                        <svg class="w-5 h-5 text-Dark-Slate transition-transform duration-700 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8M21 3v5h-5"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
-            
-
             <div id="loading" class="text-center py-8">
-                <p class="animate-pulse text-gray-500">Loading venues...</p>
+                <p class="animate-pulse text-gray-500 text-lg">Loading venues...</p>
             </div>
             
             <div id="empty" class="text-center py-8 hidden">
-                <p class="text-gray-500">No venues available.</p>
+                <p class="text-gray-400 text-lg">No venues available.</p>
             </div>
 
-            <!-- Grid kosong dulu, akan diisi oleh JavaScript -->
             <div id="venue-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
 
         {% elif profile %}
         <!-- USER VIEW -->
-        <div>
+        <div class="mt-10">
             <!-- Tabs -->
-            <div class="flex justify-center gap-4 mb-4">
-                <button id="tab-booking" class="tab-btn bg-Dark-Navy text-white px-4 py-2 rounded-xl font-semibold">My Bookings</button>
-                <button id="tab-review" class="tab-btn bg-white text-Dark-Navy border border-Dark-Navy px-4 py-2 rounded-xl font-semibold">My Reviews</button>
+            <div class="flex justify-center gap-4 mb-6">
+                <button id="tab-booking" class="tab-btn px-5 py-3 bg-Flash-White text-black font-semibold border-2  rounded-lg shadow">My Bookings</button>
+                <button id="tab-review" class="tab-btn px-5 py-3 text-Flash-White font-semibold border-2 border-Flash-White rounded-lg hover:bg-Flash-White hover:text-black transition-all">My Reviews</button>
             </div>
 
             <!-- Filter -->
-            <div id="filter-section" class="flex flex-wrap justify-between items-center gap-4">
+            <div id="filter-section" class="flex flex-wrap justify-between items-center gap-4 mb-6">
                 <div class="flex items-center gap-2">
-                    <label for="filter-sort" class="text-gray-600 font-semibold">Sort By:</label>
-                    <select id="filter-sort" class="border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-Light-Navy">
-                        <option value="asc">Ascending</option>
-                        <option value="desc" selected>Descending</option>
+                    <label for="filter-sort" class="text-gray-600 font-medium">Sort By:</label>
+                    <select id="filter-sort" class="border px-3 py-2 bg-Flash-White rounded-lg focus:outline-none focus:ring-2 focus:ring-Light-Navy transition-all">
+                        <option value="asc">Date Ascending</option>
+                        <option value="desc" selected>Date Descending</option>
                     </select>
                 </div>
-                <button id="refresh-btn" class="flex-shrink-0 group inline-flex items-center justify-center p-3.5 h-[50px] w-[50px] bg-white text-gray-800 border rounded-full border-gray-300 transition-all duration-300 hover:bg-gray-100 hover:shadow-md">
-                <svg class="w-5 h-5 text-Dark-Slate transition-transform duration-700 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8M21 3v5h-5"></path></svg></button>
+                <button id="refresh-btn" class="p-3.5 bg-Flash-White text-gray-800 rounded-full shadow hover:bg-gray-100 hover:shadow-lg transition-all duration-300">
+                    <svg class="w-5 h-5 text-Dark-Slate transition-transform duration-700 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8M21 3v5h-5"></path>
+                    </svg>
+                </button>
             </div>
 
             <!-- Card Grid -->
-            <div id="card-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6"></div>
+            <div id="card-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
 
         {% else %}
         <!-- GUEST VIEW -->
-        <p class="text-center text-gray-500 mt-10">Please login to see your profile.</p>
+        <p class="text-center text-gray-400 text-lg mt-10">Please login to see your profile.</p>
         {% endif %}
     </div>
 </div>
@@ -153,13 +184,13 @@ async function loadData() {
             }
             
             venues = await res.json();
-            console.log(" Venues loaded:", venues.length, venues);
+            console.log("✅ Venues loaded:", venues.length, venues);
             
             loading.classList.add("hidden");
             renderOwnerVenues(venues);
             
         } catch (error) {
-            console.error(" Error loading venues:", error);
+            console.error("❌ Error loading venues:", error);
             loading.classList.add("hidden");
             empty.classList.remove("hidden");
         }
@@ -172,17 +203,17 @@ async function loadData() {
             fetch("/account/api/bookings/"),
             fetch("/account/api/reviews/"),
         ]);
-        
-        bookings = Array.isArray(await bookRes.json()) ? await bookRes.json() : [];
-        reviews = Array.isArray(await revRes.json()) ? await revRes.json() : [];
+        const bookingsData = await bookRes.json();
+        const reviewsData = await revRes.json();
+        bookings = Array.isArray(bookingsData) ? bookingsData : [];
+        reviews = Array.isArray(reviewsData) ? reviewsData : [];
 
-        
-        console.log("Bookings loaded:", bookings.length);
+        console.log(" Bookings loaded:", bookings.length);
         console.log(" Reviews loaded:", reviews.length);
         
         renderCards();
     } catch (error) {
-        console.error("Error loading data:", error);
+        console.error(" Error loading data:", error);
     }
 }
 
@@ -193,7 +224,7 @@ function renderOwnerVenues(venuesData) {
     venueGrid.innerHTML = "";
 
     if (!venuesData || venuesData.length === 0) {
-        console.log("No venues to display");
+        console.log(" No venues to display");
         empty.classList.remove("hidden");
         return;
     }
@@ -202,14 +233,15 @@ function renderOwnerVenues(venuesData) {
     
     console.log(" Rendering", venuesData.length, "venues");
 
-    const venueHTML = venuesData.map((v) => {
+    const venueHTML = venuesData.map((v, index) => {
+        console.log(`Venue ${index + 1}:`, v.name);
         const priceFormatted = v.price ? `Rp ${Number(v.price).toLocaleString("id-ID")}` : '-';
         const descriptionShort = (v.description && v.description.length > 100) 
             ? v.description.substring(0, 100) + '...' 
             : (v.description || 'No description available.');
         
         return `
-        <article class="group bg-white border border-Dark-Slate hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col card-animate">
+        <article class="group bg-Flash-White border border-Dark-Slate hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col card-animate" style="opacity: 1;">
             <a href="#" class="block aspect-[16/9] relative overflow-hidden">
                 <img src="${v.image_url || '{% static "image/placeholder.png" %}'}" alt="${v.name}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                 <div class="absolute top-3 left-3 flex gap-2">
@@ -237,7 +269,7 @@ function renderOwnerVenues(venuesData) {
                 </div>
                 <div class="flex justify-between items-end mt-auto">
                     <span class="text-gray-900 text-2xl font-bold">${priceFormatted}</span>
-                    <a href="#" class="px-5 py-2 bg-black text-white text-base font-normal hover:bg-Dark-Slate transition-colors">View More</a>
+                    <a href="#" class="px-5 py-2 bg-black text-Flash-White text-base font-normal hover:bg-Dark-Slate transition-colors">View More</a>
                 </div>
             </div>
         </article>
@@ -246,11 +278,12 @@ function renderOwnerVenues(venuesData) {
 
     venueGrid.innerHTML = venueHTML;
 
+    // Animate venue cards
     requestAnimationFrame(() => {
         gsap.from(".card-animate", {
             opacity: 0, 
             y: 30, 
-            duration: 0.1, 
+            duration: 0.5, 
             stagger: 0.08, 
             ease: "power2.out",
             clearProps: "all"
@@ -258,13 +291,14 @@ function renderOwnerVenues(venuesData) {
     });
 }
 
-
 function renderCards() {
     const cardGrid = document.getElementById("card-grid");
     const filterSort = document.getElementById("filter-sort");
     
     cardGrid.innerHTML = "";
     let dataToDisplay = currentTab === "booking" ? [...bookings] : [...reviews];
+
+    console.log(` Rendering ${currentTab}:`, dataToDisplay.length, "items");
 
     if (currentTab === "booking") {
         dataToDisplay.sort((a, b) => {
@@ -282,27 +316,37 @@ function renderCards() {
         return;
     }
 
-    const cardsHTML = dataToDisplay.map(item => {
+    const cardsHTML = dataToDisplay.map((item, index) => {
+        console.log(`${currentTab} ${index + 1}:`, item);
         if (currentTab === "booking") {
             return `
-            <div class="card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
-                <h3 class="text-xl font-semibold text-Dark-Navy">${item.venue_name}</h3>
-                <p class="text-gray-500 mt-1">Date: ${item.date}</p>
-                <p class="text-gray-600 mt-1 font-medium">Status: ${item.status}</p>
+            <div class="user-card bg-Flash-White p-6 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1" style="opacity: 1;">
+                <h3 class="text-xl font-semibold text-Dark-Navy">${item.venue_name || 'No venue name'}</h3>
+                <p class="text-gray-500 mt-1">Date: ${item.date || 'N/A'}</p>
+                <p class="text-gray-600 mt-1 font-medium">Status: ${item.status || 'Unknown'}</p>
             </div>`;
         } else {
             return `
-            <div class="card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
-                <h3 class="text-xl font-semibold text-Dark-Navy">${item.venue_name}</h3>
-                <p class="text-yellow-500 mt-2">${"⭐".repeat(item.rating)}</p>
-                <p class="text-gray-600 mt-1 italic">"${item.comment}"</p>
+            <div class="user-card bg-Flash-White p-6 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1" style="opacity: 1;">
+                <h3 class="text-xl font-semibold text-Dark-Navy">${item.venue_name || 'No venue name'}</h3>
+                <p class="text-yellow-500 mt-2">${"⭐".repeat(item.rating || 0)}</p>
+                <p class="text-gray-600 mt-1 italic">"${item.comment || 'No comment'}"</p>
             </div>`;
         }
     }).join("");
 
     cardGrid.innerHTML = cardsHTML;
-    gsap.from(".card", {
-        opacity: 0, y: 30, duration: 0.4, stagger: 0.1, ease: "power2.out"
+    
+    // Animate user cards (different selector from venue cards)
+    requestAnimationFrame(() => {
+        gsap.from(".user-card", {
+            opacity: 0, 
+            y: 30, 
+            duration: 0.5, 
+            stagger: 0.08, 
+            ease: "power2.out",
+            clearProps: "all"
+        });
     });
 }
 
@@ -318,7 +362,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const refreshBtn = document.getElementById("refresh-owner");
         if (refreshBtn) {
             refreshBtn.addEventListener("click", () => {
-                console.log(" Refreshing venues...");
+                console.log("Refreshing venues...");
                 loadData();
             });
         }
@@ -331,10 +375,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tabBooking.addEventListener("click", () => {
             currentTab = "booking";
-            tabBooking.classList.add("bg-Dark-Navy", "text-white");
-            tabBooking.classList.remove("bg-white", "text-Dark-Navy", "border");
-            tabReview.classList.remove("bg-Dark-Navy", "text-white");
-            tabReview.classList.add("bg-white", "text-Dark-Navy", "border");
+            // Aktifkan tab booking
+            tabBooking.classList.add("bg-Flash-White", "text-black");
+            tabBooking.classList.remove("bg-transparent", "text-Flash-White", "outline", "outline-1", "outline-Flash-White");
+
+            // Non-aktifkan tab review
+            tabReview.classList.remove("bg-Flash-White", "text-black");
+            tabReview.classList.add("bg-transparent", "text-Flash-White", "outline", "outline-1", "outline-Flash-White");
+            
             filterSort.innerHTML = `
                 <option value="asc">Date Ascending</option>
                 <option value="desc" selected>Date Descending</option>
@@ -344,10 +392,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tabReview.addEventListener("click", () => {
             currentTab = "review";
-            tabReview.classList.add("bg-Dark-Navy", "text-white");
-            tabReview.classList.remove("bg-white", "text-Dark-Navy", "border");
-            tabBooking.classList.remove("bg-Dark-Navy", "text-white");
-            tabBooking.classList.add("bg-white", "text-Dark-Navy", "border");
+            
+            // Aktifkan tab review
+            tabReview.classList.add("bg-Flash-White", "text-black");
+            tabReview.classList.remove("bg-transparent", "text-Flash-White", "outline", "outline-1", "outline-Flash-White");
+
+            // Non-aktifkan tab booking
+            tabBooking.classList.remove("bg-Flash-White", "text-black");
+            tabBooking.classList.add("bg-transparent", "text-Flash-White", "outline", "outline-1", "outline-Flash-White");
+            
             filterSort.innerHTML = `
                 <option value="asc">Lowest Rating</option>
                 <option value="desc" selected>Highest Rating</option>
@@ -363,57 +416,107 @@ document.addEventListener("DOMContentLoaded", () => {
         filterSort.addEventListener("change", renderCards);
     }
 });
+
+// === MODAL EDIT PROFILE ===
 document.addEventListener("DOMContentLoaded", () => {
     const editBtn = document.querySelector('a[href="#"]'); // Tombol Edit Profile
     const modal = document.getElementById("editProfileModal");
     const cancelBtn = document.getElementById("cancelEdit");
     const form = document.getElementById("editProfileForm");
 
-    // Buka modal
-    editBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-    });
+    if (editBtn && modal) {
+        // Buka modal
+        editBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        });
 
-    // Tutup modal
-    cancelBtn.addEventListener("click", () => {
-        modal.classList.add("hidden");
-    });
+        // Tutup modal
+        cancelBtn.addEventListener("click", () => {
+            modal.classList.add("hidden");
+        });
 
-    // Submit form edit profile
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+        // Submit form edit profile
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-        const payload = {
-            username: document.getElementById("edit-username").value,
-            role: document.getElementById("edit-role").value,
-        };
+            const payload = {
+                username: document.getElementById("edit-username").value,
+                role: document.getElementById("edit-role").value,
+            };
 
-        try {
-            const res = await fetch("/account/api/edit-profile/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCookie("csrftoken"),
-                },
-                body: JSON.stringify(payload),
-            });
+            try {
+                const res = await fetch("/account/api/edit-profile/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    },
+                    body: JSON.stringify(payload),
+                });
 
-            const data = await res.json();
+                const data = await res.json();
 
-            if (data.success) {
-                alert("Profile updated successfully!");
-                modal.classList.add("hidden");
-                location.reload(); // reload biar langsung update nama & role di UI
-            } else {
-                alert("Error: " + (data.error || "Failed to update"));
+                if (data.success) {
+                    alert("Profile updated successfully!");
+                    modal.classList.add("hidden");
+                    location.reload(); // reload biar langsung update nama & role di UI
+                } else {
+                    alert("Error: " + (data.error || "Failed to update"));
+                }
+            } catch (err) {
+                console.error("Edit profile error:", err);
+                alert("Unexpected error occurred.");
             }
-        } catch (err) {
-            console.error("Edit profile error:", err);
-            alert("Unexpected error occurred.");
-        }
-    });
+        });
+    }
+});
+
+// === MODAL DELETE ACCOUNT ===
+document.addEventListener("DOMContentLoaded", () => {
+    const deleteBtn = document.getElementById("delete-account-btn");
+    const modal = document.getElementById("deleteAccountModal");
+    const cancelBtn = document.getElementById("cancelDelete");
+    const confirmBtn = document.getElementById("confirmDelete");
+
+    if (deleteBtn && modal) {
+        // Buka modal konfirmasi
+        deleteBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        });
+
+        // Tutup modal
+        cancelBtn.addEventListener("click", () => {
+            modal.classList.add("hidden");
+        });
+
+        // Konfirmasi hapus akun
+        confirmBtn.addEventListener("click", async () => {
+            try {
+                const res = await fetch("/account/api/delete-account/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    },
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert("Akun berhasil dihapus!");
+                    window.location.href = "/"; // redirect ke home setelah hapus
+                } else {
+                    alert("Error: " + (data.error || "Gagal menghapus akun"));
+                }
+            } catch (err) {
+                console.error("Delete account error:", err);
+                alert("Terjadi error saat menghapus akun");
+            }
+        });
+    }
 });
 
 // Helper ambil CSRF token
@@ -431,5 +534,6 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
 </script>
 {% endblock extra_js %}
