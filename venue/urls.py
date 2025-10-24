@@ -14,5 +14,4 @@ urlpatterns = [
     path('api/venues/add/', add_venue_ajax, name='api_add_venue'),
     path('api/venues/edit/<int:id>/', edit_venue_ajax, name='api_edit_venue'),
     path('api/venues/delete/<int:id>/', delete_venue_ajax, name='api_delete_venue'),
-    path('details/<int:id>/', show_details, name='venue_detail'),
 ]
