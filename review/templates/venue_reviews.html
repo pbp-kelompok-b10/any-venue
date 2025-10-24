@@ -7,21 +7,23 @@
         <h2 class="text-xl font-bold text-gray-900">Customer Reviews</h2>
         
         <!-- Filter Buttons -->
-        <div class="flex gap-3">
-            <button 
-                id="filterAllBtn"
-                onclick="filterReviews('all')"
-                class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm filter-btn active">
-                All Reviews
-            </button>
-            <button 
-                id="filterMyBtn"
-                onclick="filterReviews('my')"
-                class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm filter-btn"
-                {% if not user.is_authenticated %}disabled{% endif %}>
-                My Reviews
-            </button>
-        </div>
+        {% if not user.profile.is_owner %} 
+            <div class="flex gap-3">
+                <button 
+                    id="filterAllBtn"
+                    onclick="filterReviews('all')"
+                    class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm filter-btn active">
+                    All Reviews
+                </button>
+                <button 
+                    id="filterMyBtn"
+                    onclick="filterReviews('my')"
+                    class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm filter-btn"
+                    {% if not user.is_authenticated %}disabled{% endif %}>
+                    My Reviews
+                </button>
+            </div>
+        {% endif %}
     </div>
 
     <div id="loadingReviews" class="py-16 text-center hidden">
@@ -93,7 +95,6 @@
         scroll-snap-type: x mandatory;
     }
     
-    /* Filter button styles */
     .filter-btn.active {
         background-color: #1f2937;
         color: white;
@@ -147,7 +148,7 @@
 
     // HTML for the star rating display.
     function generateStars(rating) {
-        let starsHTML = '<div class="flex items-center gap-0.5 mb-3">';
+        let starsHTML = '<div class="flex items-center gap-0.5">';
         const starChar = `★`; 
 
         const numericRating = Number(rating);
@@ -165,6 +166,12 @@
 // HTML for a single review card
     function buildReviewCard(review) {
         const isOwnReview = IS_AUTHENTICATED && review.user === CURRENT_USERNAME;
+
+        const isEdited = review.created_at !== review.last_modified;
+
+        const editedTag = isEdited
+        ? `<span class="text-xs text-gray-500 ml-2">(edited)</span>`
+        : '';
 
         const actionButtons = isOwnReview ? `
             <div class="absolute top-6 right-6 flex items-center gap-2">
@@ -190,7 +197,12 @@
         return `
             <div class="flex-shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] scroll-snap-align-start">
                 <article class="bg-gray-50 border border-gray-200 p-6 h-full flex flex-col hover:border-gray-300 transition-colors relative">
-                    ${generateStars(review.rating)}
+                    ${actionButtons}
+                    <div class="flex items-center gap-0.5">
+                        ${generateStars(review.rating)}
+                        ${editedTag}
+                    </div>
+
                     <blockquote class="flex-grow mb-4">
                         
                         <p class="text-gray-700 text-sm leading-relaxed break-words whitespace-pre-line">
@@ -201,7 +213,6 @@
                         <p class="font-semibold text-gray-900 text-sm">${review.user}</p>
                         <p class="text-xs text-gray-500 mt-1">Last modified: ${review.last_modified}</p>
                     </div>
-                    ${actionButtons}
                 </article>
             </div>
         `;
