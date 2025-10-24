@@ -1,185 +1,333 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block meta %}
-<title>Venue Reviews</title>
-{% endblock meta %}
-
 {% block content %}
-{% include 'navbar.html' %} <div class="bg-gray-100 w-full pt-16 min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="bg-white border border-gray-200 p-6 sm:p-8 shadow-md">
 
-        <div class="mb-8 flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">What Our Users Say</h1>
-                <p class="text-gray-600">Real feedback from our venue users.</p>
-            </div>
-            <button id="refreshReviews" type="button" 
-                class="flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
-                title="Refresh Reviews">
-                <svg id="refreshIcon" class="w-5 h-5 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-            </button>
-        </div>
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+        <h2 class="text-xl font-bold text-gray-900">Customer Reviews</h2>
+    </div>
 
-        <div id="loadingReviews" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
-            <svg class="animate-spin h-8 w-8 text-cyan-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
-                viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    <div id="loadingReviews" class="py-16 text-center hidden">
+        <svg class="animate-spin h-8 w-8 text-Light-Navy inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <p class="text-gray-600 mt-3 text-sm">Loading reviews...</p>
+    </div>
+
+    <div id="errorReviews" class="hidden text-center py-16">
+        <svg class="w-16 h-16 mx-auto mb-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p class="text-red-600 font-medium">Error loading reviews. Please try again.</p>
+    </div>
+
+    <div id="emptyReviews" class="py-16 text-center hidden">
+        <div class="w-20 h-20 mx-auto mb-4 opacity-40">
+            <svg class="w-full h-full text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
+                </path>
             </svg>
-            <p class="text-gray-600 mt-3">Loading reviews...</p>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No reviews yet</h3>
+        <p class="text-gray-500 text-sm">
+            {% if venue %}
+            Be the first to share your experience at this venue!
+            {% else %}
+            Be the first to leave a review for one of our venues!
+            {% endif %}
+        </p>
+    </div>
+
+    <div id="reviewCarouselWrapper" class="relative hidden">
+        <button id="scrollReviewLeft" type="button" aria-label="Scroll left"
+            class="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-300 shadow-md hover:bg-gray-50 hover:border-gray-400 text-gray-600 hover:text-gray-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </button>
+
+        <div id="reviewScrollViewport"
+            class="overflow-x-auto scroll-snap-type-x-mandatory scroll-smooth scrollbar-hide px-10 py-2">
+            <div id="reviewCardTrack" class="flex flex-nowrap gap-4"></div>
         </div>
 
-        <div id="errorReviews" class="hidden text-center text-red-500 font-medium bg-red-100 border border-red-300 rounded-lg p-6">
-            Error loading reviews. Please try again.
-        </div>
-
-        <div id="reviewGrid" class="hidden">
-            </div>
-
-        <div id="emptyReviews" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
-            <div class="w-32 h-32 mx-auto mb-4 opacity-50">
-                 <svg class="w-full h-full text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No reviews found</h3>
-            <p class="text-gray-500">Be the first to leave a review for one of our venues!</p>
-        </div>
+        <button id="scrollReviewRight" type="button" aria-label="Scroll right"
+            class="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-300 shadow-md hover:bg-gray-50 hover:border-gray-400 text-gray-600 hover:text-gray-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </button>
     </div>
 </div>
 
-<script>
-    // --- PENYESUAIAN KONTEKS ---
-    // Pastikan 'review:get_reviews_json' adalah nama URL yang benar di urls.py Anda
-    const REVIEWS_API_ENDPOINT = "{% url 'review:get_reviews_json' %}";
-    // -------------------------
+<style>
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .scroll-snap-type-x-mandatory {
+        scroll-snap-type: x mandatory;
+    }
+</style>
+{% endblock content %}
 
-    // DOM elements
+{% block extra_js %}
+<script>
+    // global cache & constants
+    let venueReviewsCache = [];
+    const REVIEWS_API_ENDPOINT = "{% url 'review:get_reviews_json' %}";
+    const CURRENT_VENUE_NAME = "{{ venue.name|escapejs|default:'' }}";
+    const CURRENT_USERNAME = "{{ user.username|escapejs|default:'' }}";
+    const IS_AUTHENTICATED = {% if user.is_authenticated %}true{% else %}false{% endif %};
+
     const loadingReviews = document.getElementById('loadingReviews');
     const errorReviews = document.getElementById('errorReviews');
     const emptyReviews = document.getElementById('emptyReviews');
-    const reviewGridContainer = document.getElementById('reviewGrid');
-    const refreshButton = document.getElementById('refreshReviews');
-    const refreshIcon = document.getElementById('refreshIcon');
+    const reviewCarouselWrapper = document.getElementById('reviewCarouselWrapper');
+    const reviewViewport = document.getElementById('reviewScrollViewport');
+    const reviewTrack = document.getElementById('reviewCardTrack');
+    const scrollLeftBtn = document.getElementById('scrollReviewLeft');
+    const scrollRightBtn = document.getElementById('scrollReviewRight');
 
-    let allReviews = [];
 
-    // Show/hide page sections
-    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
-        loadingReviews.classList.toggle('hidden', !showLoading);
-        errorReviews.classList.toggle('hidden', !showError);
-        emptyReviews.classList.toggle('hidden', !showEmpty);
-        reviewGridContainer.classList.toggle('hidden', !showGrid);
-
-        if (showGrid) {
-            // Mengatur grid agar 3 kolom di layar medium, sesuai gambar
-            reviewGridContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8';
-        }
+    // decide which state to display
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showCarousel = false }) {
+        if (loadingReviews) loadingReviews.classList.toggle('hidden', !showLoading);
+        if (errorReviews) errorReviews.classList.toggle('hidden', !showError);
+        if (emptyReviews) emptyReviews.classList.toggle('hidden', !showEmpty);
+        if (reviewCarouselWrapper) reviewCarouselWrapper.classList.toggle('hidden', !showCarousel);
     }
 
-    // Helper function to generate star icons
+    // HTML for the star rating display.
     function generateStars(rating) {
-        let starsHTML = '<div class="flex items-center mb-4">';
-        // SVG untuk bintang, mudah diwarnai dengan text-color
-        const starSVG = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.959a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.446a1 1 0 00-.364 1.118l1.286 3.959c.3.921-.755 1.688-1.538 1.118l-3.368-2.446a1 1 0 00-1.175 0l-3.368 2.446c-.783.57-1.838-.197-1.538-1.118l1.286-3.959a1 1 0 00-.364-1.118L2.063 9.386c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"></path></svg>`;
-        
+        let starsHTML = '<div class="flex items-center gap-0.5 mb-3">';
+        const starSVG = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.959a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.446a1 1 0 00-.364 1.118l1.286 3.959c.3.921-.755 1.688-1.538 1.118l-3.368-2.446a1 1 0 00-1.175 0l-3.368 2.446c-.783.57-1.838-.197-1.538-1.118l1.286-3.959a1 1 0 00-.364-1.118L2.063 9.386c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"></path></svg>`;
+
         const numericRating = Number(rating);
         for (let i = 1; i <= 5; i++) {
             if (i <= numericRating) {
-                // Bintang terisi (kuning)
-                starsHTML += `<span class="text-yellow-400">${starSVG}</span>`;
+                starsHTML += `<span class="text-yellow-500">${starSVG}</span>`;
             } else {
-                // Bintang kosong (abu-abu)
-                starsHTML += `<span class="text-gray-600">${starSVG}</span>`;
+                starsHTML += `<span class="text-gray-300">${starSVG}</span>`;
             }
         }
         starsHTML += '</div>';
         return starsHTML;
     }
 
-    // Build review card HTML
-    // Disesuaikan agar cocok dengan gambar dan data JSON dari views.py Anda
+    // HTML for a single review card
     function buildReviewCard(review) {
-        // Data dari get_reviews_json: id, rating, comment, user, venue_name
-        
-        const cardHTML = `
-            <article class="bg-slate-800 rounded-lg shadow-xl p-6 text-gray-300 flex flex-col h-full">
-                ${generateStars(review.rating)}
+        const isOwnReview = IS_AUTHENTICATED && review.user === CURRENT_USERNAME;
 
-                <blockquote class="flex-grow">
-                    <p class="italic text-gray-300 text-base leading-relaxed mb-4">
-                        "${review.comment}"
-                    </p>
-                </blockquote>
+        const actionButtons = isOwnReview ? `
+            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
+                <button
+                    onclick="handleEditReview('${review.id}')"
+                    class="flex-1 px-3 py-1.5 text-xs font-medium text-Light-Navy border border-Light-Navy hover:bg-Light-Navy hover:text-white transition-colors"
+                    aria-label="Edit review">
+                    <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Edit
+                </button>
+                <button
+                    onclick="handleDeleteReview('${review.id}')"
+                    class="flex-1 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-600 hover:bg-red-600 hover:text-white transition-colors"
+                    aria-label="Delete review">
+                    <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Delete
+                </button>
+            </div>
+        ` : '';
 
-                <div class="mt-auto border-t border-slate-700 pt-4">
-                    <p class="font-semibold text-white">${review.user}</p>
-                    <p class="text-sm text-gray-400">Review for ${review.venue_name}</p>
-                </div>
-            </article>
-            `;
-        return cardHTML;
+        return `
+            <div class="flex-shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] scroll-snap-align-start">
+                <article class="bg-gray-50 border border-gray-200 p-6 h-full flex flex-col hover:border-gray-300 transition-colors">
+                    ${generateStars(review.rating)}
+                    <blockquote class="flex-grow mb-4">
+                        
+                        <p class="text-gray-700 text-sm leading-relaxed break-words whitespace-pre-line">
+                            "${review.comment}"
+                        </p>
+                        </blockquote>
+                    <div class="mt-auto pt-4 border-t border-gray-200">
+                        <p class="font-semibold text-gray-900 text-sm">${review.user}</p>
+                        <p class="text-xs text-gray-500 mt-1">Last modified: ${review.last_modified}</p>
+                    </div>
+                    ${actionButtons}
+                </article>
+            </div>
+        `;
     }
 
-    // Render review cards
     function renderReviews(reviews) {
-        reviewGridContainer.innerHTML = reviews.map(buildReviewCard).join('');
+        if (!reviewTrack) return;
+        reviewTrack.innerHTML = reviews.map(buildReviewCard).join('');
+        updateArrowVisibility();
     }
 
-    // Fetch reviews
     async function fetchReviews() {
         try {
             displayPageSection({ showLoading: true });
             const response = await fetch(REVIEWS_API_ENDPOINT);
             if (!response.ok) throw new Error("Failed to fetch review data");
-            
+
             const data = await response.json();
-            allReviews = data;
-            
-            if (allReviews.length === 0) {
+            let reviewsToDisplay = data;
+
+            // Filter reviews if on a specific venue page
+            if (CURRENT_VENUE_NAME) {
+                reviewsToDisplay = data.filter(review => review.venue_name === CURRENT_VENUE_NAME);
+            }
+
+            // populate the global cache
+            venueReviewsCache = reviewsToDisplay;
+
+            if (reviewsToDisplay.length === 0) {
                 displayPageSection({ showEmpty: true });
             } else {
-                renderReviews(allReviews);
-                displayPageSection({ showGrid: true });
+                renderReviews(reviewsToDisplay);
+                displayPageSection({ showCarousel: true });
             }
         } catch (error) {
             console.error(error);
             displayPageSection({ showError: true });
-            errorReviews.textContent = "Error loading reviews. Please check the console and try refreshing.";
         }
     }
 
-    // Refresh button handler (diambil dari contoh Anda)
-    function handleRefreshReviewsClick() {
-        if (!refreshButton) return;
-
-        // Tambahkan animasi spin
-        refreshIcon.classList.add('animate-spin');
-        refreshButton.disabled = true;
-        refreshButton.classList.add('opacity-50', 'cursor-not-allowed');
-
-        // (Optional) Jika Anda punya fungsi toast:
-        // if (typeof showToast !== 'undefined') {
-        //     showToast('Refreshing', 'Fetching the latest reviews...', 'normal', 1500);
-        // }
-
-        fetchReviews().finally(() => {
-            // Hapus animasi spin
-            refreshIcon.classList.remove('animate-spin');
-            refreshButton.disabled = false;
-            refreshButton.classList.remove('opacity-50', 'cursor-not-allowed');
-        });
+    function handleScrollLeft() {
+        if (!reviewViewport) return;
+        const scrollAmount = reviewViewport.clientWidth * 0.85;
+        reviewViewport.scrollLeft -= scrollAmount;
     }
 
-    // --- Initial Load & Event Listeners ---
-    
-    // Muat data saat halaman dibuka
-    fetchReviews();
-
-    // Tambahkan listener ke tombol refresh
-    if (refreshButton) { 
-        refreshButton.addEventListener('click', handleRefreshReviewsClick);
+    function handleScrollRight() {
+        if (!reviewViewport) return;
+        const scrollAmount = reviewViewport.clientWidth * 0.85;
+        reviewViewport.scrollLeft += scrollAmount;
     }
+    function updateArrowVisibility() {
+        if (!reviewViewport || !scrollLeftBtn || !scrollRightBtn || !reviewTrack) return;
+
+        scrollLeftBtn.classList.remove('hidden');
+        scrollRightBtn.classList.remove('hidden');
+
+        const hasOverflow = reviewViewport.scrollWidth > reviewViewport.clientWidth;
+
+        if (!hasOverflow) {
+            // If no overflow, disable both arrows
+            scrollLeftBtn.disabled = true;
+            scrollRightBtn.disabled = true;
+            return;
+        }
+
+        // If there is overflow, check scroll position
+        const atStart = reviewViewport.scrollLeft < 10;
+        const atEnd = (reviewViewport.scrollWidth - reviewViewport.scrollLeft - reviewViewport.clientWidth) < 10;
+
+        scrollLeftBtn.disabled = atStart;
+        scrollRightBtn.disabled = atEnd;
+    }
+
+    function handleEditReview(reviewId) {
+        // Find the review from our cache
+        const review = venueReviewsCache.find(r => r.id.toString() === reviewId.toString());
+
+        if (review) {
+            // Check if the modal function exists before calling it
+            if (typeof showEditReviewModal === 'function') {
+                showEditReviewModal(review.id, review.rating, review.comment);
+            } else {
+                console.error('showEditReviewModal() is not defined. Make sure edit_review.html is included.');
+                alert('Error: Edit modal function not found.');
+            }
+        } else {
+            console.error(`Could not find review with ID ${reviewId} in cache.`);
+            alert('An error occurred. Could not find review data to edit.');
+        }
+    }
+
+
+    // Template URL with a placeholder id (0) -> e.g. "/review/delete/0/"
+    const DELETE_REVIEW_API_URL_TEMPLATE = "{% url 'review:delete_review' 0 %}";
+    // Remove the trailing "0/" so modal's `${DELETE_REVIEW_API_URL_BASE}${id}/` works
+    const DELETE_REVIEW_API_URL_BASE = DELETE_REVIEW_API_URL_TEMPLATE.endsWith('/0/') ?
+        DELETE_REVIEW_API_URL_TEMPLATE.replace(/0\/$/, '') :
+        DELETE_REVIEW_API_URL_TEMPLATE;
+
+    let CSRF_TOKEN = "{{ csrf_token }}";
+    function getCookie(name) {
+        const matches = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[]\\\/+^])/g, '\\$1') + '=([^;]*)'));
+        return matches ? decodeURIComponent(matches[1]) : undefined;
+    }
+    if (!CSRF_TOKEN || CSRF_TOKEN === 'NOTPROVIDED') {
+        CSRF_TOKEN = getCookie('csrftoken');
+    }
+
+    window.DELETE_REVIEW_API_URL_BASE = DELETE_REVIEW_API_URL_BASE;
+    window.CSRF_TOKEN = CSRF_TOKEN;
+
+    async function handleDeleteReview(reviewId) {
+        // Try to find review details in cache
+        const review = venueReviewsCache.find(r => r.id.toString() === reviewId.toString());
+
+        if (typeof showDeleteReviewModal === 'function') {
+            // If we have the modal, show it with preview text (or empty)
+            const comment = review ? (review.comment || '') : '';
+            showDeleteReviewModal(reviewId, comment);
+            return;
+        }
+
+        if (!confirm('Are you sure you want to delete this review? This action cannot be undone.')) return;
+
+        try {
+            displayPageSection({ showLoading: true });
+            const response = await fetch(`${DELETE_REVIEW_API_URL_BASE}${reviewId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN,
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message || 'Review deleted successfully.');
+                fetchReviews();
+            } else {
+                alert(data.message || 'Failed to delete review. You may not have permission.');
+                displayPageSection({ showError: true });
+            }
+        } catch (error) {
+            console.error('Error deleting review:', error);
+            alert('An error occurred while trying to delete the review. Please try again.');
+            displayPageSection({ showError: true });
+        } finally {
+            // Hide loading UI if necessary
+            displayPageSection({ showLoading: false });
+        }
+    }    
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchReviews();
+
+        // Attach listeners for carousel controls
+        if (scrollLeftBtn && scrollRightBtn && reviewViewport) {
+            scrollLeftBtn.addEventListener('click', handleScrollLeft);
+            scrollRightBtn.addEventListener('click', handleScrollRight);
+            reviewViewport.addEventListener('scroll', updateArrowVisibility, { passive: true });
+        }
+    });
 </script>
-{% endblock content %}
+{% endblock extra_js %}
