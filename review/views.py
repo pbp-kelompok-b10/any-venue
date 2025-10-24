@@ -112,7 +112,7 @@ def delete_review(request, review_id):
 
 @require_http_methods(["GET"])
 def get_reviews_json(request):
-    reviews = Review.objects.select_related('user__user', 'venue').all().order_by('-last_modified')
+    reviews = Review.objects.select_related('user__user', 'venue').all().order_by('-last_modified', '-pk')
     
     data = []
     for review in reviews:
