@@ -103,11 +103,13 @@ def add_venue_ajax(request):
 
     form = VenueForm(data)
     if form.is_valid():
-        # Form valid, simpan data
-        venue = form.save(commit=False)
-        venue.owner = request.user.profile
-        venue.save()
-        return JsonResponse({'status': 'success', 'id': venue.id}, status=201)
+        try:
+            venue = form.save(commit=False) 
+            venue.owner = request.user.profile 
+            venue.save()
+            return JsonResponse({'status': 'success', 'message': 'Venue berhasil ditambahkan'}, status=201)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     else:
         # Form tidak valid, kirim error validasi
         return JsonResponse(form.errors, status=400)

@@ -17,7 +17,7 @@
             <span class="font-semibold leading-tight">{{ venue.name }}</span>
         </nav>
 
-        <h1 class="text-gray-600 text-4xl sm:text-5xl font-bold leading-tight opacity-0 animate-[fadeIn_0.6s_ease-out_0.1s_forwards]">
+        <h1 class="text-white text-4xl sm:text-5xl font-bold leading-tight opacity-0 animate-[fadeIn_0.6s_ease-out_0.1s_forwards] drop-shadow-md mb-4">
             {{ venue.name }}
         </h1>
     </div>
@@ -74,7 +74,10 @@
                             <h2 class="text-lg font-bold text-gray-900">Venue Information</h2>
                             
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-gray-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                <svg class="w-5 h-5 text-gray-500 mt-0.5 shrink-0 transition-all duration-300 group-hover:text-Light-Navy group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="9" stroke-width="2"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c2.5 0 4.5 4 4.5 9s-2 9-4.5 9m0-18c-2.5 0-4.5 4-4.5 9s2 9 4.5 9m-9-9h18"/>
+                                </svg>
                                 <div>
                                     <span class="block text-xs text-gray-500 uppercase font-medium tracking-wider">Category</span>
                                     <span class="block text-gray-900 font-medium">{{ venue.category.name }}</span>
