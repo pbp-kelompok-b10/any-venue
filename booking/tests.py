@@ -102,10 +102,11 @@ class BookingViewTest(TestCase):
             is_booked=False
         )
     
-    def test_booking_page_requires_login(self):
-        """Test booking page requires authentication"""
+    def test_booking_page_public_access(self):
+        """Booking page should be accessible without login"""
         response = self.client.get(reverse('booking:booking_page', args=[self.venue.id]))
-        self.assertEqual(response.status_code, 302)  # Redirect to login
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.venue.name)
     
     def test_booking_page_authenticated(self):
         """Test booking page loads for authenticated user"""
@@ -114,9 +115,8 @@ class BookingViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.venue.name)
     
-    def test_get_slots(self):
-        """Test getting available slots"""
-        self.client.login(username='testuser', password='testpass123')
+    def test_get_slots_public(self):
+        """Getting available slots should work without login"""
         tomorrow = date.today() + timedelta(days=1)
         response = self.client.get(
             reverse('booking:get_slots', args=[self.venue.id]),
@@ -126,6 +126,24 @@ class BookingViewTest(TestCase):
         data = json.loads(response.content)
         self.assertIsInstance(data, list)
         self.assertTrue(len(data) > 0)
+
+    def test_create_booking_requires_login(self):
+        """Creating booking without login should redirect"""
+        response = self.client.post(
+            reverse('booking:create_booking'),
+            json.dumps({'slots': [self.slot.id]}),
+            content_type='application/json'
+        )
+        self.assertIn(response.status_code, [302, 401])
+
+    def test_cancel_booking_requires_login(self):
+        """Cancel booking without login should redirect"""
+        response = self.client.post(
+            reverse('booking:cancel_booking'),
+            json.dumps({'slot_id': self.slot.id}),
+            content_type='application/json'
+        )
+        self.assertIn(response.status_code, [302, 401])
     
     def test_create_booking(self):
         """Test creating a booking"""

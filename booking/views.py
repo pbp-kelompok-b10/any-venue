@@ -6,12 +6,14 @@ from venue.models import Venue
 from .models import BookingSlot, Booking
 import json
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 def cleanup_old_slots_and_create_new():
     """
     Delete slots older than today and create new slots for 7 days ahead if they don't exist
     """
-    current_date = datetime.now().date()
+    # Use timezone-aware current date
+    current_date = timezone.localdate()
     
     # Delete old slots (older than today)
     old_slots = BookingSlot.objects.filter(date__lt=current_date)
@@ -44,7 +46,27 @@ def cleanup_old_slots_and_create_new():
                         is_booked=False
                     )
 
-@login_required
+def ensure_slots_for_date(venue, target_date, start_hour=8, end_hour=22):
+    """
+    Ensure hourly slots exist for a specific venue and date.
+    Will create slots from start_hour to end_hour (exclusive) if none exist.
+    Only creates for today or future dates to avoid resurrecting past days.
+    """
+    today = timezone.localdate()
+    if target_date < today:
+        return
+    if not BookingSlot.objects.filter(venue=venue, date=target_date).exists():
+        for hour in range(start_hour, end_hour):
+            start_time = f"{hour:02d}:00:00"
+            end_time = f"{hour+1:02d}:00:00"
+            BookingSlot.objects.create(
+                venue=venue,
+                date=target_date,
+                start_time=start_time,
+                end_time=end_time,
+                is_booked=False,
+            )
+
 def booking_page(request, venue_id):
     # Clean up old slots and create new ones
     cleanup_old_slots_and_create_new()
@@ -52,17 +74,36 @@ def booking_page(request, venue_id):
     venue = get_object_or_404(Venue, id=venue_id)
     return render(request, "booking/booking_ajax.html", {"venue": venue})
 
-@login_required
 def get_slots(request, venue_id):
     date_str = request.GET.get("date")
     if not date_str:
         return JsonResponse([], safe=False)
     date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    # Proactively create slots on-demand for future dates within horizon
+    horizon_days = 30
+    today = timezone.localdate()
+    venue = get_object_or_404(Venue, id=venue_id)
+    if today <= date <= today + timedelta(days=horizon_days):
+        ensure_slots_for_date(venue, date)
+    
     slots = BookingSlot.objects.filter(venue_id=venue_id, date=date).order_by("start_time")
-    user_bookings = Booking.objects.filter(user=request.user.profile, slot__venue_id=venue_id, slot__date=date).values_list('slot_id', flat=True)
+    # Fallback: if still empty and within horizon, try once more (avoid racing reloads)
+    if not slots.exists() and today <= date <= today + timedelta(days=horizon_days):
+        ensure_slots_for_date(venue, date)
+        slots = BookingSlot.objects.filter(venue_id=venue_id, date=date).order_by("start_time")
+    # Determine user's existing bookings only if authenticated
+    if request.user.is_authenticated:
+        user_bookings = Booking.objects.filter(
+            user=request.user.profile,
+            slot__venue_id=venue_id,
+            slot__date=date
+        ).values_list('slot_id', flat=True)
+    else:
+        user_bookings = []
     
     # Get current date and time
-    now = datetime.now()
+    # Use timezone-aware current time
+    now = timezone.localtime()
     current_date = now.date()
     current_time = now.time()
     
