@@ -6,6 +6,23 @@
 
     <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
         <h2 class="text-xl font-bold text-gray-900">Customer Reviews</h2>
+        
+        <!-- Filter Buttons -->
+        <div class="flex gap-3">
+            <button 
+                id="filterAllBtn"
+                onclick="filterReviews('all')"
+                class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm filter-btn active">
+                All Reviews
+            </button>
+            <button 
+                id="filterMyBtn"
+                onclick="filterReviews('my')"
+                class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm filter-btn"
+                {% if not user.is_authenticated %}disabled{% endif %}>
+                My Reviews
+            </button>
+        </div>
     </div>
 
     <div id="loadingReviews" class="py-16 text-center hidden">
@@ -76,6 +93,25 @@
     .scroll-snap-type-x-mandatory {
         scroll-snap-type: x mandatory;
     }
+    
+    /* Filter button styles */
+    .filter-btn.active {
+        background-color: #1f2937;
+        color: white;
+        border-color: #111827;
+    }
+    .filter-btn.active:hover {
+        background-color: #374151;
+        border-color: #1f2937;
+    }
+    .filter-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        background-color: #f9fafb;
+    }
+    .filter-btn:disabled:hover {
+        background-color: #f9fafb;
+    }
 </style>
 {% endblock content %}
 
@@ -83,6 +119,9 @@
 <script>
     // global cache & constants
     let venueReviewsCache = [];
+    let allReviewsData = []; // Store all reviews from API
+    let currentFilter = 'all'; // Track current filter state
+    
     const REVIEWS_API_ENDPOINT = "{% url 'review:get_reviews_json' %}";
     const CURRENT_VENUE_NAME = "{{ venue.name|escapejs|default:'' }}";
     const CURRENT_USERNAME = "{{ user.username|escapejs|default:'' }}";
@@ -96,7 +135,8 @@
     const reviewTrack = document.getElementById('reviewCardTrack');
     const scrollLeftBtn = document.getElementById('scrollReviewLeft');
     const scrollRightBtn = document.getElementById('scrollReviewRight');
-
+    const filterAllBtn = document.getElementById('filterAllBtn');
+    const filterMyBtn = document.getElementById('filterMyBtn');
 
     // decide which state to display
     function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showCarousel = false }) {
@@ -176,6 +216,39 @@
         updateArrowVisibility();
     }
 
+    // Filter reviews based on selected filter
+    function filterReviews(filterType) {
+        currentFilter = filterType;
+        
+        // Update button states
+        if (filterAllBtn && filterMyBtn) {
+            filterAllBtn.classList.toggle('active', filterType === 'all');
+            filterMyBtn.classList.toggle('active', filterType === 'my');
+        }
+
+        let filteredReviews = [...allReviewsData];
+
+        // Apply venue filter if on specific venue page
+        if (CURRENT_VENUE_NAME) {
+            filteredReviews = filteredReviews.filter(review => review.venue_name === CURRENT_VENUE_NAME);
+        }
+
+        // Apply user filter
+        if (filterType === 'my' && IS_AUTHENTICATED) {
+            filteredReviews = filteredReviews.filter(review => review.user === CURRENT_USERNAME);
+        }
+
+        // Update cache and display
+        venueReviewsCache = filteredReviews;
+
+        if (filteredReviews.length === 0) {
+            displayPageSection({ showEmpty: true });
+        } else {
+            renderReviews(filteredReviews);
+            displayPageSection({ showCarousel: true });
+        }
+    }
+
     async function fetchReviews() {
         try {
             displayPageSection({ showLoading: true });
@@ -183,22 +256,13 @@
             if (!response.ok) throw new Error("Failed to fetch review data");
 
             const data = await response.json();
-            let reviewsToDisplay = data;
+            
+            // Store all reviews
+            allReviewsData = data;
 
-            // Filter reviews if on a specific venue page
-            if (CURRENT_VENUE_NAME) {
-                reviewsToDisplay = data.filter(review => review.venue_name === CURRENT_VENUE_NAME);
-            }
+            // Apply current filter
+            filterReviews(currentFilter);
 
-            // populate the global cache
-            venueReviewsCache = reviewsToDisplay;
-
-            if (reviewsToDisplay.length === 0) {
-                displayPageSection({ showEmpty: true });
-            } else {
-                renderReviews(reviewsToDisplay);
-                displayPageSection({ showCarousel: true });
-            }
         } catch (error) {
             console.error(error);
             displayPageSection({ showError: true });
@@ -216,6 +280,7 @@
         const scrollAmount = reviewViewport.clientWidth * 0.85;
         reviewViewport.scrollLeft += scrollAmount;
     }
+
     function updateArrowVisibility() {
         if (!reviewViewport || !scrollLeftBtn || !scrollRightBtn || !reviewTrack) return;
 
@@ -225,13 +290,11 @@
         const hasOverflow = reviewViewport.scrollWidth > reviewViewport.clientWidth;
 
         if (!hasOverflow) {
-            // If no overflow, disable both arrows
             scrollLeftBtn.disabled = true;
             scrollRightBtn.disabled = true;
             return;
         }
 
-        // If there is overflow, check scroll position
         const atStart = reviewViewport.scrollLeft < 10;
         const atEnd = (reviewViewport.scrollWidth - reviewViewport.scrollLeft - reviewViewport.clientWidth) < 10;
 
@@ -240,11 +303,9 @@
     }
 
     function handleEditReview(reviewId) {
-        // Find the review from our cache
         const review = venueReviewsCache.find(r => r.id.toString() === reviewId.toString());
 
         if (review) {
-            // Check if the modal function exists before calling it
             if (typeof showEditReviewModal === 'function') {
                 showEditReviewModal(review.id, review.rating, review.comment);
             } else {
@@ -257,10 +318,7 @@
         }
     }
 
-
-    // Template URL with a placeholder id (0) -> e.g. "/review/delete/0/"
     const DELETE_REVIEW_API_URL_TEMPLATE = "{% url 'review:delete_review' 0 %}";
-    // Remove the trailing "0/" so modal's `${DELETE_REVIEW_API_URL_BASE}${id}/` works
     const DELETE_REVIEW_API_URL_BASE = DELETE_REVIEW_API_URL_TEMPLATE.endsWith('/0/') ?
         DELETE_REVIEW_API_URL_TEMPLATE.replace(/0\/$/, '') :
         DELETE_REVIEW_API_URL_TEMPLATE;
@@ -278,11 +336,9 @@
     window.CSRF_TOKEN = CSRF_TOKEN;
 
     async function handleDeleteReview(reviewId) {
-        // Try to find review details in cache
         const review = venueReviewsCache.find(r => r.id.toString() === reviewId.toString());
 
         if (typeof showDeleteReviewModal === 'function') {
-            // If we have the modal, show it with preview text (or empty)
             const comment = review ? (review.comment || '') : '';
             showDeleteReviewModal(reviewId, comment);
             return;
@@ -314,7 +370,6 @@
             alert('An error occurred while trying to delete the review. Please try again.');
             displayPageSection({ showError: true });
         } finally {
-            // Hide loading UI if necessary
             displayPageSection({ showLoading: false });
         }
     }    
@@ -322,12 +377,14 @@
     document.addEventListener('DOMContentLoaded', () => {
         fetchReviews();
 
-        // Attach listeners for carousel controls
         if (scrollLeftBtn && scrollRightBtn && reviewViewport) {
             scrollLeftBtn.addEventListener('click', handleScrollLeft);
             scrollRightBtn.addEventListener('click', handleScrollRight);
             reviewViewport.addEventListener('scroll', updateArrowVisibility, { passive: true });
         }
     });
+
+    // Make filterReviews globally accessible
+    window.filterReviews = filterReviews;
 </script>
 {% endblock extra_js %}
