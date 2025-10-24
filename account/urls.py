@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'account'
+
 urlpatterns = [
     path('', views.profile_page, name='profile_page'),
     path('api/venues/', views.get_venues_json, name='get_venues_json'),
