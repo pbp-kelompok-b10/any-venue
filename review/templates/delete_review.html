@@ -1,0 +1,143 @@
+<div id="deleteReviewModal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+
+    <div id="deleteReviewModalContent"
+        class="bg-white shadow-xl
+        w-[85%] sm:w-[60%] md:w-[45%] lg:w-[40%] max-w-lg
+        max-h-[90vh] overflow-y-auto
+        px-10 py-10 relative font-['Roboto']
+        transform transition-all duration-300 opacity-0 scale-95">
+
+        <!-- Close Button -->
+        <button type="button"
+            class="absolute top-4 right-4 text-black hover:text-gray-600 text-lg"
+            onclick="hideDeleteReviewModal()">
+            ✕
+        </button>
+
+        <!-- Header -->
+        <div class="w-full text-center mb-6">
+            <h2 class="text-3xl font-bold text-black">Delete Review</h2>
+            <p class="text-sm text-gray-600 mt-2">Are you sure you want to permanently delete this review?</p>
+        </div>
+
+        <!-- Body -->
+        <div class="w-full flex flex-col gap-4">
+            
+            <!-- Review Content Preview -->
+            <div class="bg-gray-50 border border-gray-200 p-4 max-h-32 overflow-y-auto">
+                <p class="text-xs text-gray-500 mb-1">Review you are deleting:</p>
+                <blockquote id="deleteReviewComment" class="text-sm text-gray-700 italic whitespace-pre-line break-words">
+                    <!-- Comment will be inserted here by JS -->
+                </blockquote>
+            </div>
+            
+            <p class="text-center text-sm font-medium text-red-600">
+                This action cannot be undone!
+            </p>
+
+            <!-- Hidden input to store the ID -->
+            <input type="hidden" id="deleteReviewId">
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="flex justify-end gap-3 mt-8">
+            <button type="button"
+                class="px-5 py-2 border border-black text-black hover:bg-gray-100"
+                onclick="hideDeleteReviewModal()">
+                Cancel
+            </button>
+
+            <button type="button"
+                id="confirmDeleteButton"
+                class="px-5 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors"
+                onclick="confirmDeleteReview()">
+                Yes, Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const deleteReviewModal = document.getElementById('deleteReviewModal');
+    const deleteReviewModalContent = document.getElementById('deleteReviewModalContent');
+    const deleteReviewId = document.getElementById('deleteReviewId');
+    const deleteReviewComment = document.getElementById('deleteReviewComment');
+    const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+
+    function showDeleteReviewModal(reviewId, comment) {
+        // Set the data
+        deleteReviewId.value = reviewId;
+        // Show a snippet of the comment
+        deleteReviewComment.textContent = `"${comment.substring(0, 150)}${comment.length > 150 ? '...' : ''}"`;
+
+        // Show modal
+        deleteReviewModal.classList.remove('hidden');
+        setTimeout(() => {
+            deleteReviewModalContent.classList.remove('opacity-0', 'scale-95');
+            deleteReviewModalContent.classList.add('opacity-100', 'scale-100');
+        }, 50);
+    }
+
+    function hideDeleteReviewModal() {
+        deleteReviewModalContent.classList.remove('opacity-100', 'scale-100');
+        deleteReviewModalContent.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+            deleteReviewModal.classList.add('hidden');
+        }, 150);
+    }
+
+    async function confirmDeleteReview() {
+        const reviewId = deleteReviewId.value;
+        if (!reviewId) {
+            console.error("No review ID found to delete.");
+            return;
+        }
+
+        // Check for global variables
+        if (typeof DELETE_REVIEW_API_URL_BASE === 'undefined' || typeof CSRF_TOKEN === 'undefined') {
+            alert('Error: Missing required configuration. Delete failed.');
+            console.error('DELETE_REVIEW_API_URL_BASE or CSRF_TOKEN is not defined globally.');
+            return;
+        }
+
+        // Loading state
+        confirmDeleteButton.disabled = true;
+        confirmDeleteButton.textContent = "Deleting...";
+
+        try {
+            const response = await fetch(`${DELETE_REVIEW_API_URL_BASE}${reviewId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN,
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Using alert for consistency with your other modals
+                alert(data.message || "Review deleted successfully.");
+                hideDeleteReviewModal();
+                
+                // Refresh the reviews list if the function exists
+                if (typeof fetchReviews === 'function') {
+                    fetchReviews();
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                alert(data.message || 'Failed to delete review. You may not have permission.');
+            }
+
+        } catch (error) {
+            console.error('Error deleting review:', error);
+            alert('An error occurred while trying to delete the review. Please try again.');
+        } finally {
+            // Restore button state
+            confirmDeleteButton.disabled = false;
+            confirmDeleteButton.textContent = "Yes, Delete";
+        }
+    }
+</script>

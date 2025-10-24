@@ -81,14 +81,13 @@
 
 {% block extra_js %}
 <script>
-    // --- Global Cache & Constants ---
-    let _venueReviewsCache = [];
+    // global cache & constants
+    let venueReviewsCache = [];
     const REVIEWS_API_ENDPOINT = "{% url 'review:get_reviews_json' %}";
     const CURRENT_VENUE_NAME = "{{ venue.name|escapejs|default:'' }}";
     const CURRENT_USERNAME = "{{ user.username|escapejs|default:'' }}";
     const IS_AUTHENTICATED = {% if user.is_authenticated %}true{% else %}false{% endif %};
 
-    // --- DOM Elements ---
     const loadingReviews = document.getElementById('loadingReviews');
     const errorReviews = document.getElementById('errorReviews');
     const emptyReviews = document.getElementById('emptyReviews');
@@ -98,11 +97,8 @@
     const scrollLeftBtn = document.getElementById('scrollReviewLeft');
     const scrollRightBtn = document.getElementById('scrollReviewRight');
 
-    // --- UI Helper Functions ---
 
-    /**
-     * Manages which UI section (loading, error, empty, or carousel) is visible.
-     */
+    // decide which state to display
     function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showCarousel = false }) {
         if (loadingReviews) loadingReviews.classList.toggle('hidden', !showLoading);
         if (errorReviews) errorReviews.classList.toggle('hidden', !showError);
@@ -110,9 +106,7 @@
         if (reviewCarouselWrapper) reviewCarouselWrapper.classList.toggle('hidden', !showCarousel);
     }
 
-    /**
-     * Generates HTML for the star rating display.
-     */
+    // HTML for the star rating display.
     function generateStars(rating) {
         let starsHTML = '<div class="flex items-center gap-0.5 mb-3">';
         const starSVG = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.959a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.446a1 1 0 00-.364 1.118l1.286 3.959c.3.921-.755 1.688-1.538 1.118l-3.368-2.446a1 1 0 00-1.175 0l-3.368 2.446c-.783.57-1.838-.197-1.538-1.118l1.286-3.959a1 1 0 00-.364-1.118L2.063 9.386c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"></path></svg>`;
@@ -129,9 +123,7 @@
         return starsHTML;
     }
 
-    /**
-     * Builds the HTML for a single review card.
-     */
+    // HTML for a single review card
     function buildReviewCard(review) {
         const isOwnReview = IS_AUTHENTICATED && review.user === CURRENT_USERNAME;
 
@@ -163,10 +155,11 @@
                 <article class="bg-gray-50 border border-gray-200 p-6 h-full flex flex-col hover:border-gray-300 transition-colors">
                     ${generateStars(review.rating)}
                     <blockquote class="flex-grow mb-4">
-                        <p class="text-gray-700 text-sm leading-relaxed">
+                        
+                        <p class="text-gray-700 text-sm leading-relaxed break-words whitespace-pre-line">
                             "${review.comment}"
                         </p>
-                    </blockquote>
+                        </blockquote>
                     <div class="mt-auto pt-4 border-t border-gray-200">
                         <p class="font-semibold text-gray-900 text-sm">${review.user}</p>
                         <p class="text-xs text-gray-500 mt-1">Last modified: ${review.last_modified}</p>
@@ -177,20 +170,12 @@
         `;
     }
 
-    /**
-     * Renders all review cards into the track and updates arrow visibility.
-     */
     function renderReviews(reviews) {
         if (!reviewTrack) return;
         reviewTrack.innerHTML = reviews.map(buildReviewCard).join('');
         updateArrowVisibility();
     }
 
-    // --- Data & Carousel Logic ---
-
-    /**
-     * Fetches review data from the API, filters it, and populates the cache.
-     */
     async function fetchReviews() {
         try {
             displayPageSection({ showLoading: true });
@@ -205,8 +190,8 @@
                 reviewsToDisplay = data.filter(review => review.venue_name === CURRENT_VENUE_NAME);
             }
 
-            // --- Populate the global cache ---
-            _venueReviewsCache = reviewsToDisplay;
+            // populate the global cache
+            venueReviewsCache = reviewsToDisplay;
 
             if (reviewsToDisplay.length === 0) {
                 displayPageSection({ showEmpty: true });
@@ -220,27 +205,17 @@
         }
     }
 
-    /**
-     * Handles click on the left scroll arrow.
-     */
     function handleScrollLeft() {
         if (!reviewViewport) return;
         const scrollAmount = reviewViewport.clientWidth * 0.85;
         reviewViewport.scrollLeft -= scrollAmount;
     }
 
-    /**
-     * Handles click on the right scroll arrow.
-     */
     function handleScrollRight() {
         if (!reviewViewport) return;
         const scrollAmount = reviewViewport.clientWidth * 0.85;
         reviewViewport.scrollLeft += scrollAmount;
     }
-
-    /**
-     * Shows/hides/disables carousel arrows based on scroll position and content.
-     */
     function updateArrowVisibility() {
         if (!reviewViewport || !scrollLeftBtn || !scrollRightBtn || !reviewTrack) return;
 
@@ -264,14 +239,9 @@
         scrollRightBtn.disabled = atEnd;
     }
 
-    // --- Review Action Handlers ---
-
-    /**
-     * Finds review data from cache and shows the edit modal.
-     */
     function handleEditReview(reviewId) {
         // Find the review from our cache
-        const review = _venueReviewsCache.find(r => r.id.toString() === reviewId.toString());
+        const review = venueReviewsCache.find(r => r.id.toString() === reviewId.toString());
 
         if (review) {
             // Check if the modal function exists before calling it
@@ -287,19 +257,68 @@
         }
     }
 
-    /**
-     * Shows a confirmation before deleting a review.
-     */
-    function handleDeleteReview(reviewId) {
-        console.log('Delete review:', reviewId);
-        if (confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
-            // TODO: Call your delete API here
-            // deleteReviewAPI(reviewId);
-            alert(`Delete review functionality for review ID: ${reviewId}\n\nThis should call your delete API.`);
-        }
+
+    // Template URL with a placeholder id (0) -> e.g. "/review/delete/0/"
+    const DELETE_REVIEW_API_URL_TEMPLATE = "{% url 'review:delete_review' 0 %}";
+    // Remove the trailing "0/" so modal's `${DELETE_REVIEW_API_URL_BASE}${id}/` works
+    const DELETE_REVIEW_API_URL_BASE = DELETE_REVIEW_API_URL_TEMPLATE.endsWith('/0/') ?
+        DELETE_REVIEW_API_URL_TEMPLATE.replace(/0\/$/, '') :
+        DELETE_REVIEW_API_URL_TEMPLATE;
+
+    let CSRF_TOKEN = "{{ csrf_token }}";
+    function getCookie(name) {
+        const matches = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[]\\\/+^])/g, '\\$1') + '=([^;]*)'));
+        return matches ? decodeURIComponent(matches[1]) : undefined;
+    }
+    if (!CSRF_TOKEN || CSRF_TOKEN === 'NOTPROVIDED') {
+        CSRF_TOKEN = getCookie('csrftoken');
     }
 
-    // --- Initialization ---
+    window.DELETE_REVIEW_API_URL_BASE = DELETE_REVIEW_API_URL_BASE;
+    window.CSRF_TOKEN = CSRF_TOKEN;
+
+    async function handleDeleteReview(reviewId) {
+        // Try to find review details in cache
+        const review = venueReviewsCache.find(r => r.id.toString() === reviewId.toString());
+
+        if (typeof showDeleteReviewModal === 'function') {
+            // If we have the modal, show it with preview text (or empty)
+            const comment = review ? (review.comment || '') : '';
+            showDeleteReviewModal(reviewId, comment);
+            return;
+        }
+
+        if (!confirm('Are you sure you want to delete this review? This action cannot be undone.')) return;
+
+        try {
+            displayPageSection({ showLoading: true });
+            const response = await fetch(`${DELETE_REVIEW_API_URL_BASE}${reviewId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN,
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message || 'Review deleted successfully.');
+                fetchReviews();
+            } else {
+                alert(data.message || 'Failed to delete review. You may not have permission.');
+                displayPageSection({ showError: true });
+            }
+        } catch (error) {
+            console.error('Error deleting review:', error);
+            alert('An error occurred while trying to delete the review. Please try again.');
+            displayPageSection({ showError: true });
+        } finally {
+            // Hide loading UI if necessary
+            displayPageSection({ showLoading: false });
+        }
+    }    
+
     document.addEventListener('DOMContentLoaded', () => {
         fetchReviews();
 
