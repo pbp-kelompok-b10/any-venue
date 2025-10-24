@@ -14,14 +14,14 @@ def show_landing(request):
 
     return render(request, "landing.html", context)
 
-def features_preview(request):
-    return render(request, "sections/features_preview.html")
-
 def header_test(request):
     return render(request, "sections/header.html")
 
-def features_review(request):
-    return render(request, "sections/features_review.html")
+def features_preview(request):
+    return render(request, "sections/features_preview.html")
+
+def reviews_preview(request):
+    return render(request, "sections/reviews_preview.html")
 
 def booking_preview(request):
     return render(request, "sections/booking_preview.html")
