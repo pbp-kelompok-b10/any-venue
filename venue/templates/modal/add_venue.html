@@ -3,11 +3,9 @@
      class="hidden fixed inset-0 z-50 w-full flex items-start justify-center p-4 sm:p-6 md:p-10 overflow-hidden bg-gray-800 bg-opacity-70 backdrop-blur-sm"
      role="dialog" aria-modal="true" aria-labelledby="addVenueModal-title">
 
-    {# Modal Content Box - Ukuran disesuaikan (max-w-3xl) & 'relative' ditambah #}
     <div id="addVenueModalContent"
          class="relative bg-white  shadow-xl w-full max-w-3xl transform transition-all duration-300 ease-in-out opacity-0 scale-90 flex flex-col my-auto max-h-[90vh]">
 
-        {# Tombol Close (Dipindah & diposisikan 'absolute' sesuai Figma) #}
         <button type="button"
                 class="absolute top-4 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900  text-sm w-8 h-8 p-1.5 ml-auto inline-flex justify-center items-center z-20"
                 onclick="hideModal('addVenueModal')"
@@ -15,15 +13,13 @@
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
         </button>
 
-        {# Modal Header (Style Figma: Besar, Terpusat) #}
         <div class="flex-shrink-0 pt-10 sm:pt-12 pb-6 text-center">
             <h3 id="addVenueModal-title" class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight px-12">
                 Add Venue
             </h3>
-            <p class="text text-gray-600 mt-2 px-12">Isi detail lengkap untuk venue baru Anda.</p>
+            <p class="text text-gray-600 mt-2 px-12">Get Your Venue in the Game!</p>
         </div>
 
-        {# Modal Body (Form) - Padding diubah, layout grid dihapus #}
         <div class="px-6 sm:px-10 md:px-12 pb-6 space-y-4 overflow-y-auto flex-grow">
             <form id="addVenueForm" class="space-y-6" novalidate>
                 {% csrf_token %}
@@ -40,23 +36,15 @@
                     <input type="number" id="add-venue-price" name="price" min="0" placeholder="e.g., 150000" 
                            class="block w-full border border-gray-300 -md shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-Pale-Cerulean focus:border-Pale-Cerulean sm:text-sm" required>
                 </div>
-
                 <div>
-                    <label class="block text-base font-medium text-gray-700 mb-2">Type <span class="text-red-500">*</span></label>
-                    <div class="flex items-center gap-4">
-                        <input type="radio" id="add-type-indoor" name="type" value="Indoor" class="sr-only peer" required>
-                        <label for="add-type-indoor" 
-                               class="w-full sm:w-auto text-center px-5 py-2.5 border border-gray-800 text-gray-800 -md text-base font-normal cursor-pointer transition-colors peer-checked:bg-gray-800 peer-checked:text-white hover:bg-gray-100 peer-checked:hover:bg-gray-700">
-                            Indoor
-                        </label>
-                        <input type="radio" id="add-type-outdoor" name="type" value="Outdoor" class="sr-only peer">
-                        <label for="add-type-outdoor" 
-                               class="w-full sm:w-auto text-center px-5 py-2.5 border border-gray-800 text-gray-800 -md text-base font-normal cursor-pointer transition-colors peer-checked:bg-gray-800 peer-checked:text-white hover:bg-gray-100 peer-checked:hover:bg-gray-700">
-                            Outdoor
-                        </label>
-                    </div>
+                    <label for="add-venue-type" class="block text-base font-medium text-gray-700 mb-2">Type <span class="text-red-500">*</span></label>
+                    <select id="add-venue-type" name="type" 
+                            class="block w-full border border-gray-300 -md shadow-sm p-3 focus:outline-none focus:ring-2 focus:ring-Pale-Cerulean focus:border-Pale-Cerulean sm:text-sm" required>
+                        <option value="" disabled selected>Select Type</option>
+                        <option value="Indoor">Indoor</option>
+                        <option value="Outdoor">Outdoor</option>
+                    </select>
                 </div>
-
                 <div>
                     <label for="add-venue-city" class="block text-base font-medium text-gray-700 mb-2">City <span class="text-red-500">*</span></label>
                     <select id="add-venue-city" name="city" 
@@ -99,7 +87,6 @@
             </form>
         </div>
 
-        {# Modal Footer (Style Tombol Figma) #}
         <div class="flex justify-end gap-4 p-6 sm:px-10 md:px-12 py-6 border-t border-gray-200 flex-shrink-0">
             <button type="button"
                     class="w-full sm:w-auto px-5 py-2.5 border border-gray-800 bg-white text-gray-800 -md font-normal text-base hover:bg-gray-100 transition-colors"
