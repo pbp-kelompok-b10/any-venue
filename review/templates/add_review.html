@@ -1,0 +1,167 @@
+<div id="addReviewModal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+
+    <div id="addReviewModalContent"
+        class="bg-white shadow-xl
+        w-[85%] sm:w-[60%] md:w-[45%] lg:w-[40%]
+        max-h-[90vh] overflow-y-auto
+        px-10 py-10 relative font-['Roboto']
+        transform transition-all duration-300 opacity-0 scale-95">
+
+        <!-- Close Button -->
+        <button type="button"
+            class="absolute top-4 right-4 text-black hover:text-gray-600 text-lg"
+            onclick="hideAddReviewModal()">
+            ✕
+        </button>
+
+        <!-- Header -->
+        <div class="w-full text-center mb-6">
+            <h2 class="text-3xl font-bold text-black">Add Review</h2>
+            <p class="text-xs text-gray-600 mt-1">Lorem ipsum dolor sit amet.</p>
+        </div>
+
+        <!-- Form -->
+        <form id="addReviewForm" method="POST" action=""
+            class="w-full flex flex-col gap-6">
+            {% csrf_token %}
+
+        <!-- Rating -->
+        <div class="flex flex-col gap-2">
+            <label class="text-s text-black">Rate Venue</label>
+
+            <div id="starContainer" class="flex gap-1">
+                <span data-value="1" class="star cursor-pointer text-gray-300 text-2xl">★</span>
+                <span data-value="2" class="star cursor-pointer text-gray-300 text-2xl">★</span>
+                <span data-value="3" class="star cursor-pointer text-gray-300 text-2xl">★</span>
+                <span data-value="4" class="star cursor-pointer text-gray-300 text-2xl">★</span>
+                <span data-value="5" class="star cursor-pointer text-gray-300 text-2xl">★</span>
+            </div>
+
+            <!-- Hidden input for form -->
+            <input type="hidden" name="rating" id="ratingValue" required>
+        </div>
+
+            <!-- Review Comment -->
+            <div class="flex flex-col gap-2">
+                <label for="review_content" class="text-s text-black">Review</label>
+                <textarea id="review_content" name="comment" rows="5"
+                    class="w-full p-3 border border-gray-700 resize-none"
+                    placeholder="How was your experience?" required></textarea>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex justify-end gap-3 mt-2">
+                <button type="button"
+                    class="px-5 py-2 border border-black text-black hover:bg-gray-100"
+                    onclick="hideAddReviewModal()">
+                    Cancel
+                </button>
+
+                <button type="submit"
+                    class="px-5 py-2 bg-black text-white hover:bg-gray-900">
+                    Add New Review
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    const addReviewModal = document.getElementById('addReviewModal');
+    const addReviewModalContent = document.getElementById('addReviewModalContent');
+    const addReviewForm = document.getElementById('addReviewForm');
+
+    function showAddReviewModal(venueId) {
+        addReviewForm.action = `/review/add/${venueId}/`;
+
+        addReviewModal.classList.remove('hidden');
+        setTimeout(() => {
+            addReviewModalContent.classList.remove('opacity-0', 'scale-95');
+            addReviewModalContent.classList.add('opacity-100', 'scale-100');
+        }, 50);
+    }
+
+    function hideAddReviewModal() {
+        addReviewModalContent.classList.remove('opacity-100', 'scale-100');
+        addReviewModalContent.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+            addReviewModal.classList.add('hidden');
+        }, 150);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const stars = document.querySelectorAll('.star');
+        const ratingValue = document.getElementById('ratingValue');
+
+        function highlightStars(rating) {
+            stars.forEach(s => {
+                if (s.dataset.value <= rating) {
+                    s.classList.add('text-yellow-400');
+                    s.classList.remove('text-gray-300');
+                } else {
+                    s.classList.add('text-gray-300');
+                    s.classList.remove('text-yellow-400');
+                }
+            });
+        }
+
+        stars.forEach(star => {
+            // hover effect
+            star.addEventListener('mouseover', () => highlightStars(star.dataset.value));
+            
+            // restore selection
+            star.addEventListener('mouseout', () => highlightStars(ratingValue.value || 0));
+            
+            // store value when clicked
+            star.addEventListener('click', () => {
+                ratingValue.value = star.dataset.value;
+                highlightStars(star.dataset.value);
+            });
+        });
+
+        // default
+        highlightStars(0);
+
+        addReviewForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+        
+            if (!ratingValue.value) {
+                alert("Please select a rating first!");
+                return;
+            }
+        
+            const formData = new FormData(addReviewForm);
+            const actionUrl = addReviewForm.action;
+        
+            try {
+                const response = await fetch(actionUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest', 
+                    },
+                });
+        
+                const data = await response.json();
+        
+                if (response.ok) {
+                    alert(data.message);
+                    hideAddReviewModal();
+                    window.location.reload();
+                } else {
+                    let errorMessage = data.message || "An unknown error occurred.";
+                    if (data.errors) {
+                        errorMessage = Object.values(data.errors).join("\n");
+                    }
+                    alert(errorMessage);
+                }
+            } catch (error) {
+                console.error("Form submission error:", error);
+                alert("An error occurred. Please try again.");
+            }
+        });
+    });
+
+</script>

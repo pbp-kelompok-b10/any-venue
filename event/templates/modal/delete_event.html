@@ -1,0 +1,39 @@
+{% load static %}
+
+<!-- Delete Event Modal -->
+<div id="deleteEventModal" class="hidden fixed inset-0 bg-black/25 flex justify-center items-center z-50">
+    <div class="p-10 relative bg-white flex flex-col justify-start items-center gap-8 rounded-2xl shadow-lg w-[500px]">
+        <!-- Close Button -->
+        <button class="absolute top-4 right-4 text-gray-700 hover:text-red-500 text-2xl font-bold transition-colors duration-300" onclick="toggleDeleteModal(false)">✕</button>
+
+        <!-- Header -->
+        <div class="text-center text-gray-900 text-4xl font-bold font-['Roboto']">Delete Event</div>
+        <div class="text-center text-gray-700 text-lg font-normal font-['Roboto']">Apakah kamu yakin ingin menghapus event ini?</div>
+
+        <!-- Warning Icon -->
+        <div class="flex justify-center">
+            <svg class="w-20 h-20 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+        </div>
+
+        <!-- Form -->
+        <form id="deleteEventForm" class="flex justify-end gap-4 pt-4 w-full">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="deleteEventId">
+            
+            <!-- Action Buttons -->
+            <button 
+                type="button" 
+                onclick="toggleDeleteModal(false)" 
+                class="px-5 py-2 outline outline-1 outline-gray-400 rounded-md text-gray-700 font-medium font-['Roboto'] hover:bg-gray-50 transition-colors duration-300">
+                Cancel
+            </button>
+            <button 
+                type="submit" 
+                class="px-5 py-2 bg-red-600 text-white rounded-md font-medium font-['Roboto'] hover:bg-red-700 transition-colors duration-300">
+                Delete
+            </button>
+        </form>
+    </div>
+</div>

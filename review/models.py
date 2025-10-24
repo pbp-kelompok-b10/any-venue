@@ -1,6 +1,6 @@
 from django.db import models
 from venue.models import Venue
-from user.models import Profile
+from account.models import Profile
 
 class Review(models.Model):
     RATING_CHOICES = [
@@ -16,6 +16,7 @@ class Review(models.Model):
     rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES)
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.user.username} - {self.venue.name} ({self.rating}/5)'
+        return f'{self.user.user.username} - {self.venue.name} ({self.rating}/5)'

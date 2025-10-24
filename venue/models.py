@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 class City(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
@@ -23,7 +22,7 @@ class Venue(models.Model):
         ('Outdoor', 'Outdoor'),
     ]
 
-    owner = models.ForeignKey('user.Profile', on_delete=models.CASCADE, related_name='venues', 
+    owner = models.ForeignKey('account.Profile', on_delete=models.CASCADE, related_name='venues', 
                               limit_choices_to={'role': 'OWNER'})
     name = models.CharField(max_length=255)
     price = models.IntegerField()
