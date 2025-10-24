@@ -113,3 +113,5 @@ GitHub.sublime-settings
 !.vscode/launch.json
 !.vscode/extensions.json
 .history
+# Windows Explorer folder settings
+desktop.ini
