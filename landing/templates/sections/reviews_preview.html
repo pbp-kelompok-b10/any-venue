@@ -10,7 +10,7 @@
                 Apa Kata Para Pemain?
             </h2>
             <p class="mt-4 text-lg text-gray-600 leading-relaxed">
-                Temukan tempat bermain favorit baru Anda dari 3 venue terbaik yang kami pilihkan untuk Anda.
+                Simak cerita tentang pengalaman mereka di berbagai venue!
             </p>
         </div>
 
@@ -25,32 +25,26 @@
                     <div class="flex items-center gap-1">
                         {% for i in "12345" %}
                             {% if review.rating >= forloop.counter %}
-                                <svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.986 4.845a.8.8 0 01-.6.434H1.459c-.83 0-1.17.973-.574 1.487l4.11 2.99a.8.8 0 01.3.73l-1.54 5.253c-.23.79.64 1.42 1.32 1.015L10 16.602l4.66 3.036c.68.405 1.55-.224 1.32-1.015l-1.54-5.253a.8.8 0 01.3-.73l4.11-2.99c.596-.514.256-1.487-.574-1.487h-5.087a.8.8 0 01-.6-.434l-1.986-4.845z" clip-rule="evenodd" />
-                                </svg>
+                                <span class="text-3xl text-yellow-400">★</span>
                             {% else %}
-                                <svg class="w-5 h-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.986 4.845a.8.8 0 01-.6.434H1.459c-.83 0-1.17.973-.574 1.487l4.11 2.99a.8.8 0 01.3.73l-1.54 5.253c-.23.79.64 1.42 1.32 1.015L10 16.602l4.66 3.036c.68.405 1.55-.224 1.32-1.015l-1.54-5.253a.8.8 0 01.3-.73l4.11-2.99c.596-.514.256-1.487-.574-1.487h-5.087a.8.8 0 01-.6-.434l-1.986-4.845z" clip-rule="evenodd" />
-                                </svg>
+                                <span class="text-3xl text-gray-300">★</span>
                             {% endif %}
                         {% endfor %}
                     </div>
 
                     <!-- Review Comment -->
                     <div class="flex-1">
-                        <p class="text-gray-700 text-base font-normal leading-normal" style="min-height: 4.5rem;">
-                            "{{ review.comment|truncatewords:30|default:"No comment provided." }}"
+                        <p class="text-gray-700 text-base font-normal leading-normal break-words" style="min-height: 4.5rem;">
+                            "{% if review.comment|length > 150 %}{{ review.comment|slice:":150" }}... 
+                            <a href="{% url 'venue:venue_detail' review.venue.pk %}" class="text-blue-600 hover:underline font-medium">
+                                See More
+                            </a>{% else %}{{ review.comment }}{% endif %}"
                         </p>
                     </div>
 
                     <!-- User Info & Venue Link -->
                     <div class="flex flex-col gap-3 pt-4 border-t border-gray-200 mt-auto">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gray-200 border border-gray-300 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-6 h-6 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
                             <div class="flex-1 min-w-0">
                                 <div class="text-base font-semibold text-gray-900 truncate">
                                     {{ review.user.user.get_full_name|default:review.user.user.username }}
