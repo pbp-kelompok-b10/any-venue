@@ -8,13 +8,13 @@
         </a>
 
         <div class="hidden items-center gap-5 md:flex">
-            <a href="{% url 'venue:venue_main' %}" class="nav-link text-base text-white/80 hover:text-white transition-colors duration-300">Booking</a> 
-            <a href="#event" class="nav-link text-base text-white/80 hover:text-white transition-colors duration-300">Event</a> {# Ganti href jika perlu #}
+            <a href="{% url 'venue:venue_main' %}" class="nav-link text-base text-white/80 hover:text-white transition-colors duration-300">Venue</a> 
+            <a href="{% url 'event:show_event' %}" class="nav-link text-base text-white/80 hover:text-white transition-colors duration-300">Event</a>
         </div>
 
         <div class="hidden md:flex items-center gap-4">
             {% if user.is_authenticated %}
-                <a href="{% url 'authentication:logout' %}" id="nav-username" class="text-sm text-white/80 hover:text-Sunrise-Orange">{{ user.username }}</a>
+                <a href="{% url 'account:profile_page' %}" id="nav-username" class="text-sm text-white/80 hover:text-Sunrise-Orange">{{ user.username }}</a>
                 <a href="{% url 'authentication:logout' %}" id="logout-button" 
                    class="px-6 py-2 border border-white text-base font-normal text-white hover:bg-white hover:text-[#000456] transition-colors duration-300"> 
                     Logout
@@ -41,15 +41,15 @@
         
     </div>
 
-    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200 shadow-lg"> {# Background putih saat dibuka #}
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200 shadow-lg">
         <div class="px-4 py-4 space-y-3">
-            <a href="{% url 'venue:venue_main' %}" class="block py-2 text-base text-gray-700 hover:text-[#000456] hover:bg-gray-50  px-3">Booking</a>
+            <a href="{% url 'venue:venue_main' %}" class="block py-2 text-base text-gray-700 hover:text-[#000456] hover:bg-gray-50  px-3">Venue</a>
             <a href="#event" class="block py-2 text-base text-gray-700 hover:text-[#000456] hover:bg-gray-50  px-3">Event</a>
             
             <div class="border-t border-gray-200 pt-4 mt-4">
                 {% if user.is_authenticated %}
                     <div class="mb-3 px-3">
-                        <a href="{% url 'authentication:logout' %}" class="font-medium text-gray-800 hover:text-red-700">{{ user.username }}</a>
+                        <a href="{% url 'account:profile_page' %}" class="font-medium text-gray-800 hover:text-red-700">{{ user.username }}</a>
                     </div>
                     <a href="{% url 'authentication:logout' %}" 
                        class="block w-full px-3 py-2 text-left text-base text-red-600 hover:bg-red-50 hover:text-red-700 ">

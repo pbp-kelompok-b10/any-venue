@@ -45,8 +45,8 @@ def add_review(request, venue_id):
                 'rating': review.rating,
                 'comment': review.comment,
                 'user': review.user.user.username,
-                'created_at': review.created_at.strftime('%B %d, %Y'),
-                'last_modified': review.last_modified.strftime('%B %d, %Y')
+                'created_at': review.created_at.strftime('%d-%m-%Y %H:%M'),
+                'last_modified': review.last_modified.strftime('%d-%m-%Y %H:%M')
             }
         }, status=201)
     else:
@@ -81,7 +81,7 @@ def edit_review(request, review_id):
                 'id': review.id,
                 'rating': review.rating,
                 'comment': review.comment,
-                'last_modified': review.last_modified.strftime('%B %d, %Y')
+                'last_modified': review.last_modified.strftime('%d-%m-%Y %H:%M')
             }
         }, status=200)
     else:
@@ -112,7 +112,7 @@ def delete_review(request, review_id):
 
 @require_http_methods(["GET"])
 def get_reviews_json(request):
-    reviews = Review.objects.select_related('user__user', 'venue').all().order_by('-created_at')
+    reviews = Review.objects.select_related('user__user', 'venue').all().order_by('-last_modified', '-pk')
     
     data = []
     for review in reviews:
@@ -124,8 +124,8 @@ def get_reviews_json(request):
             'user_profile_id': review.user.user.id,
             'venue_id': review.venue.id,
             'venue_name': review.venue.name,
-            'created_at': review.created_at.strftime('%B %d, %Y'),
-            'last_modified': review.last_modified.strftime('%B %d, %Y')
+            'created_at': review.created_at.strftime('%d-%m-%Y %H:%M'),
+            'last_modified': review.last_modified.strftime('%d-%m-%Y %H:%M')
         })
         
     return JsonResponse(data, safe=False)
@@ -145,7 +145,7 @@ def get_review_json_by_id(request, review_id):
         'user_profile_id': review.user.user.id,
         'venue_id': review.venue.id,
         'venue_name': review.venue.name,
-        'created_at': review.created_at.strftime('%B %d, %Y'),
-        'last_modified': review.last_modified.strftime('%B %d, %Y')
+        'created_at': review.created_at.strftime('%d-%m-%Y %H:%M'),
+        'last_modified': review.last_modified.strftime('%d-%m-%Y %H:%M')
     }
     return JsonResponse(data)

@@ -1,4 +1,3 @@
-{% extends "base.html" %}
 {% load static %}
 
 {% block content %}
@@ -8,21 +7,23 @@
         <h2 class="text-xl font-bold text-gray-900">Customer Reviews</h2>
         
         <!-- Filter Buttons -->
-        <div class="flex gap-3">
-            <button 
-                id="filterAllBtn"
-                onclick="filterReviews('all')"
-                class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm filter-btn active">
-                All Reviews
-            </button>
-            <button 
-                id="filterMyBtn"
-                onclick="filterReviews('my')"
-                class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm filter-btn"
-                {% if not user.is_authenticated %}disabled{% endif %}>
-                My Reviews
-            </button>
-        </div>
+        {% if not user.profile.is_owner %} 
+            <div class="flex gap-3">
+                <button 
+                    id="filterAllBtn"
+                    onclick="filterReviews('all')"
+                    class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm filter-btn active">
+                    All Reviews
+                </button>
+                <button 
+                    id="filterMyBtn"
+                    onclick="filterReviews('my')"
+                    class="px-4 py-2 text-sm font-semibold text-gray-800 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm filter-btn"
+                    {% if not user.is_authenticated %}disabled{% endif %}>
+                    My Reviews
+                </button>
+            </div>
+        {% endif %}
     </div>
 
     <div id="loadingReviews" class="py-16 text-center hidden">
@@ -53,9 +54,9 @@
         <h3 class="text-lg font-semibold text-gray-900 mb-2">No reviews yet</h3>
         <p class="text-gray-500 text-sm">
             {% if venue %}
-            Be the first to share your experience at this venue!
+            Help kick things off by leaving the very first review!
             {% else %}
-            Be the first to leave a review for one of our venues!
+            Help kick things off by leaving the very first review!
             {% endif %}
         </p>
     </div>
@@ -94,7 +95,6 @@
         scroll-snap-type: x mandatory;
     }
     
-    /* Filter button styles */
     .filter-btn.active {
         background-color: #1f2937;
         color: white;
@@ -112,6 +112,32 @@
     .filter-btn:disabled:hover {
         background-color: #f9fafb;
     }
+    
+    .review-comment {
+        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        word-break: break-word;
+    }
+
+    .review-comment.collapsed {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .toggle-comment {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 4px 0;
+        transition: all 0.2s ease;
+    }
+
+    .comment-text {
+        display: block;
+        transition: opacity 0.2s ease;
+    }
+    
 </style>
 {% endblock content %}
 
@@ -119,8 +145,8 @@
 <script>
     // global cache & constants
     let venueReviewsCache = [];
-    let allReviewsData = []; // Store all reviews from API
-    let currentFilter = 'all'; // Track current filter state
+    let allReviewsData = [];
+    let currentFilter = 'all';
     
     const REVIEWS_API_ENDPOINT = "{% url 'review:get_reviews_json' %}";
     const CURRENT_VENUE_NAME = "{{ venue.name|escapejs|default:'' }}";
@@ -148,79 +174,132 @@
 
     // HTML for the star rating display.
     function generateStars(rating) {
-        let starsHTML = '<div class="flex items-center gap-0.5 mb-3">';
-        const starSVG = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.959a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.446a1 1 0 00-.364 1.118l1.286 3.959c.3.921-.755 1.688-1.538 1.118l-3.368-2.446a1 1 0 00-1.175 0l-3.368 2.446c-.783.57-1.838-.197-1.538-1.118l1.286-3.959a1 1 0 00-.364-1.118L2.063 9.386c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"></path></svg>`;
+        let starsHTML = '<div class="flex items-center gap-0.5">';
+        const starChar = `★`; 
 
         const numericRating = Number(rating);
         for (let i = 1; i <= 5; i++) {
             if (i <= numericRating) {
-                starsHTML += `<span class="text-yellow-500">${starSVG}</span>`;
+                starsHTML += `<span class="text-yellow-400 text-2xl">${starChar}</span>`;
             } else {
-                starsHTML += `<span class="text-gray-300">${starSVG}</span>`;
+                starsHTML += `<span class="text-gray-300 text-2xl">${starChar}</span>`;
             }
         }
         starsHTML += '</div>';
         return starsHTML;
     }
 
+    function truncateComment(text, maxLength = 100) {
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength).trim() + '…';
+    }
+
     // HTML for a single review card
     function buildReviewCard(review) {
         const isOwnReview = IS_AUTHENTICATED && review.user === CURRENT_USERNAME;
+        const isEdited = review.created_at !== review.last_modified;
+        const editedTag = isEdited ? `<span class="text-xs text-gray-500 ml-2">(edited)</span>` : '';
 
         const actionButtons = isOwnReview ? `
-            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
+            <div class="absolute top-6 right-6 flex items-center gap-2">
                 <button
                     onclick="handleEditReview('${review.id}')"
-                    class="flex-1 px-3 py-1.5 text-xs font-medium text-Light-Navy border border-Light-Navy hover:bg-Light-Navy hover:text-white transition-colors"
+                    class="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded transition-colors"
                     aria-label="Edit review">
-                    <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
-                    Edit
                 </button>
                 <button
                     onclick="handleDeleteReview('${review.id}')"
-                    class="flex-1 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-600 hover:bg-red-600 hover:text-white transition-colors"
+                    class="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                     aria-label="Delete review">
-                    <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
-                    Delete
                 </button>
             </div>
         ` : '';
 
+        const needsToggle = review.comment.length > 100;
+        const commentId = `comment-${review.id}`;
+
         return `
             <div class="flex-shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] scroll-snap-align-start">
-                <article class="bg-gray-50 border border-gray-200 p-6 h-full flex flex-col hover:border-gray-300 transition-colors">
-                    ${generateStars(review.rating)}
+                <article class="bg-gray-50 border border-gray-200 p-6 flex flex-col hover:border-gray-300 transition-colors relative">                    ${actionButtons}
+                    <div class="flex items-center gap-0.5">
+                        ${generateStars(review.rating)}
+                        ${editedTag}
+                    </div>
+
                     <blockquote class="flex-grow mb-4">
-                        
-                        <p class="text-gray-700 text-sm leading-relaxed break-words whitespace-pre-line">
-                            "${review.comment}"
-                        </p>
-                        </blockquote>
+                        <div>
+                            <p id="${commentId}" class="review-comment ${needsToggle ? 'collapsed' : ''} text-gray-700 text-sm leading-relaxed break-words whitespace-pre-line">
+                                <span class="comment-text">${review.comment}</span>
+                            </p>
+                            ${needsToggle ? 
+                                `<button 
+                                    class="toggle-comment text-blue-500 text-sm font-medium hover:text-blue-900 focus:outline-none"
+                                    data-comment-id="${commentId}"
+                                    data-full-text="${review.comment.replace(/"/g, '&quot;')}"
+                                    data-short-text="${truncateComment(review.comment, 100).replace(/"/g, '&quot;')}">
+                                    Read More
+                                </button>` : ''
+                            }
+                        </div>
+                    </blockquote>
+                    
                     <div class="mt-auto pt-4 border-t border-gray-200">
                         <p class="font-semibold text-gray-900 text-sm">${review.user}</p>
                         <p class="text-xs text-gray-500 mt-1">Last modified: ${review.last_modified}</p>
                     </div>
-                    ${actionButtons}
                 </article>
             </div>
         `;
     }
-
+    
     function renderReviews(reviews) {
         if (!reviewTrack) return;
         reviewTrack.innerHTML = reviews.map(buildReviewCard).join('');
-        updateArrowVisibility();
+
+        // toggle functionality
+        reviewTrack.querySelectorAll('.toggle-comment').forEach(button => {
+            button.addEventListener('click', function() {
+                const commentId = this.getAttribute('data-comment-id');
+                const commentEl = document.getElementById(commentId);
+                const textSpan = commentEl.querySelector('.comment-text');
+                const fullText = this.getAttribute('data-full-text');
+                const shortText = this.getAttribute('data-short-text');
+                const isExpanded = this.classList.contains('expanded');
+
+                if (isExpanded) {
+                    // collapse
+                    commentEl.classList.add('collapsed');
+                    textSpan.textContent = fullText; // keep full text, CSS handles truncation
+                    this.textContent = 'Read More';
+                    this.classList.remove('expanded');
+                } else {
+                    // expand
+                    commentEl.classList.remove('collapsed');
+                    textSpan.textContent = fullText;
+                    this.textContent = 'Show Less';
+                    this.classList.add('expanded');
+                }
+            });
+        });
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                updateArrowVisibility();
+            });
+        });
     }
 
-    // Filter reviews based on selected filter
+    // filter reviews based on selected filter
     function filterReviews(filterType) {
         currentFilter = filterType;
         
-        // Update button states
+        // update button states
         if (filterAllBtn && filterMyBtn) {
             filterAllBtn.classList.toggle('active', filterType === 'all');
             filterMyBtn.classList.toggle('active', filterType === 'my');
@@ -228,17 +307,15 @@
 
         let filteredReviews = [...allReviewsData];
 
-        // Apply venue filter if on specific venue page
         if (CURRENT_VENUE_NAME) {
             filteredReviews = filteredReviews.filter(review => review.venue_name === CURRENT_VENUE_NAME);
         }
 
-        // Apply user filter
         if (filterType === 'my' && IS_AUTHENTICATED) {
             filteredReviews = filteredReviews.filter(review => review.user === CURRENT_USERNAME);
         }
 
-        // Update cache and display
+        // update cache and display
         venueReviewsCache = filteredReviews;
 
         if (filteredReviews.length === 0) {
@@ -381,10 +458,16 @@
             scrollLeftBtn.addEventListener('click', handleScrollLeft);
             scrollRightBtn.addEventListener('click', handleScrollRight);
             reviewViewport.addEventListener('scroll', updateArrowVisibility, { passive: true });
+            
+            // Also update on window resize
+            window.addEventListener('resize', () => {
+                requestAnimationFrame(updateArrowVisibility);
+            }, { passive: true });
         }
     });
 
-    // Make filterReviews globally accessible
+    // Make filterReviews and fetchReviews globally accessible
     window.filterReviews = filterReviews;
+    window.refreshReviews = fetchReviews;
 </script>
 {% endblock extra_js %}

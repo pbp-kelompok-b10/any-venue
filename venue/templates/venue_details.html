@@ -17,7 +17,7 @@
             <span class="font-semibold leading-tight">{{ venue.name }}</span>
         </nav>
 
-        <h1 class="text-gray-600 text-4xl sm:text-5xl font-bold leading-tight opacity-0 animate-[fadeIn_0.6s_ease-out_0.1s_forwards]">
+        <h1 class="text-white text-4xl sm:text-5xl font-bold leading-tight opacity-0 animate-[fadeIn_0.6s_ease-out_0.1s_forwards] drop-shadow-md mb-4">
             {{ venue.name }}
         </h1>
     </div>
@@ -41,7 +41,7 @@
                         <div class="flex flex-col gap-3 pb-5 border-b border-gray-200">
                             <div class="flex items-baseline gap-2">
                                 <span class="text-gray-900 text-3xl font-bold">Rp {{ venue.price|floatformat:0 }}</span>
-                                <span class="text-gray-600 text-sm font-normal">/ sesi</span>
+                                <span class="text-gray-600 text-sm font-normal">/ jam</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 {% if review_count > 0 %}
@@ -74,7 +74,10 @@
                             <h2 class="text-lg font-bold text-gray-900">Venue Information</h2>
                             
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-gray-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                <svg class="w-5 h-5 text-gray-500 mt-0.5 shrink-0 transition-all duration-300 group-hover:text-Light-Navy group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="9" stroke-width="2"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c2.5 0 4.5 4 4.5 9s-2 9-4.5 9m0-18c-2.5 0-4.5 4-4.5 9s2 9 4.5 9m-9-9h18"/>
+                                </svg>
                                 <div>
                                     <span class="block text-xs text-gray-500 uppercase font-medium tracking-wider">Category</span>
                                     <span class="block text-gray-900 font-medium">{{ venue.category.name }}</span>
@@ -116,13 +119,11 @@
                     {% if venue.owner.user == user %}
                         <h3 class="text-lg font-bold text-gray-900 mb-4 text-center border-b pb-3">Manage Your Venue</h3>
                         <div class="flex flex-col gap-3 pt-3">
-                            <button type="button" onclick="showEditModal('{{ venue.pk }}')" 
-                                class="w-full px-6 py-2.5 bg-Light-Navy text-white text-center text-sm font-semibold hover:bg-Dark-Slate transition-colors  shadow-sm">
-                                Edit Venue Details
+                            <button type="button" id="open-edit-btn" data-id="{{ venue.pk }}" class="w-full px-6 py-2.5 bg-gray-800 text-white text-center text-sm font-semibold hover:bg-Light-Navy transition-colors shadow-sm">
+                                    Edit Venue Details
                             </button>
-                            <button type="button" onclick="showDeleteModal('{{ venue.pk }}', '{{ venue.name|escapejs }}')" 
-                                class="w-full px-6 py-2.5 border border-red-600 text-red-600 text-sm font-semibold hover:bg-red-600 hover:text-white transition-colors ">
-                                Delete Venue
+                            <button type="button" id="open-delete-btn" data-id="{{ venue.pk }}" data-name="{{ venue.name|escapejs }}" class="w-full px-6 py-2.5 border border-Orange text-red-600 text-sm font-semibold hover:bg-Orange hover:text-white transition-colors ">
+                                    Delete Venue
                             </button>
                         </div>
                     {% elif not user.profile.is_owner %} 
@@ -152,9 +153,13 @@
 {% include "footer.html" %}
 
 {% if user.is_authenticated and venue.owner.user == user %}
-    {% include 'modal/edit_venue.html' %}
-    {% include 'modal/delete_venue.html' %}
+    {% include "modal/edit_venue.html" %}
+    {% include "modal/delete_venue.html" %}
 {% endif %}
+
+{% include 'add_review.html' %}
+{% include 'edit_review.html' %}
+{% include 'delete_review.html' %}
 
 <style>
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -168,7 +173,6 @@
     const VENUE_DETAIL_API_URL_BASE = "{% url 'venue:api_get_venue_detail' 9999 %}".replace('/9999/', '/');
     const EDIT_VENUE_API_URL_BASE = "{% url 'venue:api_edit_venue' 9999 %}".replace('/9999/', '/');
     const DELETE_VENUE_API_URL_BASE = "{% url 'venue:api_delete_venue' 9999 %}".replace('/9999/', '/');
-    const CSRF_TOKEN = "{{ csrf_token }}";
 
     function showModal(modalId) {
         const modal = document.getElementById(modalId);
@@ -343,8 +347,24 @@
         if (deleteVenueConfirmBtn) {
             deleteVenueConfirmBtn.addEventListener('click', handleDeleteConfirm);
         }
-    });
 
+        const openEditButton = document.getElementById('open-edit-btn');
+        if (openEditButton) {
+            openEditButton.addEventListener('click', () => {
+                const venueId = openEditButton.dataset.id;
+                showEditModal(venueId);
+            });
+        }
+
+        const openDeleteButton = document.getElementById('open-delete-btn');
+        if (openDeleteButton) {
+            openDeleteButton.addEventListener('click', () => {
+                const venueId = openDeleteButton.dataset.id;
+                const venueName = openDeleteButton.dataset.name;
+                showDeleteModal(venueId, venueName);
+            });
+        }
+    });
 </script>
 {% endif %}
 {% endblock extra_js %}
