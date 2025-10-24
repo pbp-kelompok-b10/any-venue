@@ -1,0 +1,38 @@
+{% load static %}
+
+<!-- Join Event Modal -->
+<div id="joinEventModal" class="hidden fixed inset-0 bg-black/25 flex justify-center items-center z-50">
+    <div class="p-10 relative bg-white flex flex-col justify-start items-center gap-8 rounded-2xl shadow-lg w-[500px]">
+        <!-- Close Button -->
+        <button class="absolute top-4 right-4 text-gray-700 hover:text-red-500 text-2xl font-bold transition-colors duration-300" onclick="toggleJoinModal(false)">✕</button>
+
+        <!-- Icon -->
+        <div class="flex justify-center">
+            <svg class="w-20 h-20 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+
+        <!-- Header -->
+        <div class="text-center text-gray-900 text-4xl font-bold font-['Roboto']">Join Event</div>
+        <div class="text-center text-gray-700 text-lg font-normal font-['Roboto']">Apakah Anda yakin ingin bergabung dengan event ini?</div>
+
+        <!-- Form -->
+        <form id="joinEventForm" class="flex justify-end gap-4 pt-4 w-full">
+            {% csrf_token %}
+            
+            <!-- Action Buttons -->
+            <button 
+                type="button" 
+                onclick="toggleJoinModal(false)" 
+                class="px-5 py-2 outline outline-1 outline-gray-400 rounded-md text-gray-700 font-medium font-['Roboto'] hover:bg-gray-50 transition-colors duration-300">
+                Cancel
+            </button>
+            <button 
+                type="submit" 
+                class="px-5 py-2 bg-green-600 text-white rounded-md font-medium font-['Roboto'] hover:bg-green-700 transition-colors duration-300">
+                Join Event
+            </button>
+        </form>
+    </div>
+</div>

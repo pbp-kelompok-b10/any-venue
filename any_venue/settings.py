@@ -52,8 +52,8 @@ INSTALLED_APPS = [
     'booking',
     # 'user.apps.UserConfig',
     'review',
-    'event',
-    'account.apps.AccountConfig'
+    'account.apps.AccountConfig',
+    'event.apps.EventConfig'
     
 ]
 
