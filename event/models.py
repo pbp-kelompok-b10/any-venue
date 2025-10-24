@@ -1,10 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 from venue.models import Venue
+from account.models import Profile
 
 # Create your models here.
 class Event(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='event')
+    owner = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='event')
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE, related_name='event')
     thumbnail = models.URLField(blank=True, null=True)
     name = models.CharField(max_length=100)
@@ -27,8 +28,20 @@ class Event(models.Model):
         return self.venue.address
     
     @property
-    def available_slots(self):
-        return max(self.total_slots - self.booked_slots, 0)
+    def registered_count(self):
+        return self.registrations.count()
 
     def __str__(self):
         return f"{self.name} di {self.venue.name} ({self.date})"
+    
+class Registration(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="registrations")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    registered_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Pastikan 1 user hanya bisa daftar 1x di 1 event
+        unique_together = ('event', 'user')
+
+    def __str__(self):
+        return f"{self.user.username} → {self.event.name}"
