@@ -120,16 +120,36 @@ def edit_profile(request):
     except Profile.DoesNotExist:
         return JsonResponse({"error": "Profile not found"}, status=404)
 
+    old_role = profile.role  # simpan role sebelum diubah
+
     username = data.get("username")
     if username:
         profile.user.username = username
         profile.user.save()
 
-    # optional: hanya allow role change untuk admin, jangan user biasa
     role = data.get("role")
     if role and role in dict(Profile.ROLE_CHOICES).keys():
         profile.role = role
         profile.save()
+
+        # 🔹 Jika role berubah
+        if role != old_role:
+            # OWNER → USER → hapus venue miliknya
+            if old_role == "OWNER" and role == "USER":
+                deleted_venues = Venue.objects.filter(owner=request.user.profile)
+                count_venues = deleted_venues.count()
+                deleted_venues.delete()
+                print(f"Hapus {count_venues} venue milik {request.user.username}")
+
+            # USER → OWNER → hapus review & booking miliknya
+            elif old_role == "USER" and role == "OWNER":
+                deleted_reviews = Review.objects.filter(user=request.user.profile)
+                deleted_bookings = Booking.objects.filter(user=request.user.profile)
+                count_reviews = deleted_reviews.count()
+                count_bookings = deleted_bookings.count()
+                deleted_reviews.delete()
+                deleted_bookings.delete()
+                print(f"Hapus {count_reviews} review dan {count_bookings} booking milik {request.user.username}")
 
     return JsonResponse({
         "success": True,
