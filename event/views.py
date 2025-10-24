@@ -12,15 +12,14 @@ from django.http import HttpResponse
 from django.core import serializers
 from django.shortcuts import render, redirect, get_object_or_404
 from event.forms import EventForm
-from event.models import Event
+from event.models import Event, Registration
 
- # @login_required
+@login_required
 def show_event(request):
     events = Event.objects.all().order_by('date', 'start_time')
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         data = serializers.serialize('json', events)
         return JsonResponse({'events': data})
-
     return render(request, 'show_event.html', {'events': events})
 
 def show_event_json(request):
@@ -32,13 +31,11 @@ def show_event_json(request):
             "description": event.description,
             "date": event.date,
             "start_time": event.start_time,
-            "total_slots": event.total_slots,
-            "booked_slots": event.booked_slots,
-            "available_slots": event.available_slots,
+            "registered_count": event.registered_count,
             "venue_name": event.venue_name,
             "venue_address": event.venue_address,
             "venue_type": event.venue_type,
-            "owner": event.owner.username,
+            "owner": event.owner.user.username,
             "thumbnail": event.thumbnail,
         }
         for event in events
@@ -54,20 +51,18 @@ def show_event_json_by_id(request, id):
             "description": event.description,
             "date": event.date,
             "start_time": event.start_time,
-            "total_slots": event.total_slots,
-            "booked_slots": event.booked_slots,
-            "available_slots": event.available_slots,
+            "registered_count": event.registered_count,
             "venue_name": event.venue_name,
             "venue_address": event.venue_address,
             "venue_type": event.venue_type,
-            "owner": event.owner.username,
+            "owner": event.owner.user.username,
             "thumbnail": event.thumbnail,
         }
     ]
     return JsonResponse(data, safe=False)
 
 @csrf_exempt
- # @login_required
+@login_required
 @require_http_methods(["POST"])
 def create_event(request):
     form = EventForm(request.POST, user=request.user)
@@ -78,23 +73,21 @@ def create_event(request):
         return JsonResponse({'message': 'Event berhasil dibuat!'}, status=201)
     return JsonResponse({'errors': form.errors}, status=400)
 
- # @login_required
+@login_required
 def show_event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         data = {
             'id': event.id,
             'name': event.name,
-            'owner': event.owner.username,
+            'owner': event.owner.user.username,
             'venue': event.venue_name,
             'venue_type': event.venue_type,
             'venue_address': event.venue_address,
             'date': event.date.strftime('%Y-%m-%d'),
             'start_time': event.start_time.strftime('%H:%M'),
             'description': event.description,
-            'total_slots': event.total_slots,
-            'booked_slots': event.booked_slots,
-            'available_slots': event.available_slots,
+            "registered_count": event.registered_count,
             'thumbnail': event.thumbnail or '',
         }
         return JsonResponse({'event': data}, status=200)
@@ -102,7 +95,7 @@ def show_event_detail(request, event_id):
     return render(request, 'event_detail.html', {'event': event})
 
 @csrf_exempt
- # @login_required
+@login_required
 @require_http_methods(["POST"])
 def update_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
@@ -113,9 +106,35 @@ def update_event(request, event_id):
     return JsonResponse({'errors': form.errors}, status=400)
 
 @csrf_exempt
- # @login_required
+@login_required
 @require_http_methods(["POST"])
 def delete_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     event.delete()
     return JsonResponse({'message': 'Event berhasil dihapus.'})
+
+@login_required
+def join_event(request, event_id):
+    if request.method == "POST":
+        event = get_object_or_404(Event, id=event_id)
+        user = request.user
+
+        # Cegah duplikat pendaftaran (termasuk owner sendiri)
+        if Registration.objects.filter(user=user, event=event).exists():
+            return JsonResponse({"message": "You already registered for this event."}, status=400)
+
+        Registration.objects.create(user=user, event=event)
+
+        return JsonResponse({"message": "Successfully registered for the event (tracking enabled)."})
+    
+    return JsonResponse({"message": "Invalid request."}, status=400)
+
+
+@login_required
+def check_registration(request, event_id):
+    """Digunakan untuk memeriksa apakah user sudah terdaftar di event ini."""
+    event = get_object_or_404(Event, id=event_id)
+    user = request.user
+
+    registered = Registration.objects.filter(user=user, event=event).exists()
+    return JsonResponse({"registered": registered})
