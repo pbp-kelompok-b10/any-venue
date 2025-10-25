@@ -1,0 +1,116 @@
+{% load static %}
+
+<!-- Update Event Modal -->
+<div id="updateEventModal" class="hidden fixed inset-0 bg-black/25 flex justify-center items-center z-50">
+    <div class="p-12 relative bg-white flex flex-col justify-start items-center gap-8 rounded-2xl shadow-lg w-[700px] max-h-[90vh] overflow-y-auto">
+        <!-- Close Button -->
+        <button class="absolute top-4 right-4 text-gray-700 hover:text-red-500 text-2xl font-bold transition-colors duration-300" onclick="toggleUpdateModal(false)">✕</button>
+
+        <!-- Header -->
+        <div class="text-center text-gray-900 text-5xl font-bold font-['Roboto']">Edit Event</div>
+        <div class="text-center text-gray-700 text-lg font-normal font-['Roboto']">Ubah detail event yang sudah ada.</div>
+
+        <!-- Form -->
+        <form id="updateEventForm" class="w-[560px] flex flex-col gap-6">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="updateEventId">
+
+            <!-- Event Name -->
+            <div>
+                <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Event Name *</label>
+                <input 
+                    type="text" 
+                    name="name" 
+                    id="updateName" 
+                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
+                    placeholder="Enter event name"
+                    required>
+            </div>
+
+            <!-- Venue -->
+            <div>
+                <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Venue *</label>
+                <select 
+                    name="venue" 
+                    id="updateVenue" 
+                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
+                    required>
+                    <option value="">Select a venue</option>
+                </select>
+            </div>
+
+            <!-- Date and Time -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Date *</label>
+                    <input 
+                        type="date" 
+                        name="date" 
+                        id="updateDate" 
+                        class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
+                        required>
+                </div>
+                <div>
+                    <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Start Time *</label>
+                    <input 
+                        type="time" 
+                        name="start_time" 
+                        id="updateStartTime" 
+                        class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
+                        required>
+                </div>
+            </div>
+
+            <!-- Total Slots -->
+            <div>
+                <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Total Slots *</label>
+                <input 
+                    type="number" 
+                    name="total_slots" 
+                    id="updateTotalSlots" 
+                    min="2" 
+                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
+                    placeholder="Minimum 2 slots"
+                    required>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Description</label>
+                <textarea 
+                    name="description" 
+                    id="updateDescription" 
+                    rows="3" 
+                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300 resize-none" 
+                    placeholder="Enter event description"></textarea>
+            </div>
+
+            <!-- Thumbnail URL -->
+            <div>
+                <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Thumbnail URL</label>
+                <input 
+                    type="url" 
+                    name="thumbnail" 
+                    id="updateThumbnail" 
+                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
+                    placeholder="https://example.com/image.jpg">
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end gap-4 pt-4">
+                <button 
+                    type="button" 
+                    onclick="toggleUpdateModal(false)" 
+                    class="px-5 py-2 outline outline-1 outline-gray-400 rounded-md text-gray-700 font-medium font-['Roboto'] hover:bg-gray-50 transition-colors duration-300">
+                    Cancel
+                </button>
+                <button 
+                    type="submit" 
+                    class="px-5 py-2 bg-Orange text-white rounded-md font-medium font-['Roboto'] hover:bg-Sunrise-Orange transition-colors duration-300">
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+

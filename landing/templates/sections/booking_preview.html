@@ -1,229 +1,93 @@
 {% extends "base.html" %}
 {% load static %}
+
+{% block title %}Your Game, Your Space – AnyVenue{% endblock title %}
+
 {% block content %}
 
-<div id="booking" class="w-full px-24 py-36 bg-gradient-to-b from-[#A5B1C1] via-[#3D5A80] to-[#A5B1C1] inline-flex flex-col justify-start items-center gap-20 overflow-hidden">
-    <div class="w-full max-w-[1280px] flex flex-col justify-start items-center gap-20">
-        <div class="w-full max-w-[768px] flex flex-col justify-start items-center gap-4">
-            <div class="self-stretch flex flex-col justify-start items-center gap-6">
-                <div class="self-stretch text-center justify-start text-white text-5xl font-bold font-['Roboto'] leading-[57.60px] [text-shadow:_0px_4px_10px_rgb(0_0_0_/_0.75)]">Your Game, Your Space</div>
-                <div class="self-stretch text-center justify-start text-white text-lg font-normal font-['Roboto'] leading-relaxed">Atur jadwal bermain atau buka peluang baru dengan menyewakan lapanganmu.        Dengan AnyVenue semuanya jadi lebih mudah, cepat, dan efisien.</div>
-            </div>
-        </div>
-    
+<div id="booking" class="w-full py-24 md:py-36 bg-Flash-White">
+     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        
-        <div class="self-stretch flex flex-col justify-start items-center gap-16">
-            <div class="self-stretch flex flex-col md:flex-row justify-start items-start gap-8">
-                <div class="flex-1 inline-flex flex-col justify-start items-center gap-8">
-                    <div class="self-stretch bg-[#FFFFFF] outline outline-1 outline-[#000000] flex flex-col justify-start items-start overflow-hidden">
-                        <img class="self-stretch h-56 object-cover" src="https://placehold.co/405x228" />
-                        <div class="self-stretch p-6 flex flex-col justify-start items-start gap-6">
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div class="self-stretch flex flex-col justify-start items-start gap-2">
-                                    <div class="self-stretch justify-start text-black text-2xl font-bold font-['Roboto'] leading-loose">Lapangan</div>
-                                    <div class="self-stretch justify-start text-black text-base font-normal font-['Roboto'] leading-normal">Deskripsi singkat</div>
-                                </div>
-                                <div class="self-stretch h-7 inline-flex justify-start items-start gap-2 flex-wrap content-start">
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">sport</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Indor</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag lain</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div data-alternate="False" data-icon-position="Trailing" data-small="False" data-style="Link" class="inline-flex justify-center items-center gap-2">
-                                    <div class="justify-start text-black text-base font-normal font-['Roboto'] leading-normal">View </div>
-                                    <div class="w-6 h-6 relative overflow-hidden flex justify-center items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="self-stretch bg-[#FFFFFF] outline outline-1 outline-[#000000] flex flex-col justify-start items-start overflow-hidden">
-                        <img class="self-stretch h-56 object-cover" src="https://placehold.co/405x228" />
-                        <div class="self-stretch p-6 flex flex-col justify-start items-start gap-6">
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div class="self-stretch flex flex-col justify-start items-start gap-2">
-                                    <div class="self-stretch justify-start text-black text-2xl font-bold font-['Roboto'] leading-loose">venue name</div>
-                                    <div class="self-stretch justify-start text-black text-base font-normal font-['Roboto'] leading-normal">Lorem ipsum dolor sit amet, consectetur adipiscing elit. </div>
-                                </div>
-                                <div class="self-stretch inline-flex justify-start items-start gap-2 flex-wrap content-start">
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag one</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag two</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag three</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div data-alternate="False" data-icon-position="Trailing" data-small="False" data-style="Link" class="inline-flex justify-center items-center gap-2">
-                                    <div class="justify-start text-black text-base font-normal font-['Roboto'] leading-normal">View </div>
-                                    <div class="w-6 h-6 relative overflow-hidden flex justify-center items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-1 inline-flex flex-col justify-start items-center gap-8">
-                    <div class="self-stretch bg-[#FFFFFF] outline outline-1 outline-[#000000] flex flex-col justify-start items-start overflow-hidden">
-                        <img class="self-stretch h-96 object-cover" src="https://placehold.co/405x405" />
-                        <div class="self-stretch p-6 flex flex-col justify-start items-start gap-6">
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div class="self-stretch flex flex-col justify-start items-start gap-2">
-                                    <div class="self-stretch justify-start text-black text-2xl font-bold font-['Roboto'] leading-loose">venue name here</div>
-                                    <div class="self-stretch justify-start text-black text-base font-normal font-['Roboto'] leading-normal">Lorem ipsum dolor sit amet, consectetur adipiscing elit. </div>
-                                </div>
-                                <div class="self-stretch inline-flex justify-start items-start gap-2 flex-wrap content-start">
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag one</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag two</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag three</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div data-alternate="False" data-icon-position="Trailing" data-small="False" data-style="Link" class="inline-flex justify-center items-center gap-2">
-                                    <div class="justify-start text-black text-base font-normal font-['Roboto'] leading-normal">View </div>
-                                    <div class="w-6 h-6 relative overflow-hidden flex justify-center items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="self-stretch bg-[#FFFFFF] outline outline-1 outline-[#000000] flex flex-col justify-start items-start overflow-hidden">
-                        <img class="self-stretch h-56 object-cover" src="https://placehold.co/405x228" />
-                        <div class="self-stretch p-6 flex flex-col justify-start items-start gap-6">
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div class="self-stretch flex flex-col justify-start items-start gap-2">
-                                    <div class="self-stretch justify-start text-black text-2xl font-bold font-['Roboto'] leading-loose">venue name here</div>
-                                    <div class="self-stretch justify-start text-black text-base font-normal font-['Roboto'] leading-normal">Lorem ipsum dolor sit amet, consectetur adipiscing elit. </div>
-                                </div>
-                                <div class="self-stretch inline-flex justify-start items-start gap-2 flex-wrap content-start">
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag one</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag two</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag three</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div data-alternate="False" data-icon-position="Trailing" data-small="False" data-style="Link" class="inline-flex justify-center items-center gap-2">
-                                    <div class="justify-start text-black text-base font-normal font-['Roboto'] leading-normal">View </div>
-                                    <div class="w-6 h-6 relative overflow-hidden flex justify-center items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-1 inline-flex flex-col justify-start items-center gap-8">
-                    <div class="self-stretch bg-[#FFFFFF] outline outline-1 outline-[#000000] flex flex-col justify-start items-start overflow-hidden">
-                        <img class="self-stretch h-56 object-cover" src="https://placehold.co/405x228" />
-                        <div class="self-stretch p-6 flex flex-col justify-start items-start gap-6">
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div class="self-stretch flex flex-col justify-start items-start gap-2">
-                                    <div class="self-stretch justify-start text-black text-2xl font-bold font-['Roboto'] leading-loose">venue name here</div>
-                                    <div class="self-stretch justify-start text-black text-base font-normal font-['Roboto'] leading-normal">Lorem ipsum dolor sit amet, consectetur adipiscing elit. </div>
-                                </div>
-                                <div class="self-stretch inline-flex justify-start items-start gap-2 flex-wrap content-start">
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag one</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag two</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag three</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div data-alternate="False" data-icon-position="Trailing" data-small="False" data-style="Link" class="inline-flex justify-center items-center gap-2">
-                                    <div class="justify-start text-black text-base font-normal font-['Roboto'] leading-normal">View </div>
-                                    <div class="w-6 h-6 relative overflow-hidden flex justify-center items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="self-stretch bg-[#FFFFFF] outline outline-1 outline-[#000000] flex flex-col justify-start items-start overflow-hidden">
-                        <img class="self-stretch h-56 object-cover" src="https://placehold.co/405x228" />
-                        <div class="self-stretch p-6 flex flex-col justify-start items-start gap-6">
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div class="self-stretch flex flex-col justify-start items-start gap-2">
-                                    <div class="self-stretch justify-start text-black text-2xl font-bold font-['Roboto'] leading-loose">venue name here</div>
-                                    <div class="self-stretch justify-start text-black text-base font-normal font-['Roboto'] leading-normal">Lorem ipsum dolor sit amet, consectetur adipiscing elit. </div>
-                                </div>
-                                <div class="self-stretch inline-flex justify-start items-start gap-2 flex-wrap content-start">
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag one</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag two</div>
-                                    </div>
-                                    <div data-alternate="False" data-icon-position="No Icon" data-text-only="False" class="px-2 py-1 bg-neutral-lightest-new flex justify-start items-start">
-                                        <div class="justify-start text-black text-sm font-semibold font-['Roboto'] leading-tight">Tag three</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                                <div data-alternate="False" data-icon-position="Trailing" data-small="False" data-style="Link" class="inline-flex justify-center items-center gap-2">
-                                    <div class="justify-start text-black text-base font-normal font-['Roboto'] leading-normal">View </div>
-                                    <div class="w-6 h-6 relative overflow-hidden flex justify-center items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="flex flex-col justify-start items-start gap-4">
-                <div data-alternate="True" data-icon-position="No icon" data-small="False" data-style="Secondary" class="px-6 py-3 outline outline-1 outline-white inline-flex justify-center items-center gap-2">
-                    <div class="justify-start text-white text-base font-normal font-['Roboto'] leading-normal">View all</div>
-                </div>
-            </div>
+        <div class="max-w-3xl mx-auto text-center mb-12 md:mb-16">
+            <h2 class="text-4xl md:text-4xl font-semibold text-gray-800 leading-tight">
+                Your Game, Your Space!
+            </h2>
+            <p class="mt-4 text-lg text-gray-600 leading-relaxed">
+                Temukan tempat bermain favorit baru Anda dari 3 venue terbaik yang kami pilihkan untuk Anda.
+            </p>
         </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for venue in venues_list %}
+            <article class="group bg-white border border-black
+                            hover:shadow-md hover:-translate-y-1 transition-all duration-300 
+                            overflow-hidden flex flex-col
+                            md:last:col-span-2 lg:last:col-span-1">
+                
+                <a href="{% url 'venue:venue_detail' venue.pk %}" class="block aspect-[16/9] relative overflow-hidden">
+                    <img src="{{ venue.image_url|default:'https://placehold.co/400x225/3D5A80/FFFFFF?text=Venue+Image' }}" alt="{{ venue.name }}" 
+                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    
+                    <div class="absolute top-3 left-3 flex gap-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold 
+                                     bg-white/90 text-[#3D5A80] border border-[#3D5A80]">
+                            {{ venue.category.name }}
+                        </span>
+                    </div>
+                </a>
 
+                <div class="p-6 flex flex-col flex-1 gap-4"> <div class="self-stretch flex flex-col justify-start items-start gap-2 flex-1">
+                        
+                        <div class="self-stretch">
+                            <h3 class="flex-1 text-gray-900 text-xl font-semibold leading-7 line-clamp-2">{{ venue.name }}</h3>
+                        </div>
+                        
+                        <p class="self-stretch text-gray-700 text-base font-normal leading-normal line-clamp-2" style="min-height: 3rem;"> {{ venue.description|truncatewords:12|default:"No description available." }} </p>
+                    </div>
+
+                    <div class="self-stretch flex flex-row flex-wrap items-center gap-x-4 gap-y-1 pt-2 mt-auto"> <div class="flex justify-start items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                            </svg>
+                            <div class="text-gray-700 text-sm font-normal leading-tight">{{ venue.city.name }}</div>
+                        </div>
+                        <div class="flex justify-start items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                            </svg>
+                            <div class="text-gray-700 text-sm font-normal leading-tight">{{ venue.get_type_display }}</div>
+                        </div>
+                    </div>
+
+                    <div class="self-stretch inline-flex justify-between items-end gap-4 pt-4 border-t border-gray-200">
+                        <div class="flex-1 flex justify-start items-end gap-1">
+                            <div>
+                                <span class="text-gray-900 text-2xl font-semibold leading-loose">Rp {{ venue.price|floatformat:0 }}</span>
+                                <span class="text-gray-700 text-sm font-normal leading-normal"> / jam</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <a href="{% url 'venue:venue_detail' venue.pk %}" 
+                               class="px-5 py-2 bg-transparent border border-black text-black text-base font-normal 
+                                      hover:bg-black hover:text-white transition-colors">
+                                View More
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            {% endfor %}
+        </div>
+
+        {% if not venues_list %}
+        <div class="md:col-span-2 lg:col-span-3 text-center text-gray-500 py-16">
+            <h3 class="text-xl font-semibold">There is no Venue yet.</h3>
+            <p class="mt-2">Saat ini belum ada venue yang terdaftar. Silakan cek kembali nanti.</p>
+        </div>
+        {% endif %}
 
     </div>
 </div>
-
 {% endblock content %}

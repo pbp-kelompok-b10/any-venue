@@ -1,186 +1,258 @@
-<div class="w-[1440px] h-[1935px] relative bg-white overflow-hidden">
-    <div data-breakpoint="Desktop" class="w-[1440px] px-16 py-28 left-0 top-[72px] absolute bg-gradient-to-b from-Light-Navy to-Flash-White inline-flex flex-col justify-start items-center gap-20 overflow-hidden">
-        <div class="w-full max-w-[1280px] flex flex-col justify-start items-start gap-20">
-            <div class="self-stretch inline-flex justify-start items-start gap-20">
-                <div class="flex-1 inline-flex flex-col justify-start items-start gap-8">
-                    <div class="self-stretch inline-flex justify-start items-center gap-2">
-                        <div class="text-center justify-start text-Color-Scheme-1-Text text-base font-normal font-['Roboto'] leading-normal">Events</div>
-                        <div class="w-4 h-4 relative overflow-hidden">
-                            <div class="w-1 h-2 left-[5.67px] top-[4.12px] absolute bg-Color-Scheme-1-Text border-[0.67px] border-Color-Scheme-1-Text"></div>
-                        </div>
-                        <div class="text-center justify-start text-Color-Scheme-1-Text text-base font-normal font-['Roboto'] leading-normal">Events title</div>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ event.name }} - AnyVenue{% endblock %}
+
+{% block body_class %}{% endblock %}
+
+{% block content %}
+<!-- Include Navbar -->
+{% include 'navbar.html' %}
+
+<!-- Main Content -->
+<div class="w-full px-4 sm:px-8 lg:px-16 py-28 bg-gradient-to-b from-Light-Navy to-Flash-White flex flex-col justify-start items-center gap-20">
+    <div class="w-full max-w-7xl flex flex-col justify-start items-start gap-20">
+        <!-- Event Header Section -->
+        <div class="self-stretch flex flex-col lg:flex-row justify-start items-start gap-20">
+            <!-- Left Column: Event Details -->
+            <div class="flex-1 flex flex-col justify-start items-start gap-8">
+                <!-- Breadcrumb -->
+                <div class="self-stretch flex justify-start items-center gap-2">
+                    <a href="{% url 'event:show_event' %}" class="text-center text-black text-base font-normal font-['Roboto'] leading-6 hover:underline">Events</a>
+                    <div class="w-4 h-4 relative overflow-hidden">
+                        <svg class="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                        </svg>
                     </div>
-                    <div class="self-stretch flex flex-col justify-start items-start gap-6">
-                        <div class="self-stretch justify-start text-Color-Scheme-1-Text text-5xl font-bold font-['Roboto'] leading-[57.60px]">Event title </div>
-                        <div class="self-stretch justify-start text-Color-Scheme-1-Text text-lg font-normal font-['Roboto'] leading-relaxed">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique. (Basically deskripsi nya event)</div>
-                    </div>
-                    <div class="inline-flex justify-start items-start gap-4">
-                        <div class="px-6 py-3 bg-Color-Neutral-Darkest outline outline-1 outline-Color-Neutral-Darkest flex justify-center items-center gap-2">
-                            <div class="justify-start text-Color-White text-base font-normal font-['Roboto'] leading-normal">Join Event</div>
-                        </div>
-                    </div>
+                    <div id="event-breadcrumb" class="text-center text-black text-base font-normal font-['Roboto'] leading-6">Event title</div>
                 </div>
-                <div class="w-[464px] inline-flex flex-col justify-start items-start gap-8">
-                    <div class="self-stretch inline-flex justify-start items-start gap-8">
-                        <div class="flex-1 inline-flex flex-col justify-start items-start gap-2">
-                            <div class="self-stretch justify-start text-Color-Scheme-1-Text text-xl font-bold font-['Roboto'] leading-7">Date</div>
-                            <div class="self-stretch justify-start text-Color-Scheme-1-Text text-base font-normal font-['Roboto'] leading-normal">Sat 10 Feb 2024</div>
-                        </div>
-                        <div class="flex-1 inline-flex flex-col justify-start items-start gap-2">
-                            <div class="self-stretch justify-start text-Color-Scheme-1-Text text-xl font-bold font-['Roboto'] leading-7">Location</div>
-                            <div class="self-stretch justify-start text-Color-Scheme-1-Text text-base font-normal font-['Roboto'] leading-normal">Venue A.. </div>
-                        </div>
-                    </div>
-                    <div class="self-stretch inline-flex justify-start items-start gap-8">
-                        <div class="flex-1 inline-flex flex-col justify-start items-start gap-2">
-                            <div class="self-stretch justify-start text-Color-Scheme-1-Text text-xl font-bold font-['Roboto'] leading-7">Event Owner</div>
-                            <div class="self-stretch justify-start text-Color-Scheme-1-Text text-base font-normal font-['Roboto'] leading-normal">Username Owner</div>
-                        </div>
-                        <div class="flex-1 inline-flex flex-col justify-start items-start gap-2">
-                            <div class="self-stretch justify-start text-Color-Scheme-1-Text text-xl font-bold font-['Roboto'] leading-7">Sport</div>
-                            <div class="self-stretch justify-start text-Color-Scheme-1-Text text-base font-normal font-['Roboto'] leading-normal">In-person</div>
-                        </div>
-                    </div>
+
+                <!-- Event Title and Description -->
+                <div class="self-stretch flex flex-col justify-start items-start gap-6">
+                    <div id="event-title" class="self-stretch text-black text-4xl lg:text-5xl font-bold font-['Roboto'] leading-tight lg:leading-[57.60px]">Event title</div>
+                    <div id="event-description" class="self-stretch text-black text-lg font-normal font-['Roboto'] leading-7">Loading...</div>
+                </div>
+
+                <!-- Join Event Button -->
+                <div class="flex justify-start items-start gap-4">
+                    <button id="join-event-btn" onclick="showJoinModal()" class="px-6 py-3 bg-black border border-black flex justify-center items-center gap-2 hover:bg-[#000457] transition-colors duration-300">
+                        <div class="text-white text-base font-normal font-['Roboto'] leading-6">Join Event</div>
+                    </button>
                 </div>
             </div>
-            <img class="self-stretch h-[738px]" src="https://placehold.co/1280x738" />
-        </div>
-    </div>
-    <div class="w-[1440px] h-16 px-16 left-0 top-0 absolute bg-neutral-lightest-new inline-flex flex-col justify-center items-center">
-        <div class="self-stretch inline-flex justify-start items-center gap-4">
-            <div class="w-20 h-10 flex justify-center items-center">
-                <div data-alternate="False" class="w-20 h-9 relative overflow-hidden">
-                    <div class="w-16 h-9 left-[6.67px] top-0 absolute overflow-hidden">
-                        <div class="w-5 h-4 left-[50.82px] top-[10.87px] absolute bg-text-dark"></div>
-                        <div class="w-5 h-6 left-[34.33px] top-[11.32px] absolute bg-text-dark"></div>
-                        <div class="w-5 h-4 left-[18.55px] top-[10.87px] absolute bg-text-dark"></div>
-                        <div class="w-5 h-4 left-0 top-[10.24px] absolute bg-text-dark"></div>
-                        <div class="w-4 h-2.5 left-[1.15px] top-0 absolute bg-text-dark"></div>
+
+            <!-- Right Column: Event Info -->
+            <div class="w-full lg:w-[464px] flex flex-col justify-start items-start gap-8">
+                <div class="self-stretch grid grid-cols-2 gap-8">
+                    <!-- Date -->
+                    <div class="flex flex-col justify-start items-start gap-2">
+                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Date</div>
+                        <div id="event-date" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6">Loading...</div>
+                    </div>
+                    <!-- Location -->
+                    <div class="flex flex-col justify-start items-start gap-2">
+                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Location</div>
+                        <div id="event-location" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6">Loading...</div>
                     </div>
                 </div>
-            </div>
-            <div class="w-[963px] px-96 flex justify-end items-center gap-2.5">
-                <div class="flex justify-end items-center gap-8">
-                    <div class="flex justify-center items-center gap-2">
-                        <div class="justify-start text-text-dark text-base font-normal font-['Roboto'] leading-normal">Booking</div>
+
+                <div class="self-stretch grid grid-cols-2 gap-8">
+                    <!-- Event Owner -->
+                    <div class="flex flex-col justify-start items-start gap-2">
+                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Event Owner</div>
+                        <div id="event-owner" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6">Loading...</div>
                     </div>
-                    <div class="px-5 py-2 outline outline-1 outline-Color-Neutral-Darkest flex justify-center items-center gap-2">
-                        <div class="justify-start text-text-dark text-base font-normal font-['Roboto'] leading-normal">Event</div>
-                    </div>
-                </div>
-            </div>
-            <div class="w-36 h-8 inline-flex flex-col justify-center items-end">
-                <div class="text-right justify-start text-text-dark text-sm font-semibold font-['Roboto'] leading-tight">Username </div>
-                <div class="self-stretch inline-flex justify-end items-center gap-2">
-                    <div class="justify-start text-text-dark text-sm font-normal font-['Roboto'] leading-tight">Member</div>
-                </div>
-            </div>
-            <div class="w-20 flex justify-center items-center gap-4">
-                <div data-alternate="False" data-icon-position="No icon" data-small="True" data-style="Primary" class="px-5 py-2 bg-text-dark outline outline-1 outline-text-dark flex justify-center items-center gap-2">
-                    <div class="justify-start text-Color-White text-base font-normal font-['Roboto'] leading-normal">Logout</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div data-breakpoint="Desktop" class="w-[1440px] px-16 py-20 left-0 top-[1386px] absolute bg-neutral-lightest-new inline-flex flex-col justify-start items-center gap-8 overflow-hidden">
-        <div class="w-full max-w-[1280px] flex flex-col justify-start items-start gap-20">
-            <div class="self-stretch flex flex-col justify-start items-start gap-8">
-                <div class="self-stretch p-12 bg-neutral-lightest-new outline outline-1 outline-offset-[-1px] outline-Color-Scheme-1-Border inline-flex justify-start items-start gap-32">
-                    <div class="w-[500px] inline-flex flex-col justify-start items-start gap-6">
-                        <div data-alternate="False" class="w-20 h-9 relative overflow-hidden">
-                            <div class="w-16 h-9 left-[6.67px] top-0 absolute overflow-hidden">
-                                <div class="w-5 h-4 left-[50.82px] top-[10.87px] absolute bg-black"></div>
-                                <div class="w-5 h-6 left-[34.33px] top-[11.32px] absolute bg-black"></div>
-                                <div class="w-5 h-4 left-[18.55px] top-[10.87px] absolute bg-black"></div>
-                                <div class="w-5 h-4 left-0 top-[10.24px] absolute bg-black"></div>
-                                <div class="w-4 h-2.5 left-[1.15px] top-0 absolute bg-black"></div>
-                            </div>
-                        </div>
-                        <div class="self-stretch justify-start text-black text-base font-normal font-['Roboto'] leading-normal">Let’s grow the sports community together!</div>
-                    </div>
-                    <div class="flex-1 flex justify-start items-start gap-10">
-                        <div class="flex-1 inline-flex flex-col justify-start items-start gap-4 overflow-hidden">
-                            <div class="self-stretch justify-start text-black text-base font-semibold font-['Roboto'] leading-normal">Perusahaan</div>
-                            <div class="self-stretch flex flex-col justify-start items-start">
-                                <div class="self-stretch py-2 inline-flex justify-start items-start">
-                                    <div class="flex-1 justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">Tentang</div>
-                                </div>
-                                <div class="self-stretch py-2 inline-flex justify-start items-start">
-                                    <div class="flex-1 justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">Kebijakan & Privasi</div>
-                                </div>
-                                <div class="self-stretch py-2 inline-flex justify-start items-start">
-                                    <div class="flex-1 justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">Syarat & Ketentuan</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex-1 inline-flex flex-col justify-start items-start gap-4 overflow-hidden">
-                            <div class="self-stretch justify-start text-black text-base font-semibold font-['Roboto'] leading-normal">Hubungi Kami</div>
-                            <div class="self-stretch flex flex-col justify-start items-start">
-                                <div class="self-stretch py-2 inline-flex justify-start items-start">
-                                    <div class="flex-1 justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">Nabillakha</div>
-                                </div>
-                                <div class="self-stretch py-2 inline-flex justify-start items-start">
-                                    <div class="flex-1 justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">Fahri</div>
-                                </div>
-                                <div class="self-stretch py-2 inline-flex justify-start items-start">
-                                    <div class="flex-1 justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">Kurroro</div>
-                                </div>
-                                <div class="self-stretch py-2 inline-flex justify-start items-start">
-                                    <div class="flex-1 justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">Nauval</div>
-                                </div>
-                                <div class="self-stretch py-2 inline-flex justify-start items-start">
-                                    <div class="flex-1 justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">Sahilla</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex-1 inline-flex flex-col justify-start items-start gap-4">
-                            <div class="self-stretch justify-start text-black text-base font-semibold font-['Roboto'] leading-normal">Follow Us</div>
-                            <div class="self-stretch flex flex-col justify-start items-start">
-                                <div class="self-stretch py-2 inline-flex justify-start items-center gap-3">
-                                    <div class="w-6 h-6 relative overflow-hidden">
-                                        <div class="w-5 h-5 left-[2px] top-[2.24px] absolute bg-black"></div>
-                                    </div>
-                                    <div class="justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">Facebook</div>
-                                </div>
-                                <div class="self-stretch py-2 inline-flex justify-start items-center gap-3">
-                                    <div class="w-6 h-6 relative overflow-hidden">
-                                        <div class="w-4 h-4 left-[3px] top-[3.24px] absolute bg-black"></div>
-                                    </div>
-                                    <div class="justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">Instagram</div>
-                                </div>
-                                <div class="self-stretch py-2 inline-flex justify-start items-center gap-3">
-                                    <div class="w-6 h-6 relative overflow-hidden">
-                                        <div class="w-4 h-4 left-[3px] top-[4.24px] absolute bg-black"></div>
-                                    </div>
-                                    <div class="justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">X</div>
-                                </div>
-                                <div class="self-stretch py-2 inline-flex justify-start items-center gap-3">
-                                    <div class="w-6 h-6 relative overflow-hidden">
-                                        <div class="w-4 h-4 left-[3px] top-[3.24px] absolute bg-black"></div>
-                                    </div>
-                                    <div class="justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">LinkedIn</div>
-                                </div>
-                                <div class="self-stretch py-2 inline-flex justify-start items-center gap-3">
-                                    <div class="w-6 h-6 relative overflow-hidden">
-                                        <div class="w-5 h-3.5 left-[1.99px] top-[5px] absolute bg-black"></div>
-                                    </div>
-                                    <div class="justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">Youtube</div>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Sport Type -->
+                    <div class="flex flex-col justify-start items-start gap-2">
+                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Sport Type</div>
+                        <div id="event-type" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6">Loading...</div>
                     </div>
                 </div>
-                <div class="self-stretch flex flex-col justify-start items-start gap-8">
-                    <div class="self-stretch inline-flex justify-between items-start">
-                        <div class="justify-start text-black text-sm font-normal font-['Roboto'] leading-tight">© 2025. All rights reserved.</div>
-                        <div class="flex justify-start items-start gap-6">
-                            <div class="justify-start text-black text-sm font-normal font-['Roboto'] underline leading-tight">Privacy Policy</div>
-                            <div class="justify-start text-black text-sm font-normal font-['Roboto'] underline leading-tight">Terms of Service</div>
-                            <div class="justify-start text-black text-sm font-normal font-['Roboto'] underline leading-tight">Cookies Settings</div>
-                        </div>
+
+                <!-- Participants Info -->
+                <div class="self-stretch grid grid-cols-1 gap-8">
+                    <div class="flex flex-col justify-start items-start gap-2">
+                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Registered Participants</div>
+                        <div id="event-registered" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6">Loading...</div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Event Image -->
+        <img id="event-image" class="self-stretch h-[400px] lg:h-[738px] object-cover rounded-lg" src="https://placehold.co/1280x738" alt="Event Image">
     </div>
 </div>
+
+<!-- Include Footer -->
+{% include 'footer.html' %}
+
+<!-- Join Event Modal -->
+{% include 'modal/join_event.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const eventId = {{ event.id }};
+    let eventData = null;
+    let isRegistered = false;
+
+    // Load event details on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadEventDetail();
+        checkRegistrationStatus();
+    });
+
+    // Load event detail via AJAX
+    async function loadEventDetail() {
+        try {
+            const response = await fetch(`/event/json/${eventId}/`);
+            const data = await response.json();
+            eventData = data[0];
+            
+            displayEventDetail(eventData);
+        } catch (error) {
+            console.error('Error loading event:', error);
+            showNotification('Error loading event details', 'error');
+        }
+    }
+
+    // Display event details
+    function displayEventDetail(event) {
+        // Breadcrumb
+        document.getElementById('event-breadcrumb').textContent = event.name;
+        
+        // Title and Description
+        document.getElementById('event-title').textContent = event.name;
+        document.getElementById('event-description').textContent = event.description || 'No description available';
+        
+        // Event Info
+        document.getElementById('event-date').textContent = formatDate(event.date) + ' at ' + event.start_time;
+        document.getElementById('event-location').textContent = event.venue_name;
+        document.getElementById('event-owner').textContent = event.owner;
+        document.getElementById('event-type').textContent = event.venue_type;
+        document.getElementById('event-registered').textContent = `${event.registration_count ?? 0} users registered`;
+        
+        // Image
+        if (event.thumbnail) {
+            document.getElementById('event-image').src = event.thumbnail;
+        }
+    }
+
+    // Check if user is already registered
+    async function checkRegistrationStatus() {
+        try {
+            const response = await fetch(`/event/${eventId}/check-registration/`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+            isRegistered = data.is_registered;
+            
+            updateJoinButton();
+        } catch (error) {
+            console.error('Error checking registration:', error);
+        }
+    }
+
+    // Update join button based on registration status
+    function updateJoinButton() {
+        const btn = document.getElementById('join-event-btn');
+        
+        if (isRegistered) {
+            btn.innerHTML = '<div class="text-white text-base font-normal font-[\'Roboto\'] leading-6">Already Registered</div>';
+            btn.disabled = true;
+            btn.classList.remove('hover:bg-Sunrise-Orange');
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+        } else {
+            btn.innerHTML = '<div class="text-white text-base font-normal font-[\'Roboto\'] leading-6">Join Event</div>';
+            btn.disabled = false;
+            btn.classList.add('hover:bg-[#000457]');
+            btn.classList.remove('opacity-70', 'cursor-not-allowed');
+        }
+    }
+
+    // Show join modal
+    function showJoinModal() {
+        if (isRegistered) return;
+        
+        toggleJoinModal(true);
+    }
+
+    // Toggle join modal
+    function toggleJoinModal(show) {
+        const modal = document.getElementById('joinEventModal');
+        modal.classList.toggle('hidden', !show);
+        document.body.style.overflow = show ? 'hidden' : 'auto';
+    }
+
+    // Handle join event confirmation
+    document.getElementById('joinEventForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Joining...';
+        
+        try {
+            const response = await fetch(`/event/${eventId}/join/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                toggleJoinModal(false);
+                isRegistered = true;
+                updateJoinButton();
+                loadEventDetail(); // Reload to update slots
+                showNotification('Successfully joined the event!', 'success');
+            } else {
+                showNotification(data.message || 'Error joining event', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('An error occurred', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+
+    // Format date
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
+        return date.toLocaleDateString('en-GB', options);
+    }
+
+    // Show notification
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-20 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transition-all duration-300 ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            toggleJoinModal(false);
+        }
+    });
+</script>
+{% endblock %}

@@ -33,6 +33,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "keisha-vania-anyvenue.pbp.cs.ui.ac.id"]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://keisha-vania-anyvenue.pbp.cs.ui.ac.id"
+]
 
 # Application definition
 
@@ -43,14 +46,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authentication.apps.AuthenticationConfig',
+    'authentication',
     'landing',
     'venue',
     'booking',
     # 'user.apps.UserConfig',
     'review',
-    'event',
-    'account.apps.AccountConfig'
+    'account.apps.AccountConfig',
+    'event.apps.EventConfig'
     
 ]
 

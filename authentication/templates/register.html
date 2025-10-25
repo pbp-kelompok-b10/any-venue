@@ -18,7 +18,7 @@
                 </div>
                 <div class="flex flex-wrap justify-center items-center gap-1 sm:gap-[5px]">
                     <div class="text-center text-Flash-White text-base font-normal font-['Roboto'] leading-normal">Already have an account?</div>
-                    <a href="{% url 'login' %}" class="text-center text-Flash-White text-base font-normal font-['Roboto'] underline leading-normal">Login Now</a>
+                    <a href="{% url 'authentication:login' %}" class="text-center text-Flash-White text-base font-normal font-['Roboto'] underline leading-normal">Login Now</a>
                 </div>
             </div>
         </div>
@@ -75,9 +75,11 @@
                 <div id="registerMessage" class="text-red-600 text-sm"></div>
 
                 <div class="w-full pt-4 sm:pt-6 flex flex-wrap justify-end items-start gap-3 sm:gap-4">
-                    <button type="button" class="px-4 sm:px-5 py-2 outline outline-1 outline-Color-Neutral-Darkest flex justify-center items-center gap-2 rounded-md">
+                    <button type="button" onclick="window.history.back()" 
+                        class="px-4 sm:px-5 py-2 outline outline-1 outline-Color-Neutral-Darkest flex justify-center items-center gap-2 rounded-md">
                         <div class="text-Color-Neutral-Darkest text-base font-normal font-['Roboto'] leading-normal">Back</div>
                     </button>
+
                     <button type="submit" class="px-4 sm:px-5 py-2 bg-black outline outline-1 outline-Color-Neutral-Darkest flex justify-center items-center gap-2 rounded-md">
                         <div class="text-white text-base font-normal font-['Roboto'] leading-normal">Create Account</div>
                     </button>
@@ -110,12 +112,12 @@
 
         $.ajax({
             type: "POST",
-            url: "{% url 'register' %}",  // ganti sesuai URL pattern kamu
+            url: "{% url 'authentication:register' %}",  // ganti sesuai URL pattern kamu
             data: data,
             success: function (response) {
                 if (response.success) {
                     alert(response.message);
-                    window.location.href = "{% url 'login' %}";
+                    window.location.href = "{% url 'authentication:login' %}";
                 } else {
                     $("#registerMessage").text(response.error || "Failed to register.");
                 }
