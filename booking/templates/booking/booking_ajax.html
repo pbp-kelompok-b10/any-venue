@@ -7,7 +7,6 @@
 
 {% include 'navbar.html' %}
 
-<!-- Page hero header to match venue details -->
 <div class="w-full pt-24 pb-16 bg-gradient-to-b from-Light-Navy to-Flash-White flex flex-col items-center">
   <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-start gap-6">
     <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-Flash-White opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]">
@@ -43,12 +42,11 @@
     </div>
     {% endif %}
     
-    <!-- Removed secondary breadcrumb below hero to avoid duplication with hero breadcrumb/title -->
 
-    <!-- Product price under hero (keep layout lively without duplicating name) -->
+    <!-- Product price -->
     <div class="mb-6">
   <h2 class="text-4xl sm:text-5xl font-bold text-[#000456] leading-tight mb-6">{{ venue.name }}</h2>
-      <div class="text-2xl font-bold text-[#000456]">Rp {{ venue.price|floatformat:0 }} <span class="text-base font-normal text-gray-500">/ per sesi</span></div>
+      <div class="text-2xl font-bold text-[#000456]"><span id="venuePrice" data-price="{{ venue.price|floatformat:0 }}">Rp0</span> <span class="text-base font-normal text-gray-500">/ per sesi</span></div>
     </div>
 
     <!-- Details Section -->
@@ -177,6 +175,7 @@ const confirmModal = document.getElementById('confirmModal');
 const confirmBtn = document.getElementById('confirmBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 const confirmMessage = document.getElementById('confirmMessage');
+const venuePriceEl = document.getElementById('venuePrice');
 const dayNamesShort = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
 // Calendar popover refs
@@ -216,6 +215,11 @@ function updateWeek(baseDate) {
 
 // Initialize dates
 function initializeDates() {
+  // Format top price like total (Rp350.000)
+  if (venuePriceEl) {
+    const raw = parseInt(venuePriceEl.dataset.price || '0', 10);
+    venuePriceEl.textContent = `Rp${raw.toLocaleString('id-ID')}`;
+  }
   updateWeek(new Date());
   // Set first button active by default
   document.querySelectorAll('.day-btn').forEach((b, idx) => {
