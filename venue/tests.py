@@ -11,6 +11,9 @@ class VenueTest(TestCase):
         self.owner_profile = Profile.objects.get(user=self.user)
         self.owner_profile.role = 'OWNER'
         self.owner_profile.save()
+
+        self.non_owner_user = User.objects.create_user(username='testuser', password='password123')
+        self.non_owner_profile = Profile.objects.get(user=self.non_owner_user)
         
         self.city = City.objects.create(name='Jakarta')
         self.category = Category.objects.create(name='Futsal')
@@ -194,3 +197,65 @@ class VenueTest(TestCase):
 
         with self.assertRaises(Venue.DoesNotExist):
             Venue.objects.get(id=self.venue.id)
+
+    def test_api_edit_venue_not_owner(self):
+        self.client.login(username='testuser', password='password123') 
+        edit_data = {'name': 'Nama Dicuri', 'price': 1, 'city': self.city.name, 'category': self.category.name, 'type': 'Indoor', 'address': 'x', 'description': 'x', 'image_url': 'x.jpg'}
+        response = self.client.put(
+            reverse('venue:api_edit_venue', args=[self.venue.id]),
+            json.dumps(edit_data),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 403) 
+        data = json.loads(response.content)
+        self.assertEqual(data['error'], 'You do not have permission to edit this venue.')
+
+    def test_api_edit_venue_not_found(self):
+        self.client.login(username='testowner', password='password123')
+        response = self.client.put(
+            reverse('venue:api_edit_venue', args=[999]), # ID tidak ada
+            json.dumps({'name': 'Venue Hantu'}),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_api_edit_venue_invalid_data(self):
+        self.client.login(username='testowner', password='password123')
+        edit_data = {
+            'name': '', 
+            'price': 'bukan-angka', 
+            'city': 'Kota-Hantu', 
+            'category': self.category.name, 'type': 'Indoor',
+            'address': 'x', 'description': 'x', 'image_url': 'x.jpg'
+        }
+        response = self.client.put(
+            reverse('venue:api_edit_venue', args=[self.venue.id]),
+            json.dumps(edit_data),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 400) 
+        data = json.loads(response.content)
+        self.assertIn('name', data) 
+        self.assertIn('price', data) 
+        self.assertIn('city', data)
+
+    def test_api_delete_venue_not_owner(self):
+        self.client.login(username='testuser', password='password123') 
+        venue_count_before = Venue.objects.count()
+        response = self.client.delete(
+            reverse('venue:api_delete_venue', args=[self.venue.id])
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(Venue.objects.count(), venue_count_before)
+
+    def test_api_delete_venue_not_found(self):
+        self.client.login(username='testowner', password='password123')
+        response = self.client.delete(
+            reverse('venue:api_delete_venue', args=[999])
+        )
+        self.assertEqual(response.status_code, 404) 
+
+    def test_api_delete_venue_method_not_allowed(self):
+        self.client.login(username='testowner', password='password123')
+        response = self.client.get(reverse('venue:api_delete_venue', args=[self.venue.id]))
+        self.assertEqual(response.status_code, 405)
