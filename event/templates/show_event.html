@@ -13,21 +13,22 @@
         <div class="self-stretch flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
             <div class="flex-1 max-w-[768px] flex flex-col justify-start items-start gap-4">
                 <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                    <div class="self-stretch text-black text-4xl lg:text-5xl font-bold leading-tight lg:leading-[57.60px]">Events</div>
+                    <div class="self-stretch text-black text-4xl lg:text-5xl font-bold leading-tight lg:leading-[57.60px]" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.25);">Events</div>
                     <div class="self-stretch text-black text-base lg:text-lg font-normal leading-relaxed">Discover and join exciting sports events in your area!</div>
                 </div>
             </div>
             <div class="flex flex-col justify-start items-start gap-4">
-                <button onclick="toggleCreateModal(true)" class="px-6 py-3 bg-black text-white rounded-lg hover:bg-[#000457] transition-colors duration-300 font-medium">
+                {% if request.user.is_authenticated and request.user.profile.is_owner %}
+                <button id="create-event-btn" class="px-6 py-3 bg-black text-white rounded-lg hover:bg-[#000457] transition-colors duration-300 font-medium">
                     Create New Event
                 </button>
+                {% endif %}
             </div>
         </div>
 
         <div class="self-stretch flex flex-col justify-start items-start gap-16">
             <!-- Events Container -->
             <div id="events-container" class="self-stretch grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Events will be loaded here via AJAX -->
             </div>
 
             <!-- Loading State -->
@@ -48,7 +49,6 @@
             <!-- Pagination Controls -->
             <div id="pagination-controls" class="self-stretch flex flex-col sm:flex-row justify-between items-center gap-6">
                 <div id="pagination-dots" class="flex justify-start items-start gap-2">
-                    <!-- Dots will be generated dynamically -->
                 </div>
                 <div class="flex justify-start items-start gap-4">
                     <button id="prev-btn" class="p-3 bg-white rounded-full border border-gray-300 flex justify-center items-center gap-2 hover:bg-gray-50 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -70,10 +70,11 @@
 <!-- Include Footer -->
 {% include 'footer.html' %}
 
-<!-- Include Modals -->
 {% include 'modal/create_event.html' %}
 {% include 'modal/update_event.html' %}
 {% include 'modal/delete_event.html' %}
+
+<!-- Include Modals -->
 {% endblock %}
 
 {% block extra_js %}
@@ -82,334 +83,235 @@
     let currentPage = 0;
     const eventsPerPage = 6;
 
-    // Load events on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        loadEvents();
-        loadVenues();
-    });
-
-    // Load all events via AJAX
-    async function loadEvents() {
-        const container = document.getElementById('events-container');
-        const loadingState = document.getElementById('loading-state');
-        const emptyState = document.getElementById('empty-state');
-        const paginationControls = document.getElementById('pagination-controls');
-
-        try {
-            const response = await fetch("{% url 'event:show_event_json' %}");
-            allEvents = await response.json();
-            
-            loadingState.classList.add('hidden');
-            
-            if (allEvents.length === 0) {
-                emptyState.classList.remove('hidden');
-                paginationControls.classList.add('hidden');
-            } else {
-                displayEvents();
-                setupPagination();
-                paginationControls.classList.remove('hidden');
-            }
-        } catch (error) {
-            console.error('Error loading events:', error);
-            loadingState.classList.add('hidden');
-            container.innerHTML = '<div class="col-span-full text-center text-red-500 py-12">Error loading events. Please try again later.</div>';
+    function showModal(modalId) {
+        console.log('Attempting to show modal with ID:', modalId);
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        else {
+            console.error('FATAL: Modal element not found!');
         }
     }
 
-    // Display events for current page
+    function hideModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            const form = modal.querySelector('form');
+            if (form) form.reset();
+        }
+    }
+
+    async function loadEvents() {
+        const container = document.getElementById('events-container');
+        const loading = document.getElementById('loading-state');
+        const empty = document.getElementById('empty-state');
+        const pagination = document.getElementById('pagination-controls');
+
+        try {
+            loading.classList.remove('hidden');
+            container.innerHTML = '';
+            const response = await fetch("{% url 'event:show_event_json' %}");
+            allEvents = await response.json();
+            loading.classList.add('hidden');
+            
+            if (allEvents.length === 0) {
+                empty.classList.remove('hidden');
+                pagination.classList.add('hidden');
+            } else {
+                empty.classList.add('hidden');
+                pagination.classList.remove('hidden');
+                displayEvents();
+                setupPagination();
+            }
+        } catch (error) {
+            console.error('Error loading events:', error);
+            loading.classList.add('hidden');
+            container.innerHTML = '<div class="col-span-full text-center text-red-500 py-12">Error loading events</div>';
+        }
+    }
+
     function displayEvents() {
         const container = document.getElementById('events-container');
         const start = currentPage * eventsPerPage;
         const end = start + eventsPerPage;
         const eventsToShow = allEvents.slice(start, end);
-
-        container.innerHTML = eventsToShow.map(event => `
-            <div class="bg-white border border-gray-200 rounded-lg flex flex-col justify-start items-start overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300">
-                <div class="self-stretch h-72 relative flex flex-col justify-start items-start">
-                    <img class="self-stretch h-64 object-cover" src="${event.thumbnail || 'https://placehold.co/405x270'}" alt="${event.name}" loading="lazy">
-                    <div class="absolute top-4 right-4">
-                        <div class="px-3 py-1 bg-white rounded-full shadow-md">
-                            <div class="text-gray-800 text-sm font-semibold">${event.venue_type}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="self-stretch p-6 flex flex-col justify-start items-start gap-4">
-                    <div class="self-stretch flex flex-col justify-start items-start gap-4">
-                        <div class="self-stretch flex flex-wrap justify-start items-center gap-4">
-                            <div class="flex justify-start items-center gap-2">
-                                <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-                                </svg>
-                                <div class="text-gray-700 text-sm font-normal">${formatDate(event.date)}</div>
-                            </div>
-                            <div class="flex justify-start items-center gap-2">
-                                <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                                </svg>
-                                <div class="text-gray-700 text-sm font-normal truncate">${event.venue_name}</div>
-                            </div>
-                        </div>
-                        <div class="self-stretch flex flex-col justify-start items-start gap-2">
-                            <div class="self-stretch text-gray-900 text-xl font-bold leading-relaxed">${event.name}</div>
-                            <div class="self-stretch text-gray-600 text-sm font-normal leading-normal line-clamp-2">${event.description || 'No description available'}</div>
-                            <div class="flex items-center gap-2 mt-2">
-                                <span class="text-sm font-semibold text-gray-900">Registered:</span>
-                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">${event.registration_count ?? 0} people</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="self-stretch pt-2 flex justify-between items-center">
-                        <a href="/event/detail/${event.id}/" class="flex items-center gap-2 text-black hover:text-[#000457] transition-colors duration-300 font-medium">
-                            <span>View event</span>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-                            </svg>
-                        </a>
-                        <div class="flex gap-2">
-                            <button onclick="openUpdateModal(${event.id})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
-                            </button>
-                            <button onclick="openDeleteModal(${event.id})" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    // Setup pagination
-    function setupPagination() {
-        const totalPages = Math.ceil(allEvents.length / eventsPerPage);
-        const dotsContainer = document.getElementById('pagination-dots');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
         
-        dotsContainer.innerHTML = Array.from({length: totalPages}, (_, i) => `
-            <button 
-                class="w-2 h-2 rounded-full transition-all duration-300 ${i === currentPage ? 'bg-white w-8' : 'bg-white opacity-40 hover:opacity-70'}" 
-                onclick="goToPage(${i})"
-                aria-label="Go to page ${i + 1}"
-            ></button>
-        `).join('');
-
-        prevBtn.disabled = currentPage === 0;
-        nextBtn.disabled = currentPage === totalPages - 1;
-
-        prevBtn.onclick = () => {
-            if (currentPage > 0) {
-                currentPage--;
-                displayEvents();
-                setupPagination();
-                scrollToTop();
-            }
-        };
-
-        nextBtn.onclick = () => {
-            if (currentPage < totalPages - 1) {
-                currentPage++;
-                displayEvents();
-                setupPagination();
-                scrollToTop();
-            }
-        };
-    }
-
-    function goToPage(page) {
-        currentPage = page;
-        displayEvents();
-        setupPagination();
-        scrollToTop();
-    }
-
-    function scrollToTop() {
-        document.getElementById('events-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' };
-        return date.toLocaleDateString('en-GB', options);
-    }
-
-    // Modal toggle functions
-    function toggleCreateModal(show) {
-        const modal = document.getElementById('createEventModal');
-        modal.classList.toggle('hidden', !show);
-        document.body.style.overflow = show ? 'hidden' : 'auto';
-        if (!show) document.getElementById('createEventForm').reset();
-    }
-
-    function toggleUpdateModal(show) {
-        const modal = document.getElementById('updateEventModal');
-        modal.classList.toggle('hidden', !show);
-        document.body.style.overflow = show ? 'hidden' : 'auto';
-        if (!show) document.getElementById('updateEventForm').reset();
-    }
-
-    function toggleDeleteModal(show) {
-        const modal = document.getElementById('deleteEventModal');
-        modal.classList.toggle('hidden', !show);
-        document.body.style.overflow = show ? 'hidden' : 'auto';
-    }
-
-    // Load venues for dropdown
-    async function loadVenues() {
-        try {
-            const response = await fetch('/venue/json/');
-            const venues = await response.json();
+        container.innerHTML = eventsToShow.map(event => {
+            const buttons = event.is_owner ? `
+                <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition edit-btn" data-id="${event.id}" title="Edit Event">
+                    <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </button>
+                <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition delete-btn" data-id="${event.id}" title="Delete Event">
+                    <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+            ` : '';
             
-            const createSelect = document.querySelector('#createEventForm select[name="venue"]');
-            const updateSelect = document.querySelector('#updateEventForm select[name="venue"]');
-            
-            const options = venues.length === 0 
-                ? '<option value="">No venues available</option>'
-                : '<option value="">Select a venue</option>' + venues.map(v => `<option value="${v.id}">${v.name} - ${v.type}</option>`).join('');
-            
-            createSelect.innerHTML = options;
-            updateSelect.innerHTML = options;
-        } catch (error) {
-            console.error('Error loading venues:', error);
-        }
+            return `
+            <div class="bg-white border border-[#000457] rounded-lg flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <div class="h-64 relative overflow-hidden">
+                    <img class="w-full h-full object-cover" src="${event.thumbnail || 'https://placehold.co/405x270'}" alt="${event.name}">
+                    <div class="absolute top-4 right-4"><div class="px-3 py-1 bg-white rounded-full shadow-md"><span class="text-gray-800 text-sm font-semibold">${event.venue_type}</span></div></div>
+                </div>
+                <div class="p-6 flex flex-col gap-4 flex-grow">
+                    <div class="flex flex-wrap gap-4">
+                        <div class="flex items-center gap-2"><svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg><span class="text-gray-700 text-sm">${formatDate(event.date)}</span></div>
+                        <div class="flex items-center gap-2"><svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg><span class="text-gray-700 text-sm truncate">${event.venue_name}</span></div>
+                    </div>
+                    <div class="flex flex-col gap-2 flex-grow">
+                        <h3 class="text-gray-900 text-xl font-bold">${event.name}</h3>
+                        <p class="text-gray-600 text-sm line-clamp-2">${event.description || 'No description'}</p>
+                        <div class="flex items-center gap-2 mt-2"><span class="text-sm font-semibold">Registered:</span><span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">${event.registered_count ?? 0} people</span></div>
+                    </div>
+                    <div class="pt-2 flex justify-between items-center">
+                        <a href="/event/detail/${event.id}/" class="flex items-center gap-2 text-black hover:text-[#000457] font-medium"><span>View event</span><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></a>
+                        <div class="flex gap-2">${buttons}</div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
     }
 
-    // Open update modal with event data
     async function openUpdateModal(eventId) {
         try {
+            await loadVenues();
             const response = await fetch(`/event/json/${eventId}/`);
             const data = await response.json();
             const event = data[0];
-
+            
             document.getElementById('updateEventId').value = event.id;
             document.getElementById('updateName').value = event.name;
-            document.getElementById('updateVenue').value = event.venue;
+            document.getElementById('updateVenue').value = event.venue_id;
             document.getElementById('updateDate').value = event.date;
             document.getElementById('updateStartTime').value = event.start_time;
             document.getElementById('updateDescription').value = event.description || '';
             document.getElementById('updateThumbnail').value = event.thumbnail || '';
-
-            toggleUpdateModal(true);
+            
+            showModal('updateEventModal');
         } catch (error) {
-            console.error('Error loading event:', error);
+            console.error('Error opening update modal:', error);
             showNotification('Error loading event data', 'error');
         }
     }
 
-    // Open delete modal
     function openDeleteModal(eventId) {
         document.getElementById('deleteEventId').value = eventId;
-        toggleDeleteModal(true);
+        showModal('deleteEventModal');
     }
 
-    // Handle create event form
-    document.getElementById('createEventForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        
+    async function loadVenues() {
         try {
-            const response = await fetch("{% url 'event:create_event' %}", {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-CSRFToken': document.querySelector('#createEventForm [name=csrfmiddlewaretoken]').value }
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                toggleCreateModal(false);
-                loadEvents();
-                showNotification('Event created successfully!', 'success');
-            } else {
-                showNotification('Error: ' + JSON.stringify(data.errors), 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('An error occurred', 'error');
-        }
-    });
-
-    // Handle update event form
-    document.getElementById('updateEventForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const eventId = document.getElementById('updateEventId').value;
-        const formData = new FormData(this);
-        
-        try {
-            const response = await fetch(`/event/update/${eventId}/`, {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-CSRFToken': document.querySelector('#updateEventForm [name=csrfmiddlewaretoken]').value }
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                toggleUpdateModal(false);
-                loadEvents();
-                showNotification('Event updated successfully!', 'success');
-            } else {
-                showNotification('Error: ' + JSON.stringify(data.errors), 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('An error occurred', 'error');
-        }
-    });
-
-    // Handle delete event form
-    document.getElementById('deleteEventForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const eventId = document.getElementById('deleteEventId').value;
-        
-        try {
-            const response = await fetch(`/event/delete/${eventId}/`, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': document.querySelector('#deleteEventForm [name=csrfmiddlewaretoken]').value }
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                toggleDeleteModal(false);
-                loadEvents();
-                showNotification('Event deleted successfully!', 'success');
-            } else {
-                showNotification('Error deleting event', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('An error occurred', 'error');
-        }
-    });
-
-    // Show notification
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `fixed top-20 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transition-all duration-300 ${
-            type === 'success' ? 'bg-green-500' : 'bg-red-500'
-        } text-white`;
-        notification.textContent = message;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
+            const response = await fetch("{% url 'venue:api_get_venues' %}");
+            const venues = await response.json();
+            const ownerId = parseInt("{{ request.user.id|default:0 }}");
+            const ownerVenues = venues.filter(v => v.owner_profile_pk == ownerId);
+            const createSelect = document.querySelector('#createEventForm select[name="venue"]');
+            const updateSelect = document.querySelector('#updateEventForm select[name="venue"]');
+            const options = ownerVenues.length === 0 ? '<option value="">No venues available</option>' : '<option value="">Select a venue</option>' + ownerVenues.map(v => `<option value="${v.id}">${v.name} - ${v.type}</option>`).join('');
+            if (createSelect) createSelect.innerHTML = options;
+            if (updateSelect) updateSelect.innerHTML = options;
+        } catch (error) { console.error('Error loading venues:', error); }
     }
 
-    // Close modals on escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            toggleCreateModal(false);
-            toggleUpdateModal(false);
-            toggleDeleteModal(false);
-        }
+    function setupPagination() {
+        const totalPages = Math.ceil(allEvents.length / eventsPerPage);
+        const dots = document.getElementById('pagination-dots');
+        const prev = document.getElementById('prev-btn');
+        const next = document.getElementById('next-btn');
+        dots.innerHTML = Array.from({length: totalPages}, (_, i) => `<button class="w-2 h-2 rounded-full transition ${i === currentPage ? 'bg-white w-8' : 'bg-white opacity-40'}" onclick="goToPage(${i})"></button>`).join('');
+        prev.disabled = currentPage === 0;
+        next.disabled = currentPage === totalPages - 1;
+        prev.onclick = () => { if (currentPage > 0) { currentPage--; displayEvents(); setupPagination(); } };
+        next.onclick = () => { if (currentPage < totalPages - 1) { currentPage++; displayEvents(); setupPagination(); } };
+    }
+
+    function goToPage(page) { currentPage = page; displayEvents(); setupPagination(); }
+    function formatDate(dateString) { const date = new Date(dateString); return date.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }); }
+    function showNotification(message, type = 'info') { const notif = document.createElement('div'); notif.className = `fixed top-20 right-4 z-[110] px-6 py-4 rounded-lg shadow-lg transition-all duration-300 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`; notif.textContent = message; document.body.appendChild(notif); setTimeout(() => { notif.style.opacity = '0'; setTimeout(() => notif.remove(), 300); }, 3000); }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadEvents();
+        loadVenues();
+        
+        const eventsContainer = document.getElementById('events-container');
+        eventsContainer.addEventListener('click', function(e) {
+            const editButton = e.target.closest('.edit-btn');
+            if (editButton) {
+                e.preventDefault();
+                const eventId = editButton.dataset.id;
+                openUpdateModal(eventId);
+                return;
+            }
+
+            const deleteButton = e.target.closest('.delete-btn');
+            if (deleteButton) {
+                e.preventDefault();
+                const eventId = deleteButton.dataset.id;
+                openDeleteModal(eventId);
+                return;
+            }
+        });
+        
+        // Listener untuk tombol statis "Create New Event"
+        document.getElementById('create-event-btn').addEventListener('click', () => showModal('createEventModal'));
+
+        // Listener untuk semua form
+        document.getElementById('createEventForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            try {
+                const response = await fetch("{% url 'event:create_event' %}", { method: 'POST', headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') }, body: new URLSearchParams(formData) });
+                if (response.ok) { hideModal('createEventModal'); loadEvents(); showNotification('Event created!', 'success'); } 
+                else { const data = await response.json(); showNotification('Error: ' + JSON.stringify(data.errors), 'error'); }
+            } catch (error) { showNotification('Error occurred', 'error'); }
+        });
+        
+        document.getElementById('updateEventForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const eventId = document.getElementById('updateEventId').value;
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            try {
+                const response = await fetch(`/event/update/${eventId}/`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': data.csrfmiddlewaretoken }, body: JSON.stringify(data) });
+                if (response.ok) { hideModal('updateEventModal'); loadEvents(); showNotification('Event updated!', 'success'); } 
+                else { const resData = await response.json(); showNotification('Error: ' + JSON.stringify(resData.errors), 'error'); }
+            } catch (error) { showNotification('Error occurred', 'error'); }
+        });
+        
+        document.getElementById('deleteEventForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const eventId = document.getElementById('deleteEventId').value;
+            try {
+                const response = await fetch(`/event/delete/${eventId}/`, { method: 'DELETE', headers: { 'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value } });
+                if (response.ok) { hideModal('deleteEventModal'); loadEvents(); showNotification('Event deleted!', 'success'); } 
+                else { showNotification('Error deleting event', 'error'); }
+            } catch (error) { showNotification('Error occurred', 'error'); }
+        });
+        
+        // Listener untuk tombol Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideModal('createEventModal');
+                hideModal('updateEventModal');
+                hideModal('deleteEventModal');
+            }
+        });
+
+        // Atur tanggal minimum
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const year = tomorrow.getFullYear();
+        const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const day = String(tomorrow.getDate()).padStart(2, '0');
+        const minDate = `${year}-${month}-${day}`;
+        const createDateInput = document.getElementById('createDate');
+        const updateDateInput = document.getElementById('updateDate');
+        if (createDateInput) createDateInput.setAttribute('min', minDate);
+        if (updateDateInput) updateDateInput.setAttribute('min', minDate);
     });
 </script>
 {% endblock %}
