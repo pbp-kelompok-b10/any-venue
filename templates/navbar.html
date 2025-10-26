@@ -44,7 +44,7 @@
     <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200 shadow-lg">
         <div class="px-4 py-4 space-y-3">
             <a href="{% url 'venue:venue_main' %}" class="block py-2 text-base text-gray-700 hover:text-[#000456] hover:bg-gray-50  px-3">Venue</a>
-            <a href="#event" class="block py-2 text-base text-gray-700 hover:text-[#000456] hover:bg-gray-50  px-3">Event</a>
+            <a href="{% url 'event:show_event' %}" class="block py-2 text-base text-gray-700 hover:text-[#000456] hover:bg-gray-50  px-3">Event</a>
             
             <div class="border-t border-gray-200 pt-4 mt-4">
                 {% if user.is_authenticated %}
