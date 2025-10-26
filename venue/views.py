@@ -145,7 +145,7 @@ def delete_venue_ajax(request, id):
     try:
         venue = get_object_or_404(Venue, pk=id)
     except Venue.DoesNotExist:
-         return JsonResponse({'error': 'Venue not found.'}, status=44)
+         return JsonResponse({'error': 'Venue not found.'}, status=404)
 
     if venue.owner != request.user.profile:
         return JsonResponse({'error': 'You do not have permission to delete this venue.'}, status=403)
