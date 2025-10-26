@@ -33,6 +33,7 @@ def show_main(request):
 
     return render(request, "venue_main.html", context)
 
+@login_required(login_url='/auth/login')
 def show_details(request, id):
     venue = get_object_or_404(Venue, pk=id)
     cities = City.objects.all().order_by('name')

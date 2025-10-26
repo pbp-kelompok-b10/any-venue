@@ -6,6 +6,8 @@ from account.models import Profile
 from venue.models import Venue, City, Category
 from .models import BookingSlot, Booking
 import json
+from django.utils import timezone
+from booking.views import ensure_slots_for_date
 
 class BookingModelTest(TestCase):
     def setUp(self):
@@ -262,3 +264,133 @@ class BookingCleanupTest(TestCase):
         # Old slot and booking should be deleted
         self.assertFalse(BookingSlot.objects.filter(id=old_slot.id).exists())
         self.assertFalse(Booking.objects.filter(slot=old_slot).exists())
+
+
+class BookingAdditionalTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Owner and venue setup
+        owner_user = User.objects.create_user(username='owner2', password='testpass123')
+        owner_profile = Profile.objects.get(user=owner_user)
+        owner_profile.role = 'OWNER'
+        owner_profile.save()
+
+        # Customer user
+        self.user = User.objects.create_user(username='cust', password='testpass123')
+        self.profile = Profile.objects.get(user=self.user)
+
+        self.city = City.objects.create(name='City2')
+        self.category = Category.objects.create(name='Cat2')
+        self.venue = Venue.objects.create(
+            owner=owner_profile,
+            name='Venue2',
+            address='Addr',
+            type='Indoor',
+            price=250000,
+            city=self.city,
+            category=self.category,
+            description='Desc',
+            image_url='https://example.com/img.jpg'
+        )
+
+    def test_get_slots_missing_date_returns_empty(self):
+        url = reverse('booking:get_slots', args=[self.venue.id])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        data = json.loads(resp.content)
+        self.assertEqual(data, [])
+
+    def test_get_slots_creates_on_demand_within_horizon(self):
+        # Pick a date 3 days ahead with no pre-created slots
+        target = date.today() + timedelta(days=3)
+        url = reverse('booking:get_slots', args=[self.venue.id])
+        resp = self.client.get(url, {'date': target.strftime('%Y-%m-%d')})
+        self.assertEqual(resp.status_code, 200)
+        data = json.loads(resp.content)
+        # Expect slots from 08:00 to 21:00 (14 slots)
+        self.assertGreaterEqual(len(data), 10)
+        self.assertTrue(any(s['start_time'] == '08:00' for s in data))
+
+    def test_get_slots_does_not_create_beyond_horizon(self):
+        # Beyond 30-day horizon, should not auto-create
+        target = date.today() + timedelta(days=40)
+        url = reverse('booking:get_slots', args=[self.venue.id])
+        resp = self.client.get(url, {'date': target.strftime('%Y-%m-%d')})
+        self.assertEqual(resp.status_code, 200)
+        data = json.loads(resp.content)
+        self.assertEqual(data, [])
+
+    def test_get_slots_filters_past_today_slots_and_cleans_booking(self):
+        # Create a slot for today that already ended
+        now = timezone.localtime()
+        end_past = (now - timedelta(hours=1)).time()
+        start_past = (now - timedelta(hours=2)).time()
+        slot = BookingSlot.objects.create(
+            venue=self.venue,
+            date=timezone.localdate(),
+            start_time=start_past,
+            end_time=end_past,
+            is_booked=True,
+        )
+        # Assign a booking for cleanup check
+        Booking.objects.create(user=self.profile, slot=slot, total_price=self.venue.price)
+
+        url = reverse('booking:get_slots', args=[self.venue.id])
+        resp = self.client.get(url, {'date': timezone.localdate().strftime('%Y-%m-%d')})
+        self.assertEqual(resp.status_code, 200)
+        data = json.loads(resp.content)
+        # Past slot should not be returned
+        self.assertTrue(all(s['id'] != slot.id for s in data))
+        # Booking should be cleaned and slot marked available
+        slot.refresh_from_db()
+        self.assertFalse(slot.is_booked)
+        self.assertFalse(Booking.objects.filter(slot=slot).exists())
+
+    def test_cancel_booking_not_found(self):
+        # No booking exists for this slot
+        slot = BookingSlot.objects.create(
+            venue=self.venue,
+            date=date.today() + timedelta(days=1),
+            start_time=time(8, 0),
+            end_time=time(9, 0),
+            is_booked=False,
+        )
+        self.client.login(username='cust', password='testpass123')
+        resp = self.client.post(
+            reverse('booking:cancel_booking'),
+            json.dumps({'slot_id': slot.id}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(json.loads(resp.content)['status'], 'not_found')
+
+    def test_create_booking_empty_slots_returns_zero_total(self):
+        self.client.login(username='cust', password='testpass123')
+        resp = self.client.post(
+            reverse('booking:create_booking'),
+            json.dumps({'slots': []}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 200)
+        body = json.loads(resp.content)
+        self.assertEqual(body['status'], 'success')
+        self.assertEqual(body['total'], 0)
+
+    def test_create_and_cancel_booking_wrong_method_returns_error(self):
+        # create_booking via GET
+        self.client.login(username='cust', password='testpass123')
+        resp_get = self.client.get(reverse('booking:create_booking'))
+        self.assertEqual(resp_get.status_code, 200)
+        self.assertEqual(json.loads(resp_get.content)['status'], 'error')
+
+        # cancel_booking via GET
+        resp_get2 = self.client.get(reverse('booking:cancel_booking'))
+        self.assertEqual(resp_get2.status_code, 200)
+        self.assertEqual(json.loads(resp_get2.content)['status'], 'error')
+
+    def test_ensure_slots_for_past_date_no_creation(self):
+        # Directly exercise helper to cover early return path
+        yesterday = date.today() - timedelta(days=1)
+        ensure_slots_for_date(self.venue, yesterday)
+        self.assertFalse(BookingSlot.objects.filter(venue=self.venue, date=yesterday).exists())
