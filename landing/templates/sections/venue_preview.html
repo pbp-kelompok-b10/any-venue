@@ -13,7 +13,7 @@
                 Your Game, Your Space!
             </h2>
             <p class="mt-4 text-lg text-gray-600 leading-relaxed">
-                Temukan tempat bermain favorit baru Anda dari 3 venue terbaik yang kami pilihkan untuk Anda.
+                Temukan tempat bermain favorit baru Anda dengan menjelajahi venue-venue yang ada.
             </p>
         </div>
 
@@ -84,10 +84,18 @@
         {% if not venues_list %}
         <div class="md:col-span-2 lg:col-span-3 text-center text-gray-500 py-16">
             <h3 class="text-xl font-semibold">There is no Venue yet.</h3>
-            <p class="mt-2">Saat ini belum ada venue yang terdaftar. Silakan cek kembali nanti.</p>
+            <p class="mt-2">Belum ada venue yang terdaftar. Jadilah yang pertama mendaftarkan venue Anda!</p>
         </div>
         {% endif %}
 
+        {% if venues_list %}
+        <div class="flex justify-center mt-16">
+            <a href="{% url 'venue:venue_main' %}" class="px-6 py-3 border border-gray-800 inline-flex justify-center items-center gap-2 text-gray-800 text-base font-normal hover:bg-gray-800 hover:text-white transition-colors duration-300">
+                View all
+            </a>
+        </div>
+        {% endif %}
+        
     </div>
 </div>
 {% endblock content %}
