@@ -14,7 +14,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from event.forms import EventForm
 from event.models import Event, Registration
 
-@login_required
+@login_required(login_url='/auth/login')
 def show_event(request):
     events = Event.objects.all().order_by('date', 'start_time')
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -69,7 +69,7 @@ def show_event_json_by_id(request, id):
     return JsonResponse(data, safe=False)
 
 @csrf_exempt
-@login_required
+@login_required(login_url='/auth/login')
 @require_http_methods(["POST"])
 def create_event(request):
     form = EventForm(request.POST, user=request.user.profile)
@@ -80,7 +80,7 @@ def create_event(request):
         return JsonResponse({'message': 'Event berhasil dibuat!'}, status=201)
     return JsonResponse({'errors': form.errors}, status=400)
 
-@login_required
+@login_required(login_url='/auth/login')
 def show_event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -103,7 +103,7 @@ def show_event_detail(request, event_id):
     return render(request, 'event_detail.html', {'event': event})
 
 @csrf_exempt
-@login_required
+@login_required(login_url='/auth/login')
 @require_http_methods(["PUT"])
 def update_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
@@ -119,7 +119,7 @@ def update_event(request, event_id):
     return JsonResponse({'errors': form.errors}, status=400)
 
 @csrf_exempt
-@login_required
+@login_required(login_url='/auth/login')
 @require_http_methods(["DELETE"])
 def delete_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
@@ -131,7 +131,7 @@ def delete_event(request, event_id):
     return JsonResponse({'message': 'Event berhasil dihapus.'})
 
 @csrf_exempt
-@login_required
+@login_required(login_url='/auth/login')
 @require_http_methods(["POST"])
 def join_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
@@ -150,7 +150,7 @@ def join_event(request, event_id):
     return JsonResponse({"message": "Successfully registered for the event!"}, status=200)
 
 
-@login_required
+@login_required(login_url='/auth/login')
 def check_registration(request, event_id):
     """Digunakan untuk memeriksa apakah user sudah terdaftar di event ini."""
     event = get_object_or_404(Event, id=event_id)
