@@ -1,7 +1,7 @@
 from django.utils.html import strip_tags
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-import datetime
+import json
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -23,20 +23,23 @@ def show_event(request):
     return render(request, 'show_event.html', {'events': events})
 
 def show_event_json(request):
+    user = request.user
     events = Event.objects.all().order_by('date', 'start_time')
     data = [
         {
             "id": event.id,
             "name": event.name,
             "description": event.description,
-            "date": event.date,
-            "start_time": event.start_time,
+            "date": event.date.strftime('%Y-%m-%d'),
+            "start_time": event.start_time.strftime('%H:%M'),
             "registered_count": event.registered_count,
             "venue_name": event.venue_name,
             "venue_address": event.venue_address,
             "venue_type": event.venue_type,
             "owner": event.owner.user.username,
-            "thumbnail": event.thumbnail,
+            "owner_id": event.owner.user.id,
+            "thumbnail": event.thumbnail or '',
+            "is_owner": user.is_authenticated and event.owner == user.profile,
         }
         for event in events
     ]
@@ -44,19 +47,23 @@ def show_event_json(request):
 
 def show_event_json_by_id(request, id):
     event = get_object_or_404(Event, pk=id)
+    user = request.user
     data = [
         {
             "id": event.id,
             "name": event.name,
             "description": event.description,
-            "date": event.date,
-            "start_time": event.start_time,
+            "date": event.date.strftime('%Y-%m-%d'),
+            "start_time": event.start_time.strftime('%H:%M'),
             "registered_count": event.registered_count,
             "venue_name": event.venue_name,
             "venue_address": event.venue_address,
             "venue_type": event.venue_type,
+            "venue_id": event.venue.id,
             "owner": event.owner.user.username,
-            "thumbnail": event.thumbnail,
+            "owner_id": event.owner.user.id,
+            "thumbnail": event.thumbnail or '',
+            "is_owner": user.is_authenticated and event.owner == user.profile,
         }
     ]
     return JsonResponse(data, safe=False)
@@ -65,10 +72,10 @@ def show_event_json_by_id(request, id):
 @login_required
 @require_http_methods(["POST"])
 def create_event(request):
-    form = EventForm(request.POST, user=request.user)
+    form = EventForm(request.POST, user=request.user.profile)
     if form.is_valid():
         event = form.save(commit=False)
-        event.owner = request.user
+        event.owner = request.user.profile
         event.save()
         return JsonResponse({'message': 'Event berhasil dibuat!'}, status=201)
     return JsonResponse({'errors': form.errors}, status=400)
@@ -81,13 +88,14 @@ def show_event_detail(request, event_id):
             'id': event.id,
             'name': event.name,
             'owner': event.owner.user.username,
+            'owner_id': event.owner.user.id,
             'venue': event.venue_name,
             'venue_type': event.venue_type,
             'venue_address': event.venue_address,
             'date': event.date.strftime('%Y-%m-%d'),
             'start_time': event.start_time.strftime('%H:%M'),
             'description': event.description,
-            "registered_count": event.registered_count,
+            'registered_count': event.registered_count,
             'thumbnail': event.thumbnail or '',
         }
         return JsonResponse({'event': data}, status=200)
@@ -96,10 +104,15 @@ def show_event_detail(request, event_id):
 
 @csrf_exempt
 @login_required
-@require_http_methods(["POST"])
+@require_http_methods(["PUT"])
 def update_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    form = EventForm(request.POST, instance=event, user=request.user)
+    data = json.loads(request.body)
+
+    if event.owner != request.user.profile:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    form = EventForm(data, instance=event, user=request.user.profile)
     if form.is_valid():
         form.save()
         return JsonResponse({'message': 'Event berhasil diperbarui!'})
@@ -107,27 +120,34 @@ def update_event(request, event_id):
 
 @csrf_exempt
 @login_required
-@require_http_methods(["POST"])
+@require_http_methods(["DELETE"])
 def delete_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
+
+    if event.owner != request.user.profile:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
     event.delete()
     return JsonResponse({'message': 'Event berhasil dihapus.'})
 
+@csrf_exempt
 @login_required
+@require_http_methods(["POST"])
 def join_event(request, event_id):
-    if request.method == "POST":
-        event = get_object_or_404(Event, id=event_id)
-        user = request.user
+    event = get_object_or_404(Event, id=event_id)
+    user = request.user
+    try:
+        if user.profile.role == 'OWNER':
+            return JsonResponse({"message": "Owners cannot join events. Only users with 'User' role can join."}, status=400)
+    except:
+        pass
 
-        # Cegah duplikat pendaftaran (termasuk owner sendiri)
-        if Registration.objects.filter(user=user, event=event).exists():
-            return JsonResponse({"message": "You already registered for this event."}, status=400)
+    if Registration.objects.filter(user=user, event=event).exists():
+        return JsonResponse({"message": "You already registered for this event."}, status=400)
 
-        Registration.objects.create(user=user, event=event)
+    Registration.objects.create(user=user, event=event)
 
-        return JsonResponse({"message": "Successfully registered for the event (tracking enabled)."})
-    
-    return JsonResponse({"message": "Invalid request."}, status=400)
+    return JsonResponse({"message": "Successfully registered for the event!"}, status=200)
 
 
 @login_required
@@ -135,6 +155,14 @@ def check_registration(request, event_id):
     """Digunakan untuk memeriksa apakah user sudah terdaftar di event ini."""
     event = get_object_or_404(Event, id=event_id)
     user = request.user
-
-    registered = Registration.objects.filter(user=user, event=event).exists()
-    return JsonResponse({"registered": registered})
+    is_owner_role = False
+    try:
+        is_owner_role = user.profile.role == 'OWNER'
+    except:
+        is_owner_role = False
+    is_registered = Registration.objects.filter(user=user, event=event).exists()
+    
+    return JsonResponse({
+        "is_registered": is_registered,
+        "is_owner": is_owner_role
+    })

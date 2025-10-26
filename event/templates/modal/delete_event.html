@@ -1,10 +1,10 @@
 {% load static %}
 
 <!-- Delete Event Modal -->
-<div id="deleteEventModal" class="hidden fixed inset-0 bg-black/25 flex justify-center items-center z-50">
+<div id="deleteEventModal" class="hidden fixed inset-0 bg-black/25 flex justify-center items-center z-[9999]">
     <div class="p-10 relative bg-white flex flex-col justify-start items-center gap-8 rounded-2xl shadow-lg w-[500px]">
         <!-- Close Button -->
-        <button class="absolute top-4 right-4 text-gray-700 hover:text-red-500 text-2xl font-bold transition-colors duration-300" onclick="toggleDeleteModal(false)">✕</button>
+        <button class="absolute top-4 right-4 text-gray-700 hover:text-red-500 text-2xl font-bold transition-colors duration-300" onclick="hideModal('deleteEventModal')">✕</button>
 
         <!-- Header -->
         <div class="text-center text-gray-900 text-4xl font-bold font-['Roboto']">Delete Event</div>
@@ -25,7 +25,7 @@
             <!-- Action Buttons -->
             <button 
                 type="button" 
-                onclick="toggleDeleteModal(false)" 
+                onclick="hideModal('deleteEventModal')" 
                 class="px-5 py-2 outline outline-1 outline-gray-400 rounded-md text-gray-700 font-medium font-['Roboto'] hover:bg-gray-50 transition-colors duration-300">
                 Cancel
             </button>

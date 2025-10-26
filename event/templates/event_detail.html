@@ -24,56 +24,58 @@
                             <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
                         </svg>
                     </div>
-                    <div id="event-breadcrumb" class="text-center text-black text-base font-normal font-['Roboto'] leading-6">Event title</div>
+                    <div id="event-breadcrumb" class="text-center text-black text-base font-normal font-['Roboto'] leading-6"></div>
                 </div>
 
                 <!-- Event Title and Description -->
                 <div class="self-stretch flex flex-col justify-start items-start gap-6">
-                    <div id="event-title" class="self-stretch text-black text-4xl lg:text-5xl font-bold font-['Roboto'] leading-tight lg:leading-[57.60px]">Event title</div>
-                    <div id="event-description" class="self-stretch text-black text-lg font-normal font-['Roboto'] leading-7">Loading...</div>
+                    <div id="event-title" class="self-stretch text-black text-4xl lg:text-5xl font-bold font-['Roboto'] leading-tight lg:leading-[57.60px]" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.25);"></div>
+                    <div id="event-description" class="self-stretch text-black text-lg font-normal font-['Roboto'] leading-7"></div>
                 </div>
 
                 <!-- Join Event Button -->
-                <div class="flex justify-start items-start gap-4">
-                    <button id="join-event-btn" onclick="showJoinModal()" class="px-6 py-3 bg-black border border-black flex justify-center items-center gap-2 hover:bg-[#000457] transition-colors duration-300">
-                        <div class="text-white text-base font-normal font-['Roboto'] leading-6">Join Event</div>
+                <div id="join-button-container" class="flex justify-start items-start gap-4">
+                    <button id="join-event-btn" onclick="showJoinModal()" class="px-6 py-3 rounded-lg bg-black border border-black flex justify-center items-center gap-2 hover:bg-[#000457] transition-colors duration-300">
+                        <div class="text-black text-base font-normal font-['Roboto'] leading-6" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">Join Event</div>
                     </button>
                 </div>
             </div>
 
             <!-- Right Column: Event Info -->
             <div class="w-full lg:w-[464px] flex flex-col justify-start items-start gap-8">
+                <!-- Date & Venue -->
                 <div class="self-stretch grid grid-cols-2 gap-8">
-                    <!-- Date -->
                     <div class="flex flex-col justify-start items-start gap-2">
                         <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Date</div>
-                        <div id="event-date" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6">Loading...</div>
+                        <div id="event-date" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6"></div>
                     </div>
-                    <!-- Location -->
+                    <div class="flex flex-col justify-start items-start gap-2">
+                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Venue</div>
+                        <div id="event-venue" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6"></div>
+                    </div>
+                </div>
+
+                <!-- Location & Event Owner -->
+                <div class="self-stretch grid grid-cols-2 gap-8">
                     <div class="flex flex-col justify-start items-start gap-2">
                         <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Location</div>
-                        <div id="event-location" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6">Loading...</div>
+                        <div id="event-location" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6 break-words"></div>
                     </div>
-                </div>
-
-                <div class="self-stretch grid grid-cols-2 gap-8">
-                    <!-- Event Owner -->
                     <div class="flex flex-col justify-start items-start gap-2">
                         <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Event Owner</div>
-                        <div id="event-owner" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6">Loading...</div>
-                    </div>
-                    <!-- Sport Type -->
-                    <div class="flex flex-col justify-start items-start gap-2">
-                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Sport Type</div>
-                        <div id="event-type" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6">Loading...</div>
+                        <div id="event-owner" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6"></div>
                     </div>
                 </div>
 
-                <!-- Participants Info -->
-                <div class="self-stretch grid grid-cols-1 gap-8">
+                <!-- Registered Participants & Sport Type -->
+                <div class="self-stretch grid grid-cols-2 gap-8">
                     <div class="flex flex-col justify-start items-start gap-2">
                         <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Registered Participants</div>
-                        <div id="event-registered" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6">Loading...</div>
+                        <div id="event-registered" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6"></div>
+                    </div>
+                    <div class="flex flex-col justify-start items-start gap-2">
+                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Sport Type</div>
+                        <div id="event-type" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6"></div>
                     </div>
                 </div>
             </div>
@@ -96,6 +98,7 @@
     const eventId = {{ event.id }};
     let eventData = null;
     let isRegistered = false;
+    let isOwner = false;
 
     // Load event details on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -119,21 +122,15 @@
 
     // Display event details
     function displayEventDetail(event) {
-        // Breadcrumb
         document.getElementById('event-breadcrumb').textContent = event.name;
-        
-        // Title and Description
         document.getElementById('event-title').textContent = event.name;
         document.getElementById('event-description').textContent = event.description || 'No description available';
-        
-        // Event Info
         document.getElementById('event-date').textContent = formatDate(event.date) + ' at ' + event.start_time;
-        document.getElementById('event-location').textContent = event.venue_name;
+        document.getElementById('event-venue').textContent = event.venue_name;
+        document.getElementById('event-location').textContent = event.venue_address;
         document.getElementById('event-owner').textContent = event.owner;
         document.getElementById('event-type').textContent = event.venue_type;
-        document.getElementById('event-registered').textContent = `${event.registration_count ?? 0} users registered`;
-        
-        // Image
+        document.getElementById('event-registered').textContent = `${event.registered_count ?? 0} users registered`;
         if (event.thumbnail) {
             document.getElementById('event-image').src = event.thumbnail;
         }
@@ -149,6 +146,7 @@
             });
             const data = await response.json();
             isRegistered = data.is_registered;
+            isOwner = data.is_owner;
             
             updateJoinButton();
         } catch (error) {
@@ -158,29 +156,33 @@
 
     // Update join button based on registration status
     function updateJoinButton() {
+        const btnContainer = document.getElementById('join-button-container');
         const btn = document.getElementById('join-event-btn');
-        
+        if (isOwner) {
+            btnContainer.classList.add('hidden');
+            return;
+        }
         if (isRegistered) {
             btn.innerHTML = '<div class="text-white text-base font-normal font-[\'Roboto\'] leading-6">Already Registered</div>';
             btn.disabled = true;
-            btn.classList.remove('hover:bg-Sunrise-Orange');
-            btn.classList.add('opacity-70', 'cursor-not-allowed');
+            btn.onclick = null;
+            btn.classList.remove('hover:bg-[#000457]', 'bg-black', 'border-black');
+            btn.classList.add('opacity-70', 'cursor-not-allowed', 'bg-gray-500', 'border-gray-500');
         } else {
             btn.innerHTML = '<div class="text-white text-base font-normal font-[\'Roboto\'] leading-6">Join Event</div>';
             btn.disabled = false;
-            btn.classList.add('hover:bg-[#000457]');
-            btn.classList.remove('opacity-70', 'cursor-not-allowed');
+            btn.onclick = showJoinModal;
+            btn.classList.add('hover:bg-[#000457]', 'bg-black', 'border-black');
+            btn.classList.remove('opacity-70', 'cursor-not-allowed', 'bg-gray-500', 'border-gray-500');
         }
     }
 
-    // Show join modal
     function showJoinModal() {
-        if (isRegistered) return;
+        if (isRegistered || isOwner) return;
         
         toggleJoinModal(true);
     }
 
-    // Toggle join modal
     function toggleJoinModal(show) {
         const modal = document.getElementById('joinEventModal');
         modal.classList.toggle('hidden', !show);
@@ -211,7 +213,9 @@
                 toggleJoinModal(false);
                 isRegistered = true;
                 updateJoinButton();
-                loadEventDetail(); // Reload to update slots
+                
+                await loadEventDetail();
+                
                 showNotification('Successfully joined the event!', 'success');
             } else {
                 showNotification(data.message || 'Error joining event', 'error');
@@ -232,7 +236,6 @@
         return date.toLocaleDateString('en-GB', options);
     }
 
-    // Show notification
     function showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `fixed top-20 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transition-all duration-300 ${
@@ -248,7 +251,6 @@
         }, 3000);
     }
 
-    // Close modal on escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             toggleJoinModal(false);
