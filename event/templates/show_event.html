@@ -70,10 +70,11 @@
 <!-- Include Footer -->
 {% include 'footer.html' %}
 
-<!-- Include Modals -->
 {% include 'modal/create_event.html' %}
 {% include 'modal/update_event.html' %}
 {% include 'modal/delete_event.html' %}
+
+<!-- Include Modals -->
 {% endblock %}
 
 {% block extra_js %}
@@ -83,10 +84,14 @@
     const eventsPerPage = 6;
 
     function showModal(modalId) {
+        console.log('Attempting to show modal with ID:', modalId);
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+        }
+        else {
+            console.error('FATAL: Modal element not found!');
         }
     }
 
