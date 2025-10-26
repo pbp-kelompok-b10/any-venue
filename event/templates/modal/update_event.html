@@ -1,10 +1,10 @@
 {% load static %}
 
 <!-- Update Event Modal -->
-<div id="updateEventModal" class="hidden fixed inset-0 bg-black/25 flex justify-center items-center z-50">
+<div id="updateEventModal" class="hidden fixed inset-0 bg-black/25 flex justify-center items-center z-[80]">
     <div class="p-12 relative bg-white flex flex-col justify-start items-center gap-8 rounded-2xl shadow-lg w-[700px] max-h-[90vh] overflow-y-auto">
         <!-- Close Button -->
-        <button class="absolute top-4 right-4 text-gray-700 hover:text-red-500 text-2xl font-bold transition-colors duration-300" onclick="toggleUpdateModal(false)">✕</button>
+        <button class="absolute top-4 right-4 text-gray-700 hover:text-red-500 text-2xl font-bold transition-colors duration-300" onclick="hideModal('updateEventModal')">✕</button>
 
         <!-- Header -->
         <div class="text-center text-gray-900 text-5xl font-bold font-['Roboto']">Edit Event</div>
@@ -22,7 +22,7 @@
                     type="text" 
                     name="name" 
                     id="updateName" 
-                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
+                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-[#000457] focus:outline-2 transition-all duration-300" 
                     placeholder="Enter event name"
                     required>
             </div>
@@ -33,7 +33,7 @@
                 <select 
                     name="venue" 
                     id="updateVenue" 
-                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
+                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-[#000457] focus:outline-2 transition-all duration-300" 
                     required>
                     <option value="">Select a venue</option>
                 </select>
@@ -47,7 +47,7 @@
                         type="date" 
                         name="date" 
                         id="updateDate" 
-                        class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
+                        class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-[#000457] focus:outline-2 transition-all duration-300" 
                         required>
                 </div>
                 <div>
@@ -56,57 +56,45 @@
                         type="time" 
                         name="start_time" 
                         id="updateStartTime" 
-                        class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
+                        class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-[#000457] focus:outline-2 transition-all duration-300" 
                         required>
                 </div>
             </div>
 
-            <!-- Total Slots -->
-            <div>
-                <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Total Slots *</label>
-                <input 
-                    type="number" 
-                    name="total_slots" 
-                    id="updateTotalSlots" 
-                    min="2" 
-                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
-                    placeholder="Minimum 2 slots"
-                    required>
-            </div>
-
             <!-- Description -->
             <div>
-                <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Description</label>
+                <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Description *</label>
                 <textarea 
                     name="description" 
                     id="updateDescription" 
                     rows="3" 
-                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300 resize-none" 
-                    placeholder="Enter event description"></textarea>
+                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-[#000457] focus:outline-2 transition-all duration-300 resize-none" 
+                    placeholder="Enter event description" required></textarea>
             </div>
 
             <!-- Thumbnail URL -->
             <div>
-                <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Thumbnail URL</label>
+                <label class="text-gray-900 text-base font-medium font-['Roboto'] mb-2 block">Thumbnail URL *</label>
                 <input 
                     type="url" 
                     name="thumbnail" 
                     id="updateThumbnail" 
-                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-Orange focus:outline-2 transition-all duration-300" 
-                    placeholder="https://example.com/image.jpg">
+                    class="w-full p-3 outline outline-1 outline-gray-300 rounded-md focus:outline-[#000457] focus:outline-2 transition-all duration-300" 
+                    placeholder="https://example.com/image.jpg"
+                    required>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex justify-end gap-4 pt-4">
                 <button 
                     type="button" 
-                    onclick="toggleUpdateModal(false)" 
+                    onclick="hideModal('updateEventModal')" 
                     class="px-5 py-2 outline outline-1 outline-gray-400 rounded-md text-gray-700 font-medium font-['Roboto'] hover:bg-gray-50 transition-colors duration-300">
                     Cancel
                 </button>
                 <button 
                     type="submit" 
-                    class="px-5 py-2 bg-Orange text-white rounded-md font-medium font-['Roboto'] hover:bg-Sunrise-Orange transition-colors duration-300">
+                    class="px-5 py-2 bg-black text-white rounded-md font-medium font-['Roboto'] hover:bg-[#000457] transition-colors duration-300">
                     Save
                 </button>
             </div>

@@ -40,7 +40,6 @@ class Registration(models.Model):
     registered_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        # Pastikan 1 user hanya bisa daftar 1x di 1 event
         unique_together = ('event', 'user')
 
     def __str__(self):

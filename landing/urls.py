@@ -10,5 +10,5 @@ urlpatterns = [
     path('features/', features_preview, name='features_preview'),
     path('header/', header_test, name='header_test'),
     path('review/', reviews_preview, name='reviews_preview'),
-    path('booking/', booking_preview, name='booking_preview'),
+    path('booking-preview/', booking_preview, name='booking_preview'),
 ]

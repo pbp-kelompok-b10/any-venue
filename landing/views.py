@@ -2,14 +2,17 @@ from django.shortcuts import render
 
 from review.models import Review
 from venue.models import Venue
+from event.models import Event
 
 # Create your views here.
 def show_landing(request):
     latest_venues = Venue.objects.order_by('-pk')[:3]
     latest_reviews = Review.objects.order_by('-created_at')[:3]
+    latest_events = Event.objects.order_by('-date')[:3]
     context = {
         'venues_list': latest_venues,
         'reviews_list': latest_reviews,
+        'events_list': latest_events,
     }
 
     return render(request, "landing.html", context)
