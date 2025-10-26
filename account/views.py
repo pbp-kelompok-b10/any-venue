@@ -5,6 +5,7 @@ from account.models import Profile
 from booking.models import Booking
 from review.models import Review
 from venue.models import Venue
+from event.models import Event
 from django.views.decorators.csrf import csrf_exempt
 import json
 from authentication.views import logout
@@ -132,16 +133,18 @@ def edit_profile(request):
         profile.role = role
         profile.save()
 
-        # 🔹 Jika role berubah
         if role != old_role:
-            # OWNER → USER → hapus venue miliknya
+            #OWNER ke USER hapus venue miliknya
             if old_role == "OWNER" and role == "USER":
                 deleted_venues = Venue.objects.filter(owner=request.user.profile)
+                deleted_event = Event.objects.filter(owner=request.user.profile)
                 count_venues = deleted_venues.count()
+                count_event = deleted_event.count()
                 deleted_venues.delete()
-                print(f"Hapus {count_venues} venue milik {request.user.username}")
+                deleted_event.delete()
+                print(f"Hapus {count_venues} venue dan {count_event} Event milik {request.user.username}")
 
-            # USER → OWNER → hapus review & booking miliknya
+            #USER ke OWNER hapus review & booking miliknya
             elif old_role == "USER" and role == "OWNER":
                 deleted_reviews = Review.objects.filter(user=request.user.profile)
                 deleted_bookings = Booking.objects.filter(user=request.user.profile)
