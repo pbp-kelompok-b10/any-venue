@@ -76,7 +76,6 @@
 
         <!-- STATE -->
         <div id="loading" class="bg-white  border border-gray-200 p-12 text-center hidden">
-            {% comment %} Tampilkan loading secara default, JS akan menyembunyikannya {% endcomment %}
             <svg class="animate-spin h-10 w-10 text-Dark-Slate inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
@@ -155,6 +154,7 @@
 
 {% block extra_js %}
 <script>
+    // Defini URL API
     const VENUES_API_URL = "{% url 'venue:api_get_venues' %}";
     const VENUE_DETAIL_URL_BASE = "{% url 'venue:venue_detail' 9999 %}".replace('/9999/', '/');
     const VENUE_DETAIL_API_URL_BASE = "{% url 'venue:api_get_venue_detail' 9999 %}".replace('/9999/', '/');
@@ -166,15 +166,16 @@
     const IS_OWNER = {{ is_owner_role|yesno:"true,false" }};
     const CSRF_TOKEN = "{{ csrf_token }}";
 
-    // DOM ELEMENTS
+    // DOM ELEMENTS, akan diisi di dalam 'DOMContentLoaded'
     let loadingSpinner, errorMessage, emptyStateDisplay, venuesGridContainer, refreshButton;
     let ownerFilterSelect, cityFilterSelect, categoryFilterSelect, typeFilterSelect, searchInput;
     let addVenueModal, addVenueForm, addVenueSubmitBtn;
     let editVenueModal, editVenueForm, editVenueSubmitBtn, editVenueHiddenId;
     let deleteVenueModal, deleteVenueNameSpan, deleteVenueHiddenId, deleteVenueConfirmBtn;
 
-    // STATE
+    // Menyimpan semua venue dari sever, untuk filtering
     let allVenuesData = []; 
+    // Status filter
     let currentFilters = { 
         owner: ownerFilterSelect ? ownerFilterSelect.value : 'all',
         city: cityFilterSelect ? cityFilterSelect.value : '',
@@ -239,6 +240,7 @@
         renderAllVenueCards(filteredVenues);
     }
 
+    // Menampilkan semua card venue ke grid
     function renderAllVenueCards(venues) {
         venuesGridContainer.innerHTML = '';
         
@@ -392,18 +394,20 @@
         }, 300); 
     }
 
+    // Menampilkan modal add dan reset formnya
     function showAddModal() {
         if (addVenueForm) addVenueForm.reset();
         showModal('addVenueModal');
     }
 
+    // Menampilkan modal edit, ambil data, dan isi formnya
     async function showEditModal(venueId) {
         if (!editVenueForm) return;
 
         editVenueForm.reset();
         showModal('editVenueModal');
         
-        // Tampilkan loading di dalam modal (opsional, tapi bagus)
+        // Tampilkan loading di dalam modal
         document.getElementById('editVenueModal-title').textContent = 'Loading data...';
 
         try {
@@ -437,6 +441,7 @@
         showModal('deleteVenueModal');
     }
 
+    // Menampilkan eror validasi di bawah field form
     function displayFormErrors(formElement, errors) {
         // Hapus error lama
         formElement.querySelectorAll('.form-error-message').forEach(el => el.remove());
@@ -454,7 +459,7 @@
         }
     }
 
-    // HANDLER
+    // Handle submit form add venue
     async function handleAddFormSubmit(event) {
         event.preventDefault();
         addVenueSubmitBtn.disabled = true;
@@ -486,6 +491,7 @@
         }
     }
 
+    // Handle submit form edit venue
     async function handleEditFormSubmit(event) {
         event.preventDefault();
         editVenueSubmitBtn.disabled = true;
@@ -518,6 +524,7 @@
         }
     }
 
+    // Handle konfirmasi delete venue
     async function handleDeleteConfirm() {
         const venueId = deleteVenueHiddenId.value;
         if (!venueId) return;
@@ -577,7 +584,7 @@
         // Ambil data pertama kali saat halaman load
         fetchVenuesFromServer();
         
-        // MODAL
+        // Inisialisasi modal hanya jika owner
         if (IS_OWNER) {
             // Ambil elemen modal
             addVenueForm = document.getElementById('addVenueForm'); 
