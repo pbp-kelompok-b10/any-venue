@@ -18,19 +18,19 @@
             <div class="flex-1 flex flex-col justify-start items-start gap-8">
                 <!-- Breadcrumb -->
                 <div class="self-stretch flex justify-start items-center gap-2">
-                    <a href="{% url 'event:show_event' %}" class="text-center text-black text-base font-normal font-['Roboto'] leading-6 hover:underline">Events</a>
+                    <a href="{% url 'event:show_event' %}" class="text-center text-white text-base font-normal font-['Roboto'] leading-6 hover:underline">Events</a>
                     <div class="w-4 h-4 relative overflow-hidden">
-                        <svg class="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
                         </svg>
                     </div>
-                    <div id="event-breadcrumb" class="text-center text-black text-base font-normal font-['Roboto'] leading-6"></div>
+                    <div id="event-breadcrumb" class="text-center text-white text-base font-normal font-['Roboto'] leading-6"></div>
                 </div>
 
                 <!-- Event Title and Description -->
                 <div class="self-stretch flex flex-col justify-start items-start gap-6">
-                    <div id="event-title" class="self-stretch text-black text-4xl lg:text-5xl font-bold font-['Roboto'] leading-tight lg:leading-[57.60px]" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.25);"></div>
-                    <div id="event-description" class="self-stretch text-black text-lg font-normal font-['Roboto'] leading-7"></div>
+                    <div id="event-title" class="self-stretch text-white text-4xl lg:text-5xl font-bold font-['Roboto'] leading-tight lg:leading-[57.60px]" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.25);"></div>
+                    <div id="event-description" class="self-stretch text-white text-lg font-normal font-['Roboto'] leading-7"></div>
                 </div>
 
                 <!-- Join Event Button -->
@@ -46,36 +46,36 @@
                 <!-- Date & Venue -->
                 <div class="self-stretch grid grid-cols-2 gap-8">
                     <div class="flex flex-col justify-start items-start gap-2">
-                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Date</div>
-                        <div id="event-date" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6"></div>
+                        <div class="self-stretch text-white text-xl font-bold font-['Roboto'] leading-7">Date</div>
+                        <div id="event-date" class="self-stretch text-white text-base font-normal font-['Roboto'] leading-6"></div>
                     </div>
                     <div class="flex flex-col justify-start items-start gap-2">
-                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Venue</div>
-                        <div id="event-venue" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6"></div>
+                        <div class="self-stretch text-white text-xl font-bold font-['Roboto'] leading-7">Venue</div>
+                        <div id="event-venue" class="self-stretch text-white text-base font-normal font-['Roboto'] leading-6"></div>
                     </div>
                 </div>
 
                 <!-- Location & Event Owner -->
                 <div class="self-stretch grid grid-cols-2 gap-8">
                     <div class="flex flex-col justify-start items-start gap-2">
-                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Location</div>
-                        <div id="event-location" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6 break-words"></div>
+                        <div class="self-stretch text-white text-xl font-bold font-['Roboto'] leading-7">Location</div>
+                        <div id="event-location" class="self-stretch text-white text-base font-normal font-['Roboto'] leading-6 break-words"></div>
                     </div>
                     <div class="flex flex-col justify-start items-start gap-2">
-                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Event Owner</div>
-                        <div id="event-owner" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6"></div>
+                        <div class="self-stretch text-white text-xl font-bold font-['Roboto'] leading-7">Event Owner</div>
+                        <div id="event-owner" class="self-stretch text-white text-base font-normal font-['Roboto'] leading-6"></div>
                     </div>
                 </div>
 
                 <!-- Registered Participants & Sport Type -->
                 <div class="self-stretch grid grid-cols-2 gap-8">
                     <div class="flex flex-col justify-start items-start gap-2">
-                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Registered Participants</div>
-                        <div id="event-registered" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6"></div>
+                        <div class="self-stretch text-white text-xl font-bold font-['Roboto'] leading-7">Registered Participants</div>
+                        <div id="event-registered" class="self-stretch text-white text-base font-normal font-['Roboto'] leading-6"></div>
                     </div>
                     <div class="flex flex-col justify-start items-start gap-2">
-                        <div class="self-stretch text-black text-xl font-bold font-['Roboto'] leading-7">Sport Type</div>
-                        <div id="event-type" class="self-stretch text-black text-base font-normal font-['Roboto'] leading-6"></div>
+                        <div class="self-stretch text-white text-xl font-bold font-['Roboto'] leading-7">Sport Type</div>
+                        <div id="event-type" class="self-stretch text-white text-base font-normal font-['Roboto'] leading-6"></div>
                     </div>
                 </div>
             </div>

@@ -170,10 +170,12 @@
 {% block extra_js %}
 {% if user.is_authenticated and venue.owner.user == user %}
 <script>
+    // Definisi URL untuk endpoint API django
     const VENUE_DETAIL_API_URL_BASE = "{% url 'venue:api_get_venue_detail' 9999 %}".replace('/9999/', '/');
     const EDIT_VENUE_API_URL_BASE = "{% url 'venue:api_edit_venue' 9999 %}".replace('/9999/', '/');
     const DELETE_VENUE_API_URL_BASE = "{% url 'venue:api_delete_venue' 9999 %}".replace('/9999/', '/');
 
+    // Menampilkan modal berdasarkan ID nya
     function showModal(modalId) {
         const modal = document.getElementById(modalId);
         if (!modal) return;
@@ -183,6 +185,7 @@
         setTimeout(() => { if (modalContent) modalContent.classList.add('opacity-100', 'scale-100'); }, 10);
     }
 
+    // Menyembunyikan modal berdasarkan ID nya
     function hideModal(modalId) {
         const modal = document.getElementById(modalId);
         if (!modal) return;
@@ -191,6 +194,7 @@
         setTimeout(() => { modal.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }, 300);
     }
 
+    // Menampilkan modal Edit dan mengisi formnya dengan data venue yang sduah ada
     async function showEditModal(venueId) {
         const editVenueForm = document.getElementById('editVenueForm');
         const editVenueHiddenId = document.getElementById('edit-venue-id'); 
@@ -228,6 +232,7 @@
         }
     }
 
+    // Menampilkan modal untuk konfirmasi delete
     function showDeleteModal(venueId, venueName) {
         const deleteVenueNameSpan = document.getElementById('venue-name-to-delete'); 
         const deleteVenueHiddenId = document.getElementById('delete-venue-id'); 
@@ -236,6 +241,7 @@
         showModal('deleteVenueModal');
     }
 
+    // Menampilkan error validasi form
     function displayFormErrors(formElement, errors) {
         formElement.querySelectorAll('.form-error-message').forEach(el => el.remove());
         for (const field in errors) {
@@ -269,6 +275,7 @@
         }
     }
 
+    // Handle aksi submit form edit (lewat AJAX/fetch)
     async function handleEditFormSubmit(event) {
         event.preventDefault();
         const editVenueSubmitBtn = document.getElementById('editVenueSubmitBtn'); 
@@ -304,6 +311,7 @@
         }
     }
 
+    // Handle konfirmasi delete
     async function handleDeleteConfirm() {
         const deleteVenueHiddenId = document.getElementById('delete-venue-id'); 
         const deleteVenueConfirmBtn = document.getElementById('confirmDeleteBtn'); 
@@ -337,17 +345,21 @@
         }
     }
 
+    // Event listener, entry point
     document.addEventListener('DOMContentLoaded', () => {
+        // Untuk form edit
         const editVenueForm = document.getElementById('editVenueForm');
         if (editVenueForm) {
             editVenueForm.addEventListener('submit', handleEditFormSubmit);
         }
 
+        // Untuk konfirmasi delete
         const deleteVenueConfirmBtn = document.getElementById('confirmDeleteBtn');
         if (deleteVenueConfirmBtn) {
             deleteVenueConfirmBtn.addEventListener('click', handleDeleteConfirm);
         }
 
+        // Untuk tombol edit
         const openEditButton = document.getElementById('open-edit-btn');
         if (openEditButton) {
             openEditButton.addEventListener('click', () => {
@@ -356,6 +368,7 @@
             });
         }
 
+        // Untuk tombol delete
         const openDeleteButton = document.getElementById('open-delete-btn');
         if (openDeleteButton) {
             openDeleteButton.addEventListener('click', () => {
