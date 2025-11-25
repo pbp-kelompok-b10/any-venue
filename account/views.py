@@ -9,6 +9,7 @@ from event.models import Event
 from django.views.decorators.csrf import csrf_exempt
 import json
 from authentication.views import logout
+from django.views.decorators.http import require_GET, require_http_methods
 
 def profile_page(request):
     if request.user.is_authenticated:
@@ -172,3 +173,90 @@ def delete_account(request):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
     return JsonResponse({"success": False, "error": "Invalid request"})
+
+@require_GET
+@login_required
+def get_profile_flutter(request):
+    user = request.user  # user yang sedang login
+    
+    try:
+        profile = Profile.objects.get(user=user)
+    except Profile.DoesNotExist:
+        return JsonResponse({"error": "Profile not found"}, status=404)
+
+    data = {
+        "username": user.username,
+        "role": profile.role,
+        "is_owner": profile.is_owner,
+        "last_login": profile.last_login,
+        "created_at": profile.created_at,
+        "updated_at": profile.updated_at,
+    }
+
+    return JsonResponse(data, status=200)
+
+
+
+@require_http_methods(["POST"])
+@login_required
+def edit_profile_flutter(request):
+    user = request.user
+    
+    try:
+        profile = Profile.objects.get(user=user)
+    except Profile.DoesNotExist:
+        return JsonResponse({"error": "Profile not found"}, status=404)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except:
+        return JsonResponse({"error": "Invalid JSON body"}, status=400)
+
+    # Fields yang boleh di-update
+    new_username = data.get("username")
+    new_role = data.get("role")
+
+    # Update user fields
+    if new_username:
+        user.username = new_username
+    user.save()
+
+    # Update profile fields
+    if new_role:
+        if new_role not in dict(Profile.ROLE_CHOICES):
+            return JsonResponse({"error": "Invalid role"}, status=400)
+        profile.role = new_role
+        profile.save()
+
+    return JsonResponse({
+        "success": True,
+        "message": "Profile updated successfully",
+        "data": {
+            "username": user.username,
+            "role": profile.role,
+            "is_owner": profile.is_owner,
+            "last_login": profile.last_login,
+            "created_at": profile.created_at,
+            "updated_at": profile.updated_at,
+        }
+    }, status=200)
+
+@require_http_methods(["DELETE"])
+@login_required
+def delete_profile_flutter(request):
+    user = request.user
+
+    try:
+        profile = Profile.objects.get(user=user)
+    except Profile.DoesNotExist:
+        return JsonResponse({"error": "Profile not found"}, status=404)
+
+    profile.delete()
+    user.delete()
+
+    return JsonResponse({
+        "success": True,
+        "message": "User and profile deleted successfully"
+    }, status=200)
+
+
