@@ -121,7 +121,7 @@ def get_reviews_json(request):
             'rating': review.rating,
             'comment': review.comment,
             'user': review.user.user.username,
-            'user_profile_id': review.user.user.id,
+            'user_id': review.user.user.id,
             'venue_id': review.venue.id,
             'venue_name': review.venue.name,
             'created_at': review.created_at.strftime('%d-%m-%Y %H:%M'),
@@ -131,7 +131,7 @@ def get_reviews_json(request):
     return JsonResponse(data, safe=False)
 
 @require_http_methods(["GET"])
-def get_review_json_by_id(request, review_id):
+def get_json_by_id(request, review_id):
     review = get_object_or_404(
         Review.objects.select_related('user__user', 'venue'), 
         pk=review_id
@@ -142,10 +142,82 @@ def get_review_json_by_id(request, review_id):
         'rating': review.rating,
         'comment': review.comment,
         'user': review.user.user.username,
-        'user_profile_id': review.user.user.id,
+        'user_id': review.user.user.id,
         'venue_id': review.venue.id,
         'venue_name': review.venue.name,
         'created_at': review.created_at.strftime('%d-%m-%Y %H:%M'),
         'last_modified': review.last_modified.strftime('%d-%m-%Y %H:%M')
     }
     return JsonResponse(data)
+
+@login_required(login_url='/auth/login')
+@require_http_methods(["GET"])
+def get_my_reviews_json(request):
+    try:
+        profile = request.user.profile
+    except Profile.DoesNotExist:
+        return JsonResponse([], safe=False)
+
+    reviews = Review.objects.filter(user=profile).select_related('user__user', 'venue').order_by('-last_modified', '-pk')
+    
+    data = []
+    for review in reviews:
+        data.append({
+            'id': review.id,
+            'rating': review.rating,
+            'comment': review.comment,
+            'user': review.user.user.username,
+            'user_id': review.user.user.id,
+            'venue_id': review.venue.id,
+            'venue_name': review.venue.name,
+            'created_at': review.created_at.strftime('%d-%m-%Y %H:%M'),
+            'last_modified': review.last_modified.strftime('%d-%m-%Y %H:%M')
+        })
+        
+    return JsonResponse(data, safe=False)
+
+@require_http_methods(["GET"])
+def get_json_by_venue(request, venue_id):
+    reviews = Review.objects.filter(venue_id=venue_id).select_related('user__user', 'venue').order_by('-last_modified', '-pk')
+    
+    data = []
+    for review in reviews:
+        data.append({
+            'id': review.id,
+            'rating': review.rating,
+            'comment': review.comment,
+            'user': review.user.user.username,
+            'user_id': review.user.user.id,
+            'venue_id': review.venue.id,
+            'venue_name': review.venue.name,
+            'created_at': review.created_at.strftime('%d-%m-%Y %H:%M'),
+            'last_modified': review.last_modified.strftime('%d-%m-%Y %H:%M')
+        })
+        
+    return JsonResponse(data, safe=False)
+
+@login_required(login_url='/auth/login')
+@require_http_methods(["GET"])
+def get_my_json_by_venue(request, venue_id):
+    try:
+        profile = request.user.profile
+    except Profile.DoesNotExist:
+        return JsonResponse([], safe=False)
+
+    reviews = Review.objects.filter(user=profile, venue_id=venue_id).select_related('user__user', 'venue')
+    
+    data = []
+    for review in reviews:
+        data.append({
+            'id': review.id,
+            'rating': review.rating,
+            'comment': review.comment,
+            'user': review.user.user.username,
+            'user_id': review.user.user.id,
+            'venue_id': review.venue.id,
+            'venue_name': review.venue.name,
+            'created_at': review.created_at.strftime('%d-%m-%Y %H:%M'),
+            'last_modified': review.last_modified.strftime('%d-%m-%Y %H:%M')
+        })
+    
+    return JsonResponse(data, safe=False)
