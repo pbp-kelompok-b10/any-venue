@@ -8,9 +8,9 @@ urlpatterns = [
     path('edit/<int:review_id>/', views.edit_review, name='edit_review'),
     path('delete/<int:review_id>/', views.delete_review, name='delete_review'),
     
-    # path('add-flutter/<int:venue_id>/', views.add_review_flutter, name='add_review_flutter'),
-    # path('edit-flutter/<int:review_id>/', views.edit_review_flutter, name='edit_review_flutter'),
-    # path('delete-flutter/<int:review_id>/', views.delete_review_flutter, name='delete_review_flutter'),
+    path('add-flutter/<int:venue_id>/', views.add_review_flutter, name='add_review_flutter'),
+    path('edit-flutter/<int:review_id>/', views.edit_review_flutter, name='edit_review_flutter'),
+    path('delete-flutter/<int:review_id>/', views.delete_review_flutter, name='delete_review_flutter'),
     
     path('json/', views.get_reviews_json, name='get_reviews_json'),
     path('json/my/', views.get_my_reviews_json, name='get_my_reviews_json'),
