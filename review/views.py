@@ -177,7 +177,7 @@ def get_my_reviews_json(request):
     return JsonResponse(data, safe=False)
 
 @require_http_methods(["GET"])
-def get_json_by_venue(request, venue_id):
+def get_reviews_by_venue(request, venue_id):
     reviews = Review.objects.filter(venue_id=venue_id).select_related('user__user', 'venue').order_by('-last_modified', '-pk')
     
     data = []
@@ -198,7 +198,7 @@ def get_json_by_venue(request, venue_id):
 
 @login_required(login_url='/auth/login')
 @require_http_methods(["GET"])
-def get_my_json_by_venue(request, venue_id):
+def get_my_review_by_venue(request, venue_id):
     try:
         profile = request.user.profile
     except Profile.DoesNotExist:

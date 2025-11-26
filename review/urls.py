@@ -14,8 +14,8 @@ urlpatterns = [
     
     path('json/', views.get_reviews_json, name='get_reviews_json'),
     path('json/my/', views.get_my_reviews_json, name='get_my_reviews_json'),
-    path('json/venue/<int:venue_id>/', views.get_json_by_venue, name='get_json_by_venue'),
-    path('json/venue/<int:venue_id>/my/', views.get_my_json_by_venue, name='get_my_json_by_venue'),
+    path('json/venue/<int:venue_id>/', views.get_reviews_by_venue, name='get_reviews_by_venue'),
+    path('json/venue/<int:venue_id>/my/', views.get_my_review_by_venue, name='get_my_review_by_venue'),
     path('json/<int:review_id>/', views.get_json_by_id, name='get_json_by_id'),
 
 ]
