@@ -9,9 +9,6 @@ from event.views import (
     delete_event,
     join_event,
     check_registration,
-    create_event_flutter,
-    update_event_flutter,
-    delete_event_flutter,
 )
 
 
@@ -28,7 +25,4 @@ urlpatterns = [
     path('delete/<int:event_id>/', delete_event, name='delete_event'),
     path('<int:event_id>/join/', join_event, name='join_event'),
     path('<int:event_id>/check-registration/', check_registration, name='check_registration'),
-    path('create-flutter/', create_event_flutter, name='create_event_flutter'),
-    path('update-flutter/<int:event_id>/', update_event_flutter, name='update_event_flutter'),
-    path('delete-flutter/<int:event_id>/', delete_event_flutter, name='delete_event_flutter'),
 ]
