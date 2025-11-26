@@ -13,7 +13,6 @@ from django.core import serializers
 from django.shortcuts import render, redirect, get_object_or_404
 from event.forms import EventForm
 from event.models import Event, Registration
-from venue.models import Venue
 
 @login_required(login_url='/auth/login')
 def show_event(request):
@@ -167,97 +166,3 @@ def check_registration(request, event_id):
         "is_registered": is_registered,
         "is_owner": is_owner_role
     })
-
-@csrf_exempt
-def create_event_flutter(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            user_profile = request.user.profile
-
-            # Validasi Role: Hanya OWNER yang boleh buat event
-            if user_profile.role != 'OWNER':
-                return JsonResponse({"status": "error", "message": "Hanya Owner yang dapat membuat event."}, status=403)
-
-            # Ambil data dari JSON
-            name = strip_tags(data.get("name", ""))
-            description = strip_tags(data.get("description", ""))
-            date = data.get("date", "")
-            start_time = data.get("start_time", "")
-            venue_id = data.get("venue_id", "")
-            thumbnail = data.get("thumbnail", "")
-
-            # Validasi keberadaan Venue
-            venue = Venue.objects.get(pk=int(venue_id))
-
-            new_event = Event(
-                owner=user_profile,
-                venue=venue,
-                name=name,
-                description=description,
-                date=date,
-                start_time=start_time,
-                thumbnail=thumbnail,
-                # total_slots bisa ditambahkan jika ada inputnya
-            )
-            new_event.save()
-            
-            return JsonResponse({"status": "success", "message": "Event berhasil dibuat!"}, status=200)
-        except Venue.DoesNotExist:
-             return JsonResponse({"status": "error", "message": "Venue tidak ditemukan."}, status=404)
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=500)
-    
-    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
-
-@csrf_exempt
-def update_event_flutter(request, event_id):
-    if request.method == 'POST': # Gunakan POST untuk kemudahan di Flutter, atau PUT
-        try:
-            event = Event.objects.get(pk=event_id)
-            user_profile = request.user.profile
-
-            # Validasi Kepemilikan
-            if event.owner != user_profile:
-                return JsonResponse({"status": "error", "message": "Anda tidak memiliki izin mengedit event ini."}, status=403)
-
-            data = json.loads(request.body)
-            
-            # Update fields
-            event.name = strip_tags(data.get("name", event.name))
-            event.description = strip_tags(data.get("description", event.description))
-            event.date = data.get("date", event.date)
-            event.start_time = data.get("start_time", event.start_time)
-            event.thumbnail = data.get("thumbnail", event.thumbnail)
-            
-            # Jika user mengganti venue
-            if "venue_id" in data:
-                venue_id = data.get("venue_id")
-                event.venue = Venue.objects.get(pk=int(venue_id))
-            
-            event.save()
-            return JsonResponse({"status": "success", "message": "Event berhasil diperbarui!"}, status=200)
-
-        except Event.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "Event tidak ditemukan."}, status=404)
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=500)
-
-    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
-
-@csrf_exempt
-def delete_event_flutter(request, event_id):
-    if request.method == 'POST':
-        try:
-            event = Event.objects.get(pk=event_id)
-            user_profile = request.user.profile
-
-            if event.owner != user_profile:
-                return JsonResponse({"status": "error", "message": "Anda tidak memiliki izin menghapus event ini."}, status=403)
-            
-            event.delete()
-            return JsonResponse({"status": "success", "message": "Event berhasil dihapus!"}, status=200)
-        except Event.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "Event tidak ditemukan."}, status=404)
-        
-    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
