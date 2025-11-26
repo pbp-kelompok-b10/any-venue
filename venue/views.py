@@ -3,7 +3,8 @@ from django.http import JsonResponse, HttpResponse
 from django.utils.html import strip_tags
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_http_methods, csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from .models import Venue, City, Category
 from .forms import VenueForm
 from account.models import Profile
