@@ -3,7 +3,8 @@ from django.http import JsonResponse, HttpResponse
 from django.utils.html import strip_tags
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_http_methods, csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from .models import Venue, City, Category
 from .forms import VenueForm
 from account.models import Profile
@@ -201,7 +202,59 @@ def proxy_image(request):
         )
     except requests.RequestException as e:
         return HttpResponse(f'Error fetching image: {str(e)}', status=500)
+
+@require_http_methods(["GET"])
+def get_venues_flutter(request):
+    """
+    API endpoint (GET) untuk mengambil semua data venue dalam format JSON.
+    Mengirimkan data City, Category, dan Owner sebagai Objek (bukan String flat).
+    """
+    venues = Venue.objects.select_related('owner__user', 'city', 'category').all()
     
+    data = []
+    for venue in venues:
+        data.append({
+            'id': venue.id,
+            'name': venue.name,
+            'price': venue.price,
+            'city': {
+                'id': venue.city.id,
+                'name': venue.city.name
+            },
+            'category': {
+                'id': venue.category.id,
+                'name': venue.category.name
+            },
+            'owner': {
+                'id': venue.owner.pk, # ID Profile
+                'username': venue.owner.user.username,
+            },
+            'type': venue.type,
+            'address': venue.address,
+            'description': venue.description,
+            'image_url': venue.image_url,
+        })
+        
+    return JsonResponse(data, safe=False)
+
+@require_http_methods(["GET"])
+def get_cities_flutter(request):
+    """
+    API endpoint (GET) untuk mengambil semua data city dalam format JSON.
+    """
+    cities = City.objects.all().order_by('name')
+    data = [{'id': city.id, 'name': city.name} for city in cities]
+    return JsonResponse(data, safe=False)
+
+@require_http_methods(["GET"])
+def get_categories_flutter(request):
+    """
+    API endpoint (GET) untuk mengambil semua data category dalam format JSON.
+    """
+    categories = Category.objects.all().order_by('name')
+    data = [{'id': category.id, 'name': category.name} for category in categories]
+    return JsonResponse(data, safe=False)
+  
 @csrf_exempt
 def create_venue_flutter(request):
     if request.method == 'POST':
