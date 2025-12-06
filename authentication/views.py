@@ -157,6 +157,7 @@ def api_login_view(request):
             login(request, user)
             return JsonResponse({
                 "username": user.username,
+                "role": user.profile.role,
                 "status": True,
                 "message": "Login successful!"
                 # Add other data if you want to send data to Flutter.

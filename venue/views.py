@@ -63,7 +63,7 @@ def show_details(request, id):
     }
     return render(request, "venue_details.html", context)
 
-@require_http_methods(["GET"])
+# @require_http_methods(["GET"])
 def get_venues_json(request):
     """
     API endpoint (GET) untuk mengambil semua data venue dalam format JSON.
