@@ -259,4 +259,65 @@ def delete_profile_flutter(request):
         "message": "User and profile deleted successfully"
     }, status=200)
 
+@require_GET
+@login_required
+def user_profile_api(request):
+    # 1. Cek apakah user sudah login
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            "status": False,
+            "message": "Anda belum login."
+        }, status=401)
 
+    try:
+        # 2. Ambil objek Profile berdasarkan user yang sedang login
+        # Sesuaikan 'user=request.user' dengan relasi OneToOne di model kamu
+        profile = Profile.objects.get(user=request.user)
+
+        # 3. Siapkan data dasar sesuai Model Dart Profile kamu
+        # Pastikan field ini SAMA PERSIS dengan Profile.fromJson di Flutter
+        user_data = {
+            "username": request.user.username,
+            "role": profile.role,
+            "is_owner": profile.is_owner,
+            # Gunakan .isoformat() agar DateTime bisa di-parse oleh Flutter
+            "last_login": request.user.last_login.isoformat() if request.user.last_login else "",
+            "created_at": profile.created_at.isoformat() if profile.created_at else "",
+            "updated_at": profile.updated_at.isoformat() if profile.updated_at else "",
+        }
+
+        # (Opsional) 4. Logika Tambahan untuk Owner vs User 
+        # Jika kamu ingin mengirim data tambahan seperti list venue/booking di masa depan
+        extra_data = {}
+        if profile.is_owner:
+            # venues = Venue.objects.filter(owner=profile)
+            # extra_data['venues_count'] = venues.count()
+            pass 
+        else:
+            # bookings = Booking.objects.filter(user=profile)
+            # extra_data['bookings_count'] = bookings.count()
+            pass
+
+        # 5. Return JSON Response
+        return JsonResponse({
+            "status": True,
+            "message": "Berhasil mengambil data profil",
+            # Kita taruh data di key 'user_data' agar rapi, 
+            # atau bisa langsung di root jika logic fluttermu mengharapkan itu.
+            # Sesuai logika Login di diskusi sebelumnya, kita pakai struktur ini:
+            "user_data": user_data, 
+            
+            # Opsional: Jika logic fluttermu langsung ambil dari root dictionary:
+            **user_data 
+        }, status=200)
+
+    except Profile.DoesNotExist:
+        return JsonResponse({
+            "status": False,
+            "message": "Profil pengguna tidak ditemukan."
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            "status": False,
+            "message": f"Terjadi kesalahan: {str(e)}"
+        }, status=500)
