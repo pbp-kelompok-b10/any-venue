@@ -11,5 +11,6 @@ urlpatterns = [
     path("api/profile/", views.get_profile_flutter, name="get_profile"),
     path("api/profile/edit/", views.edit_profile_flutter, name="edit_profile"),
     path("api/profile/delete/", views.delete_profile_flutter, name="delete_profile"),
+    path("api/profile/page/", views.user_profile_api, name="user_profile_api"),
 
 ]
