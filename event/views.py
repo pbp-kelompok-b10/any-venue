@@ -94,7 +94,7 @@ def show_event_detail(request, event_id):
             'owner_id': event.owner.user.id,
             'venue': event.venue_name,
             'venue_category': event.venue_category,
-            'venue_type': event.venue_category,
+            'venue_type': event.venue_type,
             'venue_address': event.venue_address,
             'date': event.date.strftime('%Y-%m-%d'),
             'start_time': event.start_time.strftime('%H:%M'),
