@@ -18,6 +18,10 @@ class Event(models.Model):
     @property
     def venue_type(self):
         return self.venue.type
+
+    @property
+    def venue_category(self):
+        return self.venue.category.name
 		
     @property
     def venue_name(self):
