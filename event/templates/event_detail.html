@@ -129,7 +129,7 @@
         document.getElementById('event-venue').textContent = event.venue_name;
         document.getElementById('event-location').textContent = event.venue_address;
         document.getElementById('event-owner').textContent = event.owner;
-        document.getElementById('event-type').textContent = event.venue_type;
+        document.getElementById('event-type').textContent = event.venue_category;
         document.getElementById('event-registered').textContent = `${event.registered_count ?? 0} users registered`;
         if (event.thumbnail) {
             document.getElementById('event-image').src = event.thumbnail;

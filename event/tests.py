@@ -33,7 +33,7 @@ class EventTestCase(TestCase):
         self.assertEqual(self.event.name, 'Test Event')
         self.assertEqual(self.event.owner, self.owner_profile)
         self.assertEqual(self.event.venue_name, 'Test Venue')
-        self.assertEqual(self.event.venue_type, 'Indoor')
+        self.assertEqual(self.event.venue_category, 'Test Sport')
         self.assertEqual(str(self.event), f"Test Event di Test Venue ({self.event.date})")
 
     def test_registration_model_and_signal(self):
