@@ -183,10 +183,28 @@ def get_user_bookings_json(request):
     bookings = Booking.objects.filter(user=request.user.profile)
     return JsonResponse(json.loads(serialize('json', bookings)), safe=False)
 
+
+@login_required
+def get_user_bookings_upcoming(request):
+    today = timezone.localdate()
+    bookings = Booking.objects.filter(user=request.user.profile, slot__date__gte=today).order_by('slot__date', 'slot__start_time')
+    return JsonResponse(json.loads(serialize('json', bookings)), safe=False)
+
+
+@login_required
+def get_user_bookings_past(request):
+    today = timezone.localdate()
+    bookings = Booking.objects.filter(user=request.user.profile, slot__date__lt=today).order_by('-slot__date', '-slot__start_time')
+    return JsonResponse(json.loads(serialize('json', bookings)), safe=False)
+
 @csrf_exempt
 @login_required
 def create_booking_flutter(request):
     if request.method == "POST":
+        # Only allow USER role to book
+        if getattr(request.user.profile, 'role', 'USER') != 'USER':
+            return JsonResponse({"status": "error", "message": "Only USER role can book."}, status=403)
+
         payload = json.loads(request.body)
         slot_ids = payload.get("slots", [])
         user_profile = request.user.profile
@@ -220,6 +238,9 @@ def create_booking_flutter(request):
 @login_required
 def cancel_booking_flutter(request):
     if request.method == "POST":
+        if getattr(request.user.profile, 'role', 'USER') != 'USER':
+            return JsonResponse({"status": "error", "message": "Only USER role can cancel."}, status=403)
+
         payload = json.loads(request.body)
         slot_id = payload.get("slot_id")
 

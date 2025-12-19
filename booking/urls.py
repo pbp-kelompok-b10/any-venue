@@ -12,6 +12,8 @@ urlpatterns = [
     path('cancel/', views.cancel_booking, name='cancel_booking'),
     path('json/', views.get_booking_json, name='get_booking_json'),
     path('mybookings/json/', views.get_user_bookings_json, name='get_user_bookings_json'),
+    path('mybookings/upcoming/json/', views.get_user_bookings_upcoming, name='get_user_bookings_upcoming'),
+    path('mybookings/past/json/', views.get_user_bookings_past, name='get_user_bookings_past'),
     path('create-flutter/', views.create_booking_flutter, name='create_booking_flutter'),
     path('cancel-flutter/', views.cancel_booking_flutter, name='cancel_booking_flutter'),
 ]
