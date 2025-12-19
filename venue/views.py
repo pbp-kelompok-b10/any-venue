@@ -237,6 +237,33 @@ def get_venues_flutter(request):
         
     return JsonResponse(data, safe=False)
 
+def get_venue_detail_flutter(request, id):
+    # Ambil venue berdasarkan ID, return 404 jika tidak ada
+    venue = get_object_or_404(Venue, id=id)
+    
+    data = {
+        'id': venue.id,
+        'name': venue.name,
+        'price': venue.price,
+        'city': {
+            'id': venue.city.id,
+            'name': venue.city.name
+        },
+        'category': {
+            'id': venue.category.id,
+            'name': venue.category.name
+        },
+        'owner': {
+            'id': venue.owner.pk, # ID Profile
+            'username': venue.owner.user.username,
+        },
+        'type': venue.type,
+        'address': venue.address,
+        'description': venue.description,
+        'image_url': venue.image_url,
+    }
+    return JsonResponse(data)
+
 @require_http_methods(["GET"])
 def get_cities_flutter(request):
     """
