@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from authentication.views import logout
 from django.views.decorators.http import require_GET, require_http_methods
+from django.contrib.auth.models import User
 
 def profile_page(request):
     if request.user.is_authenticated:
@@ -124,33 +125,49 @@ def edit_profile(request):
 
     old_role = profile.role  # simpan role sebelum diubah
 
+    # --- BAGIAN VALIDASI USERNAME (BARU) ---
     username = data.get("username")
-    if username:
+    
+    # Cek jika ada input username DAN username tersebut beda dengan yang sekarang
+    if username and username != request.user.username:
+        # Cek apakah username sudah dipakai orang lain di database
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({
+                "success": False,
+                "error": "Username already taken. Please choose another one."
+            }, status=400) # Return error 400 agar frontend tahu inputnya salah
+        
+        # Jika aman, baru simpan
         profile.user.username = username
         profile.user.save()
 
+    # --- BAGIAN ROLE (TETAP) ---
     role = data.get("role")
     if role and role in dict(Profile.ROLE_CHOICES).keys():
         profile.role = role
         profile.save()
 
         if role != old_role:
-            #OWNER ke USER hapus venue miliknya
+            # OWNER ke USER hapus venue & event
             if old_role == "OWNER" and role == "USER":
-                deleted_venues = Venue.objects.filter(owner=request.user.profile)
-                deleted_event = Event.objects.filter(owner=request.user.profile)
+                deleted_venues = Venue.objects.filter(owner=profile)
+                deleted_event = Event.objects.filter(owner=profile)
+                
                 count_venues = deleted_venues.count()
                 count_event = deleted_event.count()
+                
                 deleted_venues.delete()
                 deleted_event.delete()
                 print(f"Hapus {count_venues} venue dan {count_event} Event milik {request.user.username}")
 
-            #USER ke OWNER hapus review & booking miliknya
+            # USER ke OWNER hapus review & booking
             elif old_role == "USER" and role == "OWNER":
-                deleted_reviews = Review.objects.filter(user=request.user.profile)
-                deleted_bookings = Booking.objects.filter(user=request.user.profile)
+                deleted_reviews = Review.objects.filter(user=profile)
+                deleted_bookings = Booking.objects.filter(user=profile)
+                
                 count_reviews = deleted_reviews.count()
                 count_bookings = deleted_bookings.count()
+                
                 deleted_reviews.delete()
                 deleted_bookings.delete()
                 print(f"Hapus {count_reviews} review dan {count_bookings} booking milik {request.user.username}")
@@ -174,75 +191,78 @@ def delete_account(request):
             return JsonResponse({"success": False, "error": str(e)})
     return JsonResponse({"success": False, "error": "Invalid request"})
 
-@require_GET
-@login_required
-def get_profile_flutter(request):
-    user = request.user  # user yang sedang login
-    
-    try:
-        profile = Profile.objects.get(user=user)
-    except Profile.DoesNotExist:
-        return JsonResponse({"error": "Profile not found"}, status=404)
-
-    data = {
-        "username": user.username,
-        "role": profile.role,
-        "is_owner": profile.is_owner,
-        "last_login": profile.last_login,
-        "created_at": profile.created_at,
-        "updated_at": profile.updated_at,
-    }
-
-    return JsonResponse(data, status=200)
-
-
-
-@require_http_methods(["POST"])
-@login_required
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
 def edit_profile_flutter(request):
+    # 1. Cek Login
+    if not request.user.is_authenticated:
+        return JsonResponse({"status": False, "message": "You must be logged in to edit profile."}, status=401)
+
     user = request.user
-    
     try:
         profile = Profile.objects.get(user=user)
     except Profile.DoesNotExist:
-        return JsonResponse({"error": "Profile not found"}, status=404)
+        return JsonResponse({"status": False, "message": "Profile not found."}, status=404)
 
-    try:
-        data = json.loads(request.body.decode("utf-8"))
-    except:
-        return JsonResponse({"error": "Invalid JSON body"}, status=400)
+    old_role = profile.role
 
-    # Fields yang boleh di-update
-    new_username = data.get("username")
-    new_role = data.get("role")
+    if request.method == "GET":
+        return JsonResponse({
+            "status": True,
+            "user_data": {
+                "username": user.username,
+                "role": profile.role,
+            }
+        })
 
-    # Update user fields
-    if new_username:
-        user.username = new_username
-    user.save()
+    elif request.method == "POST":
+        new_username = request.POST.get("username")
+        new_role = request.POST.get("role")
 
-    # Update profile fields
-    if new_role:
-        if new_role not in dict(Profile.ROLE_CHOICES):
-            return JsonResponse({"error": "Invalid role"}, status=400)
-        profile.role = new_role
-        profile.save()
+        # --- VALIDASI USERNAME (ENGLISH) ---
+        if new_username and new_username != user.username:
+            # Cek apakah username sudah ada di database (selain milik user ini sendiri)
+            if User.objects.filter(username=new_username).exists():
+                return JsonResponse({
+                    "status": False, 
+                    "message": "This username is already taken. Please choose another one."
+                }, status=400)
+            
+            user.username = new_username
+            user.save()
 
-    return JsonResponse({
-        "success": True,
-        "message": "Profile updated successfully",
-        "data": {
-            "username": user.username,
-            "role": profile.role,
-            "is_owner": profile.is_owner,
-            "last_login": profile.last_login,
-            "created_at": profile.created_at,
-            "updated_at": profile.updated_at,
-        }
-    }, status=200)
+        if new_role:
+            profile.role = new_role
+            profile.save()
 
-@require_http_methods(["DELETE"])
+            if new_role != old_role:
+                # OWNER -> USER (Hapus Venue & Event)
+                if old_role == "OWNER" and new_role == "USER":
+                    # Pastikan model Venue & Event sudah diimport di atas
+                    deleted_venues = Venue.objects.filter(owner=profile)
+                    deleted_event = Event.objects.filter(owner=profile)
+                    
+                    deleted_venues.delete()
+                    deleted_event.delete()
+                    
+                # USER -> OWNER (Hapus Review & Booking)
+                elif old_role == "USER" and new_role == "OWNER":
+                    # Pastikan model Review & Booking sudah diimport di atas
+                    deleted_reviews = Review.objects.filter(user=profile)
+                    deleted_bookings = Booking.objects.filter(user=profile)
+                    
+                    deleted_reviews.delete()
+                    deleted_bookings.delete()
+
+        return JsonResponse({
+            "status": True,
+            "message": "Profile updated successfully!",
+            "user_data": {"username": user.username, "role": profile.role}
+        })
+
+@require_http_methods(["POST", "DELETE"])
 @login_required
+@csrf_exempt
 def delete_profile_flutter(request):
     user = request.user
 
