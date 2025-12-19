@@ -166,9 +166,16 @@ def api_login_view(request):
             return JsonResponse({"success": False, "message": "Username atau password salah"}, status=401)
     return render(request, "login.html")
 
-def api_logout_view(request):
-    logout(request)
-    # Check if request is AJAX by looking at HTTP_X_REQUESTED_WITH header
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({"success": True, "message": "Logout berhasil"})
-    return redirect("landing:show_landing")
+@csrf_exempt
+def logout_flutter(request):
+    if request.user.is_authenticated:
+        logout(request) # Menghapus session data di server
+        return JsonResponse({
+            "status": True, 
+            "message": "Logout successful!"
+        }, status=200)
+    
+    return JsonResponse({
+        "status": False, 
+        "message": "You are not logged in."
+    }, status=401)
