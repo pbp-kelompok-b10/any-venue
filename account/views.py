@@ -261,7 +261,6 @@ def edit_profile_flutter(request):
         })
 
 @require_http_methods(["POST", "DELETE"])
-@login_required
 @csrf_exempt
 def delete_profile_flutter(request):
     user = request.user
@@ -280,7 +279,6 @@ def delete_profile_flutter(request):
     }, status=200)
 
 @require_GET
-@login_required
 def user_profile_api(request):
     # 1. Cek apakah user sudah login
     if not request.user.is_authenticated:
