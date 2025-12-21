@@ -264,3 +264,28 @@ def cancel_booking_flutter(request):
 
     return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
 
+
+@login_required
+def get_slot_venue_flutter(request, slot_id):
+    """
+    Return venue info for a given slot to let the mobile app deep-link back to the venue booking page.
+    """
+    try:
+        slot = BookingSlot.objects.select_related('venue').get(id=slot_id)
+        venue = slot.venue
+        return JsonResponse(
+            {
+                "status": "success",
+                "venue": {
+                    "id": venue.id,
+                    "name": venue.name,
+                    "price": venue.price,
+                    "address": venue.address,
+                    "type": venue.type,
+                    "image_url": venue.image_url,
+                },
+            }
+        )
+    except BookingSlot.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Slot not found."}, status=404)
+
