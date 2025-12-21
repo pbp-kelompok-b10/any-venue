@@ -1,6 +1,5 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from django.urls import reverse
 from datetime import date, time, timedelta
 from account.models import Profile
 from venue.models import Venue, City, Category
@@ -8,6 +7,162 @@ from .models import BookingSlot, Booking
 import json
 from django.utils import timezone
 from booking.views import ensure_slots_for_date
+
+
+class BookingFlutterAPITest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Owner and venue
+        owner_user = User.objects.create_user(username='owner_f', password='pass')
+        owner_profile = Profile.objects.get(user=owner_user)
+        owner_profile.role = 'OWNER'
+        owner_profile.save()
+
+        self.user = User.objects.create_user(username='cust_f', password='pass')
+        self.profile = Profile.objects.get(user=self.user)
+
+        self.city = City.objects.create(name='CityF')
+        self.category = Category.objects.create(name='CatF')
+        self.venue = Venue.objects.create(
+            owner=owner_profile,
+            name='VenueF',
+            address='Addr',
+            type='Indoor',
+            price=150000,
+            city=self.city,
+            category=self.category,
+            description='Desc',
+            image_url='https://example.com/img.jpg',
+        )
+
+        self.today = timezone.localdate()
+
+    def _login_user(self):
+        self.client.login(username='cust_f', password='pass')
+
+    def test_create_booking_flutter_success(self):
+        slot = BookingSlot.objects.create(
+            venue=self.venue,
+            date=self.today + timedelta(days=1),
+            start_time=time(8, 0),
+            end_time=time(9, 0),
+            is_booked=False,
+        )
+        self._login_user()
+        resp = self.client.post(
+            reverse('booking:create_booking_flutter'),
+            json.dumps({'slots': [slot.id]}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 201)
+        body = json.loads(resp.content)
+        self.assertEqual(body['status'], 'success')
+        slot.refresh_from_db()
+        self.assertTrue(slot.is_booked)
+        self.assertTrue(Booking.objects.filter(slot=slot, user=self.profile).exists())
+
+    def test_create_booking_flutter_conflict(self):
+        slot = BookingSlot.objects.create(
+            venue=self.venue,
+            date=self.today + timedelta(days=1),
+            start_time=time(9, 0),
+            end_time=time(10, 0),
+            is_booked=True,
+        )
+        self._login_user()
+        resp = self.client.post(
+            reverse('booking:create_booking_flutter'),
+            json.dumps({'slots': [slot.id]}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 409)
+
+    def test_create_booking_flutter_past_slot_rejected(self):
+        slot = BookingSlot.objects.create(
+            venue=self.venue,
+            date=self.today - timedelta(days=1),
+            start_time=time(10, 0),
+            end_time=time(11, 0),
+            is_booked=False,
+        )
+        self._login_user()
+        resp = self.client.post(
+            reverse('booking:create_booking_flutter'),
+            json.dumps({'slots': [slot.id]}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    def test_create_booking_flutter_role_not_user(self):
+        # login as owner (not USER role)
+        self.client.login(username='owner_f', password='pass')
+        slot = BookingSlot.objects.create(
+            venue=self.venue,
+            date=self.today + timedelta(days=1),
+            start_time=time(12, 0),
+            end_time=time(13, 0),
+            is_booked=False,
+        )
+        resp = self.client.post(
+            reverse('booking:create_booking_flutter'),
+            json.dumps({'slots': [slot.id]}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 403)
+
+    def test_cancel_booking_flutter_success(self):
+        slot = BookingSlot.objects.create(
+            venue=self.venue,
+            date=self.today + timedelta(days=1),
+            start_time=time(14, 0),
+            end_time=time(15, 0),
+            is_booked=True,
+        )
+        booking = Booking.objects.create(user=self.profile, slot=slot, total_price=self.venue.price)
+        self._login_user()
+        resp = self.client.post(
+            reverse('booking:cancel_booking_flutter'),
+            json.dumps({'slot_id': slot.id}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 200)
+        slot.refresh_from_db()
+        self.assertFalse(slot.is_booked)
+        self.assertFalse(Booking.objects.filter(id=booking.id).exists())
+
+    def test_cancel_booking_flutter_past_slot_rejected(self):
+        slot = BookingSlot.objects.create(
+            venue=self.venue,
+            date=self.today - timedelta(days=1),
+            start_time=time(8, 0),
+            end_time=time(9, 0),
+            is_booked=True,
+        )
+        Booking.objects.create(user=self.profile, slot=slot, total_price=self.venue.price)
+        self._login_user()
+        resp = self.client.post(
+            reverse('booking:cancel_booking_flutter'),
+            json.dumps({'slot_id': slot.id}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    def test_get_slot_venue_flutter(self):
+        slot = BookingSlot.objects.create(
+            venue=self.venue,
+            date=self.today + timedelta(days=2),
+            start_time=time(16, 0),
+            end_time=time(17, 0),
+            is_booked=False,
+        )
+        self._login_user()
+        resp = self.client.get(reverse('booking:get_slot_venue_flutter', args=[slot.id]))
+        self.assertEqual(resp.status_code, 200)
+        data = json.loads(resp.content)
+        self.assertEqual(data['status'], 'success')
+        self.assertEqual(data['venue']['id'], self.venue.id)
+from django.urls import reverse
 
 class BookingModelTest(TestCase):
     def setUp(self):
