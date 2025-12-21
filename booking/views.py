@@ -8,6 +8,7 @@ import json
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.core.serializers import serialize
+from django.db import transaction
 
 def cleanup_old_slots_and_create_new():
     """
@@ -264,21 +265,27 @@ def create_booking_flutter(request):
             return JsonResponse({"status": "error", "message": "No slots provided."}, status=400)
 
         bookings_created = []
-        for sid in slot_ids:
-            try:
-                slot = BookingSlot.objects.get(id=sid)
-                if slot.is_booked:
-                    return JsonResponse({"status": "error", "message": f"Slot {sid} is already booked."}, status=409)
-                
-                total += slot.venue.price
-                slot.is_booked = True
-                slot.save()
-                
-                new_booking = Booking.objects.create(user=user_profile, slot=slot, total_price=slot.venue.price)
-                bookings_created.append(new_booking.id)
+        try:
+            with transaction.atomic():
+                for sid in slot_ids:
+                    slot = BookingSlot.objects.select_for_update().get(id=sid)
 
-            except BookingSlot.DoesNotExist:
-                return JsonResponse({"status": "error", "message": f"Slot {sid} not found."}, status=404)
+                    if slot.date < timezone.localdate():
+                        raise ValueError(f"Slot {sid} sudah lewat.")
+
+                    if slot.is_booked:
+                        return JsonResponse({"status": "error", "message": f"Slot {sid} is already booked."}, status=409)
+                    
+                    total += slot.venue.price
+                    slot.is_booked = True
+                    slot.save()
+                    
+                    new_booking = Booking.objects.create(user=user_profile, slot=slot, total_price=slot.venue.price)
+                    bookings_created.append(new_booking.id)
+        except BookingSlot.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Slot not found."}, status=404)
+        except ValueError as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
         return JsonResponse({"status": "success", "total": total, "booking_ids": bookings_created}, status=201)
     
@@ -299,6 +306,10 @@ def cancel_booking_flutter(request):
 
         try:
             slot = BookingSlot.objects.get(id=slot_id)
+
+            if slot.date < timezone.localdate():
+                return JsonResponse({"status": "error", "message": "Slot sudah lewat."}, status=400)
+
             booking = Booking.objects.get(user=request.user.profile, slot=slot)
             
             booking.delete()
