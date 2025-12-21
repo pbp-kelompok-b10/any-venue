@@ -187,15 +187,65 @@ def get_user_bookings_json(request):
 @login_required
 def get_user_bookings_upcoming(request):
     today = timezone.localdate()
-    bookings = Booking.objects.filter(user=request.user.profile, slot__date__gte=today).order_by('slot__date', 'slot__start_time')
-    return JsonResponse(json.loads(serialize('json', bookings)), safe=False)
+    bookings = Booking.objects.select_related('slot__venue').filter(
+        user=request.user.profile,
+        slot__date__gte=today,
+    ).order_by('slot__date', 'slot__start_time')
+
+    data = [
+        {
+            "id": b.id,
+            "slot_id": b.slot.id,
+            "slot_date": b.slot.date.isoformat(),
+            "start_time": b.slot.start_time.strftime("%H:%M"),
+            "end_time": b.slot.end_time.strftime("%H:%M"),
+            "venue": {
+                "id": b.slot.venue.id,
+                "name": b.slot.venue.name,
+                "address": b.slot.venue.address,
+                "type": b.slot.venue.type,
+                "price": b.slot.venue.price,
+                "image_url": b.slot.venue.image_url,
+            },
+            "total_price": b.total_price,
+            "created_at": b.created_at.isoformat(),
+        }
+        for b in bookings
+    ]
+
+    return JsonResponse(data, safe=False)
 
 
 @login_required
 def get_user_bookings_past(request):
     today = timezone.localdate()
-    bookings = Booking.objects.filter(user=request.user.profile, slot__date__lt=today).order_by('-slot__date', '-slot__start_time')
-    return JsonResponse(json.loads(serialize('json', bookings)), safe=False)
+    bookings = Booking.objects.select_related('slot__venue').filter(
+        user=request.user.profile,
+        slot__date__lt=today,
+    ).order_by('-slot__date', '-slot__start_time')
+
+    data = [
+        {
+            "id": b.id,
+            "slot_id": b.slot.id,
+            "slot_date": b.slot.date.isoformat(),
+            "start_time": b.slot.start_time.strftime("%H:%M"),
+            "end_time": b.slot.end_time.strftime("%H:%M"),
+            "venue": {
+                "id": b.slot.venue.id,
+                "name": b.slot.venue.name,
+                "address": b.slot.venue.address,
+                "type": b.slot.venue.type,
+                "price": b.slot.venue.price,
+                "image_url": b.slot.venue.image_url,
+            },
+            "total_price": b.total_price,
+            "created_at": b.created_at.isoformat(),
+        }
+        for b in bookings
+    ]
+
+    return JsonResponse(data, safe=False)
 
 @csrf_exempt
 @login_required
