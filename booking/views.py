@@ -7,6 +7,7 @@ from .models import BookingSlot, Booking
 import json
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.core.serializers import serialize
 
 def cleanup_old_slots_and_create_new():
     """
@@ -172,4 +173,119 @@ def cancel_booking(request):
         except Booking.DoesNotExist:
             return JsonResponse({"status": "not_found"})
     return JsonResponse({"status": "error"})
+
+def get_booking_json(request):
+    bookings = Booking.objects.all()
+    return JsonResponse(json.loads(serialize('json', bookings)), safe=False)
+
+@login_required
+def get_user_bookings_json(request):
+    bookings = Booking.objects.filter(user=request.user.profile)
+    return JsonResponse(json.loads(serialize('json', bookings)), safe=False)
+
+
+@login_required
+def get_user_bookings_upcoming(request):
+    today = timezone.localdate()
+    bookings = Booking.objects.filter(user=request.user.profile, slot__date__gte=today).order_by('slot__date', 'slot__start_time')
+    return JsonResponse(json.loads(serialize('json', bookings)), safe=False)
+
+
+@login_required
+def get_user_bookings_past(request):
+    today = timezone.localdate()
+    bookings = Booking.objects.filter(user=request.user.profile, slot__date__lt=today).order_by('-slot__date', '-slot__start_time')
+    return JsonResponse(json.loads(serialize('json', bookings)), safe=False)
+
+@csrf_exempt
+@login_required
+def create_booking_flutter(request):
+    if request.method == "POST":
+        # Only allow USER role to book
+        if getattr(request.user.profile, 'role', 'USER') != 'USER':
+            return JsonResponse({"status": "error", "message": "Only USER role can book."}, status=403)
+
+        payload = json.loads(request.body)
+        slot_ids = payload.get("slots", [])
+        user_profile = request.user.profile
+        total = 0
+        
+        if not slot_ids:
+            return JsonResponse({"status": "error", "message": "No slots provided."}, status=400)
+
+        bookings_created = []
+        for sid in slot_ids:
+            try:
+                slot = BookingSlot.objects.get(id=sid)
+                if slot.is_booked:
+                    return JsonResponse({"status": "error", "message": f"Slot {sid} is already booked."}, status=409)
+                
+                total += slot.venue.price
+                slot.is_booked = True
+                slot.save()
+                
+                new_booking = Booking.objects.create(user=user_profile, slot=slot, total_price=slot.venue.price)
+                bookings_created.append(new_booking.id)
+
+            except BookingSlot.DoesNotExist:
+                return JsonResponse({"status": "error", "message": f"Slot {sid} not found."}, status=404)
+
+        return JsonResponse({"status": "success", "total": total, "booking_ids": bookings_created}, status=201)
+    
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+@csrf_exempt
+@login_required
+def cancel_booking_flutter(request):
+    if request.method == "POST":
+        if getattr(request.user.profile, 'role', 'USER') != 'USER':
+            return JsonResponse({"status": "error", "message": "Only USER role can cancel."}, status=403)
+
+        payload = json.loads(request.body)
+        slot_id = payload.get("slot_id")
+
+        if not slot_id:
+            return JsonResponse({"status": "error", "message": "Slot ID not provided."}, status=400)
+
+        try:
+            slot = BookingSlot.objects.get(id=slot_id)
+            booking = Booking.objects.get(user=request.user.profile, slot=slot)
+            
+            booking.delete()
+            slot.is_booked = False
+            slot.save()
+            
+            return JsonResponse({"status": "success", "message": "Booking canceled successfully."})
+        
+        except BookingSlot.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Slot not found."}, status=404)
+        except Booking.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Booking not found for this user and slot."}, status=404)
+
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+
+@login_required
+def get_slot_venue_flutter(request, slot_id):
+    """
+    Return venue info for a given slot to let the mobile app deep-link back to the venue booking page.
+    """
+    try:
+        slot = BookingSlot.objects.select_related('venue').get(id=slot_id)
+        venue = slot.venue
+        return JsonResponse(
+            {
+                "status": "success",
+                "venue": {
+                    "id": venue.id,
+                    "name": venue.name,
+                    "price": venue.price,
+                    "address": venue.address,
+                    "type": venue.type,
+                    "image_url": venue.image_url,
+                },
+            }
+        )
+    except BookingSlot.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Slot not found."}, status=404)
 
